@@ -1,8 +1,16 @@
 import "server-only";
 
 import { randomUUID } from "node:crypto";
+import { ObjectId } from "mongodb";
 import { PROGRAM } from "@career-craft/shared";
-import { prisma } from "../prisma";
+import "../db/load-env";
+import { mapEnrollment, mapUser, toDbId } from "../db/helpers";
+import {
+  enrollmentsCollection,
+  mongoClient,
+  referralsCollection,
+  usersCollection,
+} from "../db/mongo-client";
 import { serverConfig } from "@/lib/config";
 import { generateReferralCode } from "../util/referral-code";
 
@@ -30,10 +38,12 @@ export async function createEnrollment(
   userId: string,
   rawReferralCode: string | undefined,
 ): Promise<CreatedEnrollment> {
-  const user = await prisma.user.findUnique({ where: { id: userId } });
-  if (!user) {
+  const users = await usersCollection();
+  const userDoc = await users.findOne({ _id: toDbId(userId) });
+  if (!userDoc) {
     throw new EnrollmentError(401, "unauthorized", "Unauthorized");
   }
+  const user = mapUser(userDoc);
 
   const trimmed = rawReferralCode?.trim();
   const normalizedCode = trimmed && trimmed !== "" ? trimmed.toUpperCase() : undefined;
@@ -42,25 +52,29 @@ export async function createEnrollment(
   let amountInPaise = serverConfig.pricing.standardInPaise;
 
   if (normalizedCode) {
-    const referrer = await prisma.user.findFirst({
-      where: { referralCode: normalizedCode },
-    });
-    if (referrer && referrer.id !== user.id) {
-      referrerId = referrer.id;
-      amountInPaise = serverConfig.pricing.withReferralInPaise;
+    const referrerDoc = await users.findOne({ referralCode: normalizedCode });
+    if (referrerDoc) {
+      const referrer = mapUser(referrerDoc);
+      if (referrer.id !== user.id) {
+        referrerId = referrer.id;
+        amountInPaise = serverConfig.pricing.withReferralInPaise;
+      }
     }
   }
 
-  const enrollment = await prisma.enrollment.create({
-    data: {
-      userId: user.id,
-      amountInPaise,
-      currency: PROGRAM.defaultCurrency,
-      status: "PENDING",
-      referralCodeUsed: normalizedCode ?? null,
-      referrerId: referrerId ?? null,
-    },
-  });
+  const enrollments = await enrollmentsCollection();
+  const doc = {
+    _id: new ObjectId(),
+    userId: toDbId(user.id),
+    amountInPaise,
+    currency: PROGRAM.defaultCurrency,
+    status: "PENDING",
+    referralCodeUsed: normalizedCode ?? null,
+    referrerId: referrerId ? toDbId(referrerId) : null,
+    createdAt: new Date(),
+  };
+  await enrollments.insertOne(doc);
+  const enrollment = mapEnrollment(doc);
 
   return {
     id: enrollment.id,
@@ -75,60 +89,79 @@ export async function createEnrollment(
  * Idempotent via paymentId uniqueness on enrollment.
  */
 export async function mockPayEnrollment(userId: string, enrollmentId: string): Promise<{ alreadyPaid: boolean }> {
-  const enrollment = await prisma.enrollment.findFirst({
-    where: { id: enrollmentId, userId },
+  const enrollments = await enrollmentsCollection();
+  const enrollmentDoc = await enrollments.findOne({
+    _id: toDbId(enrollmentId),
+    userId: toDbId(userId),
   });
-  if (!enrollment) {
+  if (!enrollmentDoc) {
     throw new EnrollmentError(404, "not_found", "Enrollment not found");
   }
+  const enrollment = mapEnrollment(enrollmentDoc);
   if (enrollment.status === "PAID") {
     return { alreadyPaid: true };
   }
 
   const paymentId = `mock_${randomUUID()}`;
+  const paidAt = new Date();
+  const client = await mongoClient();
+  const session = client.startSession();
 
-  await prisma.$transaction(async (tx) => {
-    await tx.enrollment.update({
-      where: { id: enrollment.id },
-      data: { status: "PAID", paidAt: new Date(), paymentId },
-    });
+  try {
+    await session.withTransaction(async () => {
+      await enrollments.updateOne(
+        { _id: toDbId(enrollment.id) },
+        { $set: { status: "PAID", paymentId, paidAt } },
+        { session },
+      );
 
-    const student = await tx.user.findUnique({ where: { id: enrollment.userId } });
-    if (!student) {
-      throw new EnrollmentError(500, "user_missing", "User missing");
-    }
+      const users = await usersCollection();
+      const studentDoc = await users.findOne({ _id: toDbId(enrollment.userId) }, { session });
+      if (!studentDoc) {
+        throw new EnrollmentError(500, "user_missing", "User missing");
+      }
+      const student = mapUser(studentDoc);
 
-    if (!student.referralCode) {
-      let code = generateReferralCode();
-      for (let attempt = 0; attempt < REFERRAL_CODE_GENERATION_ATTEMPTS; attempt += 1) {
-        const clash = await tx.user.findUnique({ where: { referralCode: code } });
-        if (!clash) {
-          break;
+      if (!student.referralCode) {
+        let code = generateReferralCode();
+        for (let attempt = 0; attempt < REFERRAL_CODE_GENERATION_ATTEMPTS; attempt += 1) {
+          const clash = await users.findOne({ referralCode: code }, { session });
+          if (!clash) {
+            break;
+          }
+          code = generateReferralCode();
         }
-        code = generateReferralCode();
+        await users.updateOne(
+          { _id: toDbId(student.id) },
+          { $set: { referralCode: code, updatedAt: new Date() } },
+          { session },
+        );
       }
-      await tx.user.update({
-        where: { id: student.id },
-        data: { referralCode: code },
-      });
-    }
 
-    if (enrollment.referrerId && enrollment.referrerId !== enrollment.userId) {
-      const existing = await tx.referral.findUnique({
-        where: { enrollmentId: enrollment.id },
-      });
-      if (!existing) {
-        await tx.referral.create({
-          data: {
-            referrerId: enrollment.referrerId,
-            refereeId: enrollment.userId,
-            enrollmentId: enrollment.id,
-            status: "IN_REFUND_WINDOW",
-          },
-        });
+      if (enrollment.referrerId && enrollment.referrerId !== enrollment.userId) {
+        const referrals = await referralsCollection();
+        const existing = await referrals.findOne(
+          { enrollmentId: toDbId(enrollment.id) },
+          { session },
+        );
+        if (!existing) {
+          await referrals.insertOne(
+            {
+              _id: new ObjectId(),
+              referrerId: toDbId(enrollment.referrerId),
+              refereeId: toDbId(enrollment.userId),
+              enrollmentId: toDbId(enrollment.id),
+              status: "IN_REFUND_WINDOW",
+              createdAt: new Date(),
+            },
+            { session },
+          );
+        }
       }
-    }
-  });
+    });
+  } finally {
+    await session.endSession();
+  }
 
   return { alreadyPaid: false };
 }

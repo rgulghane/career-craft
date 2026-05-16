@@ -1,8 +1,11 @@
 import "server-only";
 
 import bcrypt from "bcryptjs";
+import { ObjectId } from "mongodb";
 import { AUTH, type LoginBody, type RegisterBody } from "@career-craft/shared";
-import { prisma } from "../prisma";
+import "../db/load-env";
+import { mapUser } from "../db/helpers";
+import { usersCollection } from "../db/mongo-client";
 import { signToken } from "../auth-tokens";
 
 export interface AuthResult {
@@ -22,14 +25,25 @@ export class AuthError extends Error {
 }
 
 export async function registerUser(body: RegisterBody): Promise<AuthResult> {
-  const existing = await prisma.user.findUnique({ where: { email: body.email } });
+  const users = await usersCollection();
+  const existing = await users.findOne({ email: body.email });
   if (existing) {
     throw new AuthError(409, "email_taken", "Email already registered");
   }
-  const passwordHash = await bcrypt.hash(body.password, AUTH.bcryptCostFactor);
-  const user = await prisma.user.create({
-    data: { email: body.email, passwordHash, fullName: body.fullName },
-  });
+
+  const now = new Date();
+  const doc = {
+    _id: new ObjectId(),
+    email: body.email,
+    passwordHash: await bcrypt.hash(body.password, AUTH.bcryptCostFactor),
+    fullName: body.fullName,
+    referralCode: null,
+    createdAt: now,
+    updatedAt: now,
+  };
+  await users.insertOne(doc);
+  const user = mapUser(doc);
+
   return {
     token: signToken(user.id, user.email),
     user: { id: user.id, email: user.email, fullName: user.fullName },
@@ -37,10 +51,12 @@ export async function registerUser(body: RegisterBody): Promise<AuthResult> {
 }
 
 export async function loginUser(body: LoginBody): Promise<AuthResult> {
-  const user = await prisma.user.findUnique({ where: { email: body.email } });
-  if (!user) {
+  const users = await usersCollection();
+  const doc = await users.findOne({ email: body.email });
+  if (!doc) {
     throw new AuthError(401, "invalid_credentials", "Invalid credentials");
   }
+  const user = mapUser(doc);
   const ok = await bcrypt.compare(body.password, user.passwordHash);
   if (!ok) {
     throw new AuthError(401, "invalid_credentials", "Invalid credentials");

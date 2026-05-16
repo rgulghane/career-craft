@@ -2,7 +2,9 @@ import "server-only";
 
 import { cookies } from "next/headers";
 import { COOKIE_NAMES } from "@career-craft/shared";
-import { prisma } from "./prisma";
+import "./db/load-env";
+import { mapUser, toDbId } from "./db/helpers";
+import { usersCollection } from "./db/mongo-client";
 import { verifyToken } from "./auth-tokens";
 
 export interface SessionUser {
@@ -26,10 +28,14 @@ export async function getSession(): Promise<SessionUser | null> {
   if (!payload) {
     return null;
   }
-  const user = await prisma.user.findUnique({ where: { id: payload.sub } });
-  if (!user) {
+
+  const users = await usersCollection();
+  const doc = await users.findOne({ _id: toDbId(payload.sub) });
+  if (!doc) {
     return null;
   }
+  const user = mapUser(doc);
+
   return {
     id: user.id,
     email: user.email,

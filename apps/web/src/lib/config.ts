@@ -48,7 +48,10 @@ function readRequired(name: string, devFallback: string): string {
 
 export const serverConfig = {
   get databaseUrl() {
-    return readRequired("DATABASE_URL", "postgresql://postgres:postgres@localhost:5432/career_craft");
+    return readRequired(
+      "DATABASE_URL",
+      "mongodb://127.0.0.1:27017/career_craft",
+    );
   },
   get jwtSecret() {
     return readRequired("JWT_SECRET", "dev-only-change-me-please-32chars-min");

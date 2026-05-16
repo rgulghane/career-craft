@@ -7,7 +7,13 @@ import {
   type DashboardResponse,
   type ReferralRowStatus,
 } from "@career-craft/shared";
-import { prisma } from "../prisma";
+import "../db/load-env";
+import { mapEnrollment, mapReferral, mapUser, toDbId, toIdString } from "../db/helpers";
+import {
+  enrollmentsCollection,
+  referralsCollection,
+  usersCollection,
+} from "../db/mongo-client";
 import { maskEmail } from "../util/mask-email";
 
 /**
@@ -15,24 +21,43 @@ import { maskEmail } from "../util/mask-email";
  * Returns null if the user can't be found.
  */
 export async function buildDashboardForUser(userId: string): Promise<DashboardResponse | null> {
-  const user = await prisma.user.findUnique({ where: { id: userId } });
-  if (!user) {
+  const users = await usersCollection();
+  const userDoc = await users.findOne({ _id: toDbId(userId) });
+  if (!userDoc) {
     return null;
   }
+  const user = mapUser(userDoc);
 
-  const paidEnrollment = await prisma.enrollment.findFirst({
-    where: { userId, status: "PAID" },
-    orderBy: { paidAt: "desc" },
-  });
+  const enrollments = await enrollmentsCollection();
+  const paidDoc = await enrollments.findOne(
+    { userId: toDbId(userId), status: "PAID" },
+    { sort: { paidAt: -1 } },
+  );
+  const paidEnrollment = paidDoc ? mapEnrollment(paidDoc) : null;
 
   const pricingLabel = paidEnrollment
     ? messages.dashboard.pricingLabelEnrolled
     : messages.dashboard.pricingLabelPending;
 
-  const referrals = await prisma.referral.findMany({
-    where: { referrerId: userId },
-    include: { referee: true },
-    orderBy: { createdAt: "desc" },
+  const referralsCol = await referralsCollection();
+  const referralDocs = await referralsCol
+    .find({ referrerId: toDbId(userId) })
+    .sort({ createdAt: -1 })
+    .toArray();
+
+  const refereeIds = referralDocs.map((r) => r.refereeId);
+  const refereeDocs =
+    refereeIds.length > 0
+      ? await users.find({ _id: { $in: refereeIds } }).toArray()
+      : [];
+  const refereeById = new Map(refereeDocs.map((u) => [toIdString(u._id), u]));
+
+  const referrals = referralDocs.map((r) => {
+    const referee = refereeById.get(toIdString(r.refereeId));
+    if (!referee) {
+      throw new Error(`Referee missing for referral ${toIdString(r._id)}`);
+    }
+    return { ...mapReferral(r), referee: { email: referee.email } };
   });
 
   const qualified = referrals.filter((r) => r.status === "QUALIFIED").length;

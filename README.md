@@ -1,11 +1,11 @@
 # Career Craft
 
-Single Next.js (App Router) application with server-side rendering, Prisma + Postgres, JWT auth, and a built-in referral lifecycle.
+Single Next.js (App Router) application with server-side rendering, MongoDB, JWT auth, and a built-in referral lifecycle.
 
 ```
 career-craft/
-├─ apps/web/                 # Next.js app (SSR + API route handlers + Prisma)
-│  ├─ prisma/schema.prisma   # Postgres schema
+├─ apps/web/                 # Next.js app (SSR + API route handlers)
+│  ├─ src/server/db/         # MongoDB client + data access
 │  └─ src/
 │     ├─ app/                # Pages + API route handlers
 │     ├─ components/         # UI
@@ -13,13 +13,13 @@ career-craft/
 │     └─ server/             # server-only modules (DB, services, auth)
 ├─ packages/shared/          # Constants, messages, Zod schemas, types
 ├─ Dockerfile                # Production image (Next standalone output)
-└─ docker-compose.yml        # One-command local stack (Postgres + web)
+└─ docker-compose.yml        # Optional local Docker deploy (web only)
 ```
 
 ## Prerequisites
 
 - Node.js 20+ and npm 10+
-- Postgres 14+ (or run via Docker — see below)
+- MongoDB 6+ (local) or [MongoDB Atlas](https://www.mongodb.com/atlas) connection string
 
 ## Quick start (local dev)
 
@@ -29,15 +29,12 @@ npm run install:all
 
 # 2. configure env
 cp apps/web/.env.example apps/web/.env.local
-#    edit JWT_SECRET, DATABASE_URL if not using docker-compose defaults
+#    set DATABASE_URL to your MongoDB URI (include database name in the path)
 
-# 3. start Postgres (skip if you already have one)
-docker compose up -d db
+# 3. ensure indexes
+npm run db:setup
 
-# 4. apply schema
-npm run db:push
-
-# 5. run dev server
+# 4. run dev server
 npm run dev
 ```
 
@@ -51,10 +48,7 @@ The app is at [http://localhost:3000](http://localhost:3000). All API endpoints 
 | `npm run dev:clean` | Same, but wipes `.next/` first                                 |
 | `npm run build`     | Builds shared + Next.js for production                         |
 | `npm start`         | Runs the production server (`next start`)                      |
-| `npm run db:push`   | Sync Prisma schema → DB (dev convenience)                      |
-| `npm run db:migrate`| Create + apply a migration                                     |
-| `npm run db:deploy` | Apply pending migrations (use in CI / on boot)                 |
-| `npm run db:studio` | Launch Prisma Studio                                           |
+| `npm run db:setup`  | Create MongoDB indexes (idempotent)                            |
 | `npm run lint`      | Next.js lint                                                   |
 
 ## Referral flow (demo)
@@ -75,7 +69,7 @@ The app is at [http://localhost:3000](http://localhost:3000). All API endpoints 
 
 All runtime configuration lives in `apps/web/.env.example`. Required in production:
 
-- `DATABASE_URL`   — Postgres connection string
+- `DATABASE_URL`   — MongoDB connection string (e.g. `mongodb+srv://user:pass@cluster.mongodb.net/career_craft?retryWrites=true&w=majority`)
 - `JWT_SECRET`     — 32+ char random string
 - `CRON_SECRET`    — random string for the internal cron header
 - `APP_ORIGIN`     — canonical site origin (used for referral share links)
@@ -91,17 +85,18 @@ All other knobs (cookie max-age, JWT TTL, bcrypt cost factor, referral code alph
 ### Docker (any host)
 
 ```bash
+export DATABASE_URL="mongodb+srv://..."
 docker compose up --build
 ```
 
-This launches Postgres and the Next.js app, runs `prisma migrate deploy` on boot, and serves on port 3000. Set real `JWT_SECRET`, `CRON_SECRET`, `APP_ORIGIN` via env or compose overrides.
+Runs `npm run db:setup` on boot, then serves on port 3000. Set real `JWT_SECRET`, `CRON_SECRET`, `APP_ORIGIN` via env or compose overrides.
 
 ### Node host (Railway / Render / Fly)
 
-1. Provision a Postgres instance, copy `DATABASE_URL` into the service env.
+1. Provision MongoDB (Atlas or host-managed), copy `DATABASE_URL` into the service env.
 2. Set `JWT_SECRET`, `CRON_SECRET`, `APP_ORIGIN` (+ optional pricing overrides).
 3. Build command: `npm run install:all && npm run build`
-4. Release command: `npm run db:deploy`
+4. Release command: `npm run db:setup`
 5. Start command: `npm start`
 6. Health check path: `/api/health`
 7. Schedule a job hitting `POST /api/internal/qualify-referrals` with the cron secret header (daily is fine).
@@ -110,7 +105,7 @@ This launches Postgres and the Next.js app, runs `prisma migrate deploy` on boot
 
 - Use a 32+ char random `JWT_SECRET` and `CRON_SECRET` in production.
 - Replace the mock payment flow with your PSP webhooks; keep referral qualification **after** the refund window.
-- Never commit `.env*` files.
+- Never commit `.env*` files. Rotate database credentials if they were ever exposed.
 
 ## Build verification
 

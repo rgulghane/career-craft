@@ -1,20 +1,19 @@
 # syntax=docker/dockerfile:1.7
 # -----------------------------------------------------------------------------
 # Multi-stage build for the Next.js single-app deployment.
-# Produces a slim runtime image with the standalone Next output + Prisma client.
+# Produces a slim runtime image with the standalone Next output.
 # -----------------------------------------------------------------------------
 
 ARG NODE_VERSION=20
 
 # 1. deps --------------------------------------------------------------------
 FROM node:${NODE_VERSION}-alpine AS deps
-RUN apk add --no-cache libc6-compat openssl
+RUN apk add --no-cache libc6-compat
 WORKDIR /app
 
 COPY package.json package-lock.json ./
 COPY packages/shared/package.json packages/shared/package-lock.json packages/shared/
 COPY apps/web/package.json apps/web/package-lock.json apps/web/
-COPY apps/web/prisma apps/web/prisma
 
 RUN --mount=type=cache,target=/root/.npm \
     npm install --prefix packages/shared --no-audit --no-fund && \
@@ -23,7 +22,7 @@ RUN --mount=type=cache,target=/root/.npm \
 
 # 2. build -------------------------------------------------------------------
 FROM node:${NODE_VERSION}-alpine AS builder
-RUN apk add --no-cache libc6-compat openssl
+RUN apk add --no-cache libc6-compat
 WORKDIR /app
 
 COPY --from=deps /app/node_modules ./node_modules
@@ -36,7 +35,7 @@ RUN npm run build
 
 # 3. runtime -----------------------------------------------------------------
 FROM node:${NODE_VERSION}-alpine AS runner
-RUN apk add --no-cache libc6-compat openssl curl
+RUN apk add --no-cache libc6-compat curl
 WORKDIR /app
 
 ENV NODE_ENV=production
@@ -51,9 +50,6 @@ RUN addgroup --system --gid 1001 nodejs && \
 COPY --from=builder --chown=nextjs:nodejs /app/apps/web/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/apps/web/.next/static ./apps/web/.next/static
 COPY --from=builder --chown=nextjs:nodejs /app/apps/web/public ./apps/web/public
-
-# Prisma migrations + schema, so `prisma migrate deploy` can run at boot.
-COPY --from=builder --chown=nextjs:nodejs /app/apps/web/prisma ./apps/web/prisma
 
 USER nextjs
 
