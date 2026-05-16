@@ -1,0 +1,25 @@
+{
+  "name": "career-craft",
+  "private": true,
+  "workspaces": ["apps/*", "packages/*"],
+  "scripts": {
+    "install:all": "npm run install:shared && npm run install:web && npm install",
+    "install:shared": "npm install --prefix packages/shared",
+    "install:web": "npm install --prefix apps/web",
+    "dev:prepare": "npm run build --prefix packages/shared",
+    "dev": "npm run dev:prepare && npm run dev --prefix apps/web",
+    "dev:clean": "rm -rf apps/web/.next && npm run dev",
+    "dev:shared": "npm run watch --prefix packages/shared",
+    "build": "npm run build --prefix packages/shared && npm run build --prefix apps/web",
+    "start": "npm run start --prefix apps/web",
+    "db:generate": "npm run db:generate --prefix apps/web",
+    "db:push": "npm run db:push --prefix apps/web",
+    "db:migrate": "npm run db:migrate --prefix apps/web",
+    "db:deploy": "npm run db:deploy --prefix apps/web",
+    "db:studio": "npm run db:studio --prefix apps/web",
+    "lint": "npm run lint --prefix apps/web"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

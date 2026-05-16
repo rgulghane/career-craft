@@ -1,0 +1,53 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  fullName     String
+  referralCode String?  @unique
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  enrollments Enrollment[]
+
+  referralsMade Referral[] @relation("ReferrerUser")
+  referralsGot  Referral[] @relation("RefereeUser")
+}
+
+model Enrollment {
+  id               String    @id @default(cuid())
+  userId           String
+  user             User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  amountInPaise    Int
+  currency         String    @default("INR")
+  status           String
+  referralCodeUsed String?
+  referrerId       String?
+  paymentId        String?   @unique
+  paidAt           DateTime?
+  createdAt        DateTime  @default(now())
+
+  referral Referral?
+}
+
+model Referral {
+  id           String     @id @default(cuid())
+  referrerId   String
+  referrer     User       @relation("ReferrerUser", fields: [referrerId], references: [id], onDelete: Cascade)
+  refereeId    String
+  referee      User       @relation("RefereeUser", fields: [refereeId], references: [id], onDelete: Cascade)
+  enrollmentId String     @unique
+  enrollment   Enrollment @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
+  status       String
+  qualifiedAt  DateTime?
+  voidReason   String?
+  createdAt    DateTime   @default(now())
+}
