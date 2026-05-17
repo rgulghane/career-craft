@@ -16,6 +16,15 @@ export const messages = {
     signIn: "Sign in",
     signOut: "Sign out",
     register: "Create account",
+    admin: "Admin",
+  },
+  admin: {
+    portalTitle: "CareerCraft Admin",
+    signInHeading: "Admin sign in",
+    signInCta: "Sign in to admin",
+    useAdminPortal: "This account uses the admin portal. Sign in at /admin/login.",
+    forbidden: "Admin access required.",
+    signedOut: "Admin session ended.",
   },
   auth: {
     emailLabel: "Email",

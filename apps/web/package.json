@@ -9,6 +9,7 @@
     "start": "next start",
     "lint": "next lint",
     "db:setup": "npm run db:env -- npx --yes tsx scripts/ensure-indexes.ts",
+    "db:create-admin": "npm run db:env -- npx --yes tsx scripts/create-admin.ts",
     "db:env": "sh -c 'set -a; [ -f .env.local ] && . ./.env.local; [ -f .env ] && . ./.env; set +a; exec \"$@\"' sh"
   },
   "dependencies": {

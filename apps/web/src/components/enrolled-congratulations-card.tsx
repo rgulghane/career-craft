@@ -6,13 +6,18 @@ const ctaClass =
 
 export function EnrolledCongratulationsCard({
   firstName,
-  referralCode = null,
+  referralCode,
 }: {
   firstName?: string;
-  referralCode?: string | null;
+  referralCode: string;
 }) {
+  const code = referralCode.trim();
+  if (!code) {
+    return null;
+  }
+
   const greeting = firstName
-    ? `Congratulations, ${firstName}!`
+    ? `Congratulations, ${firstName.charAt(0).toUpperCase() + firstName.slice(1).toLowerCase()}!`
     : messages.enroll.enrolledTitle;
 
   return (
@@ -30,14 +35,12 @@ export function EnrolledCongratulationsCard({
         <p className="mt-2 text-sm text-slate-600 sm:text-base dark:text-slate-300">
           {messages.enroll.enrolledSubtitle}
         </p>
-        {referralCode ? (
-          <p className="mt-3 text-sm text-slate-600 dark:text-slate-300">
-            Your referral code:{" "}
-            <span className="font-mono font-semibold tracking-wide text-emerald-700 dark:text-emerald-400">
-              {referralCode}
-            </span>
-          </p>
-        ) : null}
+        <p className="mt-3 text-sm text-slate-600 dark:text-slate-300">
+          Your referral code:{" "}
+          <span className="font-mono font-semibold tracking-wide text-emerald-700 dark:text-emerald-400">
+            {code}
+          </span>
+        </p>
       </div>
 
       <div className="p-5 sm:p-6">

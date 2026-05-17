@@ -1,9 +1,10 @@
 import type { ObjectId } from "mongodb";
+import type { UserType } from "@career-craft/shared";
 
 /** MongoDB _id / FK — ObjectId or legacy string id. */
 export type DbId = ObjectId | string;
 
-export type UserType = "influencer" | "student" | "partner" | "college-ambassador";
+export type { UserType };
 
 /** MongoDB collection names (PascalCase, matches existing Atlas data). */
 export const COLLECTIONS = {
@@ -56,6 +57,7 @@ export interface User {
   passwordHash: string;
   fullName: string;
   referralCode: string | null;
+  userType: UserType | null;
   createdAt: Date;
   updatedAt: Date;
 }

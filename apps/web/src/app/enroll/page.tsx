@@ -49,11 +49,11 @@ export default async function EnrollPage({
           <EnrollCurriculumShowcase />
         </div>
         <div className="order-1 min-w-0 enroll:order-2 enroll:sticky enroll:top-24">
-          {isEnrolled ? (
+          {isEnrolled && user.referralCode ? (
             <EnrolledCongratulationsCard firstName={firstName} referralCode={user.referralCode} />
-          ) : (
+          ) : !isEnrolled ? (
             <EnrollmentPricingWidget mode="enroll" defaultReferralCode={ref} autoContinue={continueFlow} />
-          )}
+          ) : null}
         </div>
       </div>
     </AppPageShell>

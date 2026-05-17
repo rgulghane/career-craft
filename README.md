@@ -40,6 +40,8 @@ npm run dev
 
 The app is at [http://localhost:3000](http://localhost:3000). All API endpoints live under `/api/*` on the same origin — there's no separate API process.
 
+**Admin portal:** [http://localhost:3000/admin/login](http://localhost:3000/admin/login) — create an admin with `ADMIN_EMAIL=you@example.com ADMIN_PASSWORD='…' npm run db:create-admin`.
+
 ## Useful scripts
 
 | Script              | What it does                                                   |
@@ -49,6 +51,7 @@ The app is at [http://localhost:3000](http://localhost:3000). All API endpoints 
 | `npm run build`     | Builds shared + Next.js for production                         |
 | `npm start`         | Runs the production server (`next start`)                      |
 | `npm run db:setup`  | Create MongoDB indexes (idempotent)                            |
+| `npm run db:create-admin` | Create/update admin user (`ADMIN_EMAIL`, `ADMIN_PASSWORD`) |
 | `npm run lint`      | Next.js lint                                                   |
 
 ## Referral flow (demo)

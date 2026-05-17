@@ -2,7 +2,7 @@ import "server-only";
 
 import bcrypt from "bcryptjs";
 import { ObjectId } from "mongodb";
-import { AUTH, type LoginBody, type RegisterBody } from "@career-craft/shared";
+import { AUTH, isAdminUserType, messages, type LoginBody, type RegisterBody } from "@career-craft/shared";
 import "../db/load-env";
 import { mapUser } from "../db/helpers";
 import { usersCollection } from "../db/mongo-client";
@@ -45,7 +45,7 @@ export async function registerUser(body: RegisterBody): Promise<AuthResult> {
   const user = mapUser(doc);
 
   return {
-    token: signToken(user.id, user.email),
+    token: signToken(user.id, user.email, user.userType ?? "student"),
     user: { id: user.id, email: user.email, fullName: user.fullName },
   };
 }
@@ -57,6 +57,9 @@ export async function loginUser(body: LoginBody): Promise<AuthResult> {
     throw new AuthError(401, "invalid_credentials", "Invalid credentials");
   }
   const user = mapUser(doc);
+  if (isAdminUserType(user.userType)) {
+    throw new AuthError(403, "use_admin_portal", messages.admin.useAdminPortal);
+  }
   if (!doc.passwordHash) {
     throw new AuthError(
       401,
@@ -69,7 +72,7 @@ export async function loginUser(body: LoginBody): Promise<AuthResult> {
     throw new AuthError(401, "invalid_credentials", "Invalid credentials");
   }
   return {
-    token: signToken(user.id, user.email),
+    token: signToken(user.id, user.email, user.userType ?? "student"),
     user: { id: user.id, email: user.email, fullName: user.fullName },
   };
 }

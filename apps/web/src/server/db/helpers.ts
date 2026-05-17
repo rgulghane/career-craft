@@ -33,6 +33,7 @@ export function mapUser(doc: UserDocument): User {
     passwordHash: doc.passwordHash ?? "",
     fullName: doc.fullName,
     referralCode: doc.referralCode ?? null,
+    userType: doc.userType ?? "student",
     createdAt: doc.createdAt,
     updatedAt: doc.updatedAt,
   };

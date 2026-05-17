@@ -1,7 +1,7 @@
 import "server-only";
 
 import { cookies } from "next/headers";
-import { COOKIE_NAMES } from "@career-craft/shared";
+import { COOKIE_NAMES, type UserType } from "@career-craft/shared";
 import "./db/load-env";
 import { mapUser, toDbId } from "./db/helpers";
 import { usersCollection } from "./db/mongo-client";
@@ -12,6 +12,7 @@ export interface SessionUser {
   email: string;
   fullName: string;
   referralCode: string | null;
+  userType: UserType;
 }
 
 /**
@@ -41,6 +42,7 @@ export async function getSession(): Promise<SessionUser | null> {
     email: user.email,
     fullName: user.fullName,
     referralCode: user.referralCode,
+    userType: user.userType ?? "student",
   };
 }
 

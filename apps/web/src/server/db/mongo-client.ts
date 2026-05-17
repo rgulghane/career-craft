@@ -1,4 +1,4 @@
-import { MongoClient, type Collection } from "mongodb";
+import { MongoClient, type Collection, type MongoClientOptions } from "mongodb";
 import {
   COLLECTIONS,
   type EnrollmentDocument,
@@ -27,6 +27,17 @@ function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+function mongoClientOptions(): MongoClientOptions {
+  const options: MongoClientOptions = {
+    serverSelectionTimeoutMS: 10_000,
+  };
+  // Some cloud hosts resolve Atlas to IPv6 first; set MONGODB_FORCE_IPV4=1 if needed.
+  if (process.env.MONGODB_FORCE_IPV4 === "1") {
+    options.family = 4;
+  }
+  return options;
+}
+
 async function ping(client: MongoClient): Promise<void> {
   await client.db().command({ ping: 1 });
 }
@@ -52,7 +63,7 @@ export async function connectMongo(options?: {
   globalForMongo.mongoReady = (async () => {
     let lastError: unknown;
     for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
-      const client = new MongoClient(connectionString());
+      const client = new MongoClient(connectionString(), mongoClientOptions());
       try {
         await client.connect();
         await ping(client);

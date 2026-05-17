@@ -13,6 +13,7 @@
     "build": "npm run build --prefix packages/shared && npm run build --prefix apps/web",
     "start": "npm run start --prefix apps/web",
     "db:setup": "npm run db:setup --prefix apps/web",
+    "db:create-admin": "npm run db:create-admin --prefix apps/web",
     "lint": "npm run lint --prefix apps/web"
   },
   "engines": {

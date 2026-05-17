@@ -78,15 +78,15 @@ export function LandingHero({
           </div>
 
           <div className="order-1 min-w-0 enroll:order-2 enroll:sticky enroll:top-24">
-            {isEnrolled ? (
+            {isEnrolled && referralCode ? (
               <EnrolledCongratulationsCard firstName={firstName} referralCode={referralCode} />
-            ) : (
+            ) : !isEnrolled ? (
               <EnrollmentPricingWidget
                 mode="marketing"
                 isLoggedIn={isLoggedIn}
                 defaultReferralCode={defaultReferralCode}
               />
-            )}
+            ) : null}
           </div>
         </div>
       </div>

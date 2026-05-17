@@ -8,12 +8,19 @@
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "import": "./dist/index.js"
+      "node": "./dist/index.js",
+      "import": "./dist/index.js",
+      "require": "./dist/index.js",
+      "default": "./dist/index.js"
     },
     "./content": {
       "types": "./dist/content.d.ts",
-      "import": "./dist/content.js"
-    }
+      "node": "./dist/content.js",
+      "import": "./dist/content.js",
+      "require": "./dist/content.js",
+      "default": "./dist/content.js"
+    },
+    "./package.json": "./package.json"
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",
