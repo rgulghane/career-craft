@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { messages } from "@career-craft/shared/content";
 
 export function GoogleSignInButton({
@@ -22,14 +21,16 @@ export function GoogleSignInButton({
     );
   }
 
+  // Plain <a> — OAuth must be a full document navigation. Next.js <Link> prefetches
+  // /api/auth/google via fetch/RSC; the 302 to Google then fails CORS in the browser.
   return (
-    <Link
+    <a
       href={href}
       className="flex w-full items-center justify-center gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-800 shadow-sm transition hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700"
     >
       <GoogleIcon />
       {messages.auth.signInWithGoogle}
-    </Link>
+    </a>
   );
 }
 
