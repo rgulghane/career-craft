@@ -1,12 +1,11 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { messages } from "@career-craft/shared/content";
+import { performSignOut } from "@/lib/sign-out-client";
 import { UserAvatar, type SessionUser } from "./user-avatar";
 
 export function UserMenu({ user }: { user: SessionUser }) {
-  const router = useRouter();
   const [open, setOpen] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
@@ -26,10 +25,9 @@ export function UserMenu({ user }: { user: SessionUser }) {
   async function signOut() {
     setSigningOut(true);
     try {
-      await fetch("/api/auth/logout", { method: "POST" });
+      const redirectPath = await performSignOut(user.userType);
       setOpen(false);
-      router.push("/");
-      router.refresh();
+      window.location.assign(redirectPath);
     } finally {
       setSigningOut(false);
     }

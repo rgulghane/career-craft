@@ -1,23 +1,29 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { performSignOut } from "@/lib/sign-out-client";
 
 export function AdminSignOutButton() {
-  const router = useRouter();
+  const [pending, setPending] = useState(false);
 
   async function signOut() {
-    await fetch("/api/admin/auth/logout", { method: "POST" });
-    router.push("/admin/login");
-    router.refresh();
+    setPending(true);
+    try {
+      const redirectPath = await performSignOut("admin");
+      window.location.assign(redirectPath);
+    } catch {
+      window.location.assign("/admin/login");
+    }
   }
 
   return (
     <button
       type="button"
+      disabled={pending}
       onClick={() => void signOut()}
-      className="rounded-lg border border-white/15 px-3 py-2 text-sm font-semibold text-slate-200 transition hover:bg-white/10"
+      className="rounded-lg border border-white/15 px-3 py-2 text-sm font-semibold text-slate-200 transition hover:bg-white/10 disabled:opacity-60"
     >
-      Sign out
+      {pending ? "…" : "Sign out"}
     </button>
   );
 }

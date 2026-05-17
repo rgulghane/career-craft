@@ -1,9 +1,12 @@
 import { getAvatarBackground, getInitials } from "@/lib/avatar";
 
+import type { UserType } from "@career-craft/shared";
+
 export type SessionUser = {
   id: string;
   email: string;
   fullName: string;
+  userType?: UserType;
 };
 
 export function UserAvatar({

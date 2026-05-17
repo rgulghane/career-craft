@@ -5,7 +5,7 @@ import { AppPageShell } from "@/components/app-page-shell";
 import { CopyShareLinkButton } from "@/components/copy-share-link-button";
 import { SignOutButton } from "@/components/sign-out-button";
 import { serverConfig } from "@/lib/config";
-import { fetchDashboard } from "@/lib/server-api";
+import { fetchDashboard, getSessionUser } from "@/lib/server-api";
 import { formatINRFromPaise } from "@/lib/format";
 import { theme } from "@/lib/theme";
 
@@ -34,6 +34,7 @@ function MilestoneBar({ label, value, target }: { label: string; value: number; 
 }
 
 export default async function DashboardPage() {
+  const sessionUser = await getSessionUser();
   let data;
   try {
     data = await fetchDashboard();
@@ -75,7 +76,7 @@ export default async function DashboardPage() {
           </p>
           <p className={`mt-1 ${theme.body}`}>{data.pricing.label}</p>
         </div>
-        <SignOutButton />
+        <SignOutButton userType={sessionUser?.userType} />
       </div>
 
       <div className="mt-10 grid gap-6 lg:grid-cols-3">

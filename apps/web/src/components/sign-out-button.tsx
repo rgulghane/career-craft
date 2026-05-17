@@ -1,12 +1,11 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { messages } from "@career-craft/shared/content";
 import { useState } from "react";
+import { performSignOut } from "@/lib/sign-out-client";
 import { theme } from "@/lib/theme";
 
-export function SignOutButton() {
-  const router = useRouter();
+export function SignOutButton({ userType }: { userType?: string | null }) {
   const [pending, setPending] = useState(false);
 
   return (
@@ -17,9 +16,8 @@ export function SignOutButton() {
       onClick={async () => {
         setPending(true);
         try {
-          await fetch("/api/auth/logout", { method: "POST" });
-          router.push("/");
-          router.refresh();
+          const redirectPath = await performSignOut(userType);
+          window.location.assign(redirectPath);
         } finally {
           setPending(false);
         }
