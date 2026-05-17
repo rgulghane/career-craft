@@ -1,5 +1,5 @@
-# Local production-image smoke test. Set DATABASE_URL (MongoDB) via env or
-# apps/web/.env.local when using docker compose.
+# Local production-image smoke test.
+# Copy .env.docker.example → .env and set secrets before: docker compose up --build
 
 services:
   web:
@@ -13,6 +13,17 @@ services:
       JWT_SECRET: ${JWT_SECRET:-dev-only-change-me-please-32chars-min}
       CRON_SECRET: ${CRON_SECRET:-dev-cron-secret}
       APP_ORIGIN: ${APP_ORIGIN:-http://localhost:3000}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
+      RAZORPAY_KEY_ID: ${RAZORPAY_KEY_ID:-}
+      RAZORPAY_KEY_SECRET: ${RAZORPAY_KEY_SECRET:-}
+      RAZORPAY_WEBHOOK_SECRET: ${RAZORPAY_WEBHOOK_SECRET:-}
+      DB_CONNECT_MAX_ATTEMPTS: ${DB_CONNECT_MAX_ATTEMPTS:-30}
+      DB_CONNECT_DELAY_MS: ${DB_CONNECT_DELAY_MS:-2000}
+      STANDARD_PRICE_PAISE: ${STANDARD_PRICE_PAISE:-}
+      REFERRAL_PRICE_PAISE: ${REFERRAL_PRICE_PAISE:-}
+      CASH_PER_REFERRAL_PAISE: ${CASH_PER_REFERRAL_PAISE:-}
+      REFUND_WINDOW_DAYS: ${REFUND_WINDOW_DAYS:-}
     depends_on:
       mongo:
         condition: service_healthy

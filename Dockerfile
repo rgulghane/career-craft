@@ -58,5 +58,5 @@ EXPOSE 3000
 HEALTHCHECK --interval=30s --timeout=5s --start-period=90s --retries=3 \
   CMD curl -fsS http://127.0.0.1:3000/api/health || exit 1
 
-# DB connect + index setup run in src/instrumentation.ts before the server listens.
+# MongoDB connects on first request; indexes are ensured in connectMongo().
 CMD ["node", "apps/web/server.js"]

@@ -7,7 +7,8 @@ services:
     dockerContext: .
     healthCheckPath: /api/health
     autoDeploy: true
-    preDeployCommand: cd apps/web && npm run db:setup
+    # Indexes are created on first connect (connectMongo). preDeploy db:setup does not
+    # work with the slim Docker standalone image (no tsx / scripts in the runtime).
     envVars:
       - key: NODE_ENV
         value: production

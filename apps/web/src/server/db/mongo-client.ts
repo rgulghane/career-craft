@@ -88,12 +88,15 @@ export async function mongoClient(): Promise<MongoClient> {
   return connectMongo();
 }
 
-export async function isDatabaseConnected(): Promise<boolean> {
+export async function isDatabaseConnected(options?: {
+  maxAttempts?: number;
+  delayMs?: number;
+}): Promise<boolean> {
   try {
-    const client = globalForMongo.mongoClient ?? (await globalForMongo.mongoReady);
-    if (!client) {
-      return false;
-    }
+    const client = await connectMongo({
+      maxAttempts: options?.maxAttempts ?? 3,
+      delayMs: options?.delayMs ?? 1000,
+    });
     await ping(client);
     return true;
   } catch {
