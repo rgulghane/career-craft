@@ -1,12 +1,11 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { messages } from "@career-craft/shared";
+import { absolutePublicUrl } from "@/lib/app-origin";
 import { theme } from "@/lib/theme";
 
 export function AdminLoginForm({ redirectTo }: { redirectTo: string }) {
-  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -21,14 +20,14 @@ export function AdminLoginForm({ redirectTo }: { redirectTo: string }) {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
+        credentials: "same-origin",
       });
       if (!r.ok) {
         const body = (await r.json()) as { error?: string };
         setError(body.error ?? messages.errors.generic);
         return;
       }
-      router.push(redirectTo);
-      router.refresh();
+      window.location.assign(absolutePublicUrl(redirectTo, window.location.origin));
     } catch {
       setError(messages.errors.network);
     } finally {

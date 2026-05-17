@@ -71,7 +71,7 @@ export async function requireAdminPage(nextPath?: string): Promise<AdminSessionU
 export async function requireFullAdminPage(): Promise<AdminSessionUser> {
   const admin = await requireAdminPage();
   if (admin.readOnly) {
-    redirect("/admin?error=read_only");
+    redirect("/admin?error=access_denied");
   }
   return admin;
 }
