@@ -3,8 +3,10 @@ import { redirect } from "next/navigation";
 import { messages } from "@career-craft/shared";
 import { AppPageShell } from "@/components/app-page-shell";
 import { EnrollCurriculumShowcase } from "@/components/enroll-curriculum-showcase";
+import { EnrolledCongratulationsCard } from "@/components/enrolled-congratulations-card";
 import { EnrollmentPricingWidget } from "@/components/enrollment-pricing-widget";
-import { getSessionUser } from "@/lib/server-api";
+import { getSessionUser, userHasPaidEnrollment } from "@/lib/server-api";
+import { buildRegisterPath } from "@/lib/referral-url";
 
 export const metadata: Metadata = {
   title: `${messages.nav.enroll} — CareerCraft`,
@@ -21,13 +23,11 @@ export default async function EnrollPage({
   const continueFlow = params.continue === "1";
 
   if (!user) {
-    const next = continueFlow
-      ? `/enroll?${ref ? `ref=${encodeURIComponent(ref)}&` : ""}continue=1`
-      : ref
-        ? `/enroll?ref=${encodeURIComponent(ref)}`
-        : "/enroll";
-    redirect(`/login?next=${encodeURIComponent(next)}`);
+    redirect(buildRegisterPath(ref));
   }
+
+  const firstName = user.fullName.split(/\s+/)[0] ?? user.fullName;
+  const isEnrolled = await userHasPaidEnrollment(user.id);
 
   return (
     <AppPageShell>
@@ -37,15 +37,23 @@ export default async function EnrollPage({
             {messages.enroll.pageEyebrow}
           </p>
           <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
-            {messages.enroll.welcome(user.fullName.split(/\s+/)[0] ?? user.fullName)}
+            {isEnrolled
+              ? `Welcome back, ${firstName} — you're all set for Cohort 4.`
+              : messages.enroll.welcome(firstName)}
           </p>
         </div>
       </div>
 
-      <div className="grid items-start gap-10 lg:grid-cols-[1fr_minmax(0,28rem)] lg:gap-12 xl:gap-16">
-        <EnrollCurriculumShowcase />
-        <div className="min-w-0 lg:sticky lg:top-24">
-          <EnrollmentPricingWidget mode="enroll" defaultReferralCode={ref} autoContinue={continueFlow} />
+      <div className="grid items-start gap-10 grid-cols-1 enroll:grid-cols-[1fr_minmax(0,28rem)] enroll:gap-12 xl:gap-16">
+        <div className="order-2 min-w-0 enroll:order-1">
+          <EnrollCurriculumShowcase />
+        </div>
+        <div className="order-1 min-w-0 enroll:order-2 enroll:sticky enroll:top-24">
+          {isEnrolled ? (
+            <EnrolledCongratulationsCard firstName={firstName} referralCode={user.referralCode} />
+          ) : (
+            <EnrollmentPricingWidget mode="enroll" defaultReferralCode={ref} autoContinue={continueFlow} />
+          )}
         </div>
       </div>
     </AppPageShell>

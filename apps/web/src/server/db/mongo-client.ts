@@ -6,23 +6,99 @@ import {
   type UserDocument,
 } from "./types";
 
-const globalForMongo = globalThis as unknown as { mongoClient?: MongoClient };
+const globalForMongo = globalThis as unknown as {
+  mongoClient?: MongoClient;
+  mongoReady?: Promise<MongoClient>;
+  indexesEnsured?: boolean;
+};
 
 function connectionString(): string {
   const url = process.env.DATABASE_URL?.trim();
-  if (!url) {
+  if (url) {
+    return url;
+  }
+  if (process.env.NODE_ENV === "production") {
     throw new Error("DATABASE_URL is not set");
   }
-  return url;
+  return "mongodb://127.0.0.1:27017/career_craft";
 }
 
-/** Shared MongoClient instance (connects once per process). */
-export async function mongoClient(): Promise<MongoClient> {
-  if (!globalForMongo.mongoClient) {
-    globalForMongo.mongoClient = new MongoClient(connectionString());
-    await globalForMongo.mongoClient.connect();
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function ping(client: MongoClient): Promise<void> {
+  await client.db().command({ ping: 1 });
+}
+
+/**
+ * Connect to MongoDB with retries. Resolves only when the database is reachable.
+ */
+export async function connectMongo(options?: {
+  maxAttempts?: number;
+  delayMs?: number;
+}): Promise<MongoClient> {
+  if (globalForMongo.mongoClient) {
+    return globalForMongo.mongoClient;
   }
-  return globalForMongo.mongoClient;
+
+  if (globalForMongo.mongoReady) {
+    return globalForMongo.mongoReady;
+  }
+
+  const maxAttempts = options?.maxAttempts ?? Number(process.env.DB_CONNECT_MAX_ATTEMPTS ?? 30);
+  const delayMs = options?.delayMs ?? Number(process.env.DB_CONNECT_DELAY_MS ?? 2000);
+
+  globalForMongo.mongoReady = (async () => {
+    let lastError: unknown;
+    for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+      const client = new MongoClient(connectionString());
+      try {
+        await client.connect();
+        await ping(client);
+        globalForMongo.mongoClient = client;
+        if (!globalForMongo.indexesEnsured) {
+          globalForMongo.indexesEnsured = true;
+          const { ensureIndexes } = await import("./ensure-indexes");
+          await ensureIndexes();
+        }
+        return client;
+      } catch (err) {
+        lastError = err;
+        await client.close().catch(() => undefined);
+        if (attempt < maxAttempts) {
+          console.warn(
+            `[db] Connection attempt ${attempt}/${maxAttempts} failed; retrying in ${delayMs}ms…`,
+          );
+          await sleep(delayMs);
+        }
+      }
+    }
+    globalForMongo.mongoReady = undefined;
+    throw lastError instanceof Error
+      ? lastError
+      : new Error("Failed to connect to MongoDB after multiple attempts.");
+  })();
+
+  return globalForMongo.mongoReady;
+}
+
+/** Shared MongoClient — connects on first use if needed. */
+export async function mongoClient(): Promise<MongoClient> {
+  return connectMongo();
+}
+
+export async function isDatabaseConnected(): Promise<boolean> {
+  try {
+    const client = globalForMongo.mongoClient ?? (await globalForMongo.mongoReady);
+    if (!client) {
+      return false;
+    }
+    await ping(client);
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 export async function usersCollection(): Promise<Collection<UserDocument>> {

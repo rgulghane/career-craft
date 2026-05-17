@@ -28,8 +28,8 @@ body {
     grid-template-columns: 1fr;
   }
 
-  /* Tablet: 720px–1023px — pricing left, features right */
-  @media (min-width: 720px) and (max-width: 1023.98px) {
+  /* Tablet: 720px–1019px — pricing left, features right */
+  @media (min-width: 720px) and (max-width: 1019.98px) {
     .enrollment-widget-body {
       grid-template-columns: 1fr 1fr;
     }

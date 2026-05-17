@@ -1,7 +1,10 @@
 import type { Metadata } from "next";
+import { redirect } from "next/navigation";
 import { messages } from "@career-craft/shared";
 import { AppPageShell } from "@/components/app-page-shell";
 import { getSessionUser } from "@/lib/server-api";
+import { buildEnrollPath, buildLoginPath } from "@/lib/referral-url";
+import { isGoogleAuthConfigured } from "@/server/services/google-auth";
 import { AuthCard } from "../login/ui";
 
 export const metadata: Metadata = {
@@ -15,9 +18,11 @@ export default async function RegisterPage({
 }) {
   const user = await getSessionUser();
   const ref = (await searchParams).ref?.trim().toUpperCase() ?? "";
-  const enrollContinuePath = ref
-    ? `/enroll?ref=${encodeURIComponent(ref)}&continue=1`
-    : "/enroll?continue=1";
+  const enrollAfterAuth = buildEnrollPath(ref, true);
+
+  if (user && ref) {
+    redirect(enrollAfterAuth);
+  }
 
   return (
     <AppPageShell narrow>
@@ -25,7 +30,10 @@ export default async function RegisterPage({
         mode="register"
         heading={user ? messages.enroll.heading : messages.auth.registerHeading}
         sessionUser={user}
-        redirectTo={user ? enrollContinuePath : "/dashboard"}
+        redirectTo={ref || user ? enrollAfterAuth : "/dashboard"}
+        alternateAuthHref={buildLoginPath(ref)}
+        referralCode={ref}
+        googleAuthEnabled={isGoogleAuthConfigured() && !user}
       />
     </AppPageShell>
   );

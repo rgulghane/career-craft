@@ -4,19 +4,16 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useActionState, useEffect, useMemo, useRef, useState } from "react";
 import { ENROLLMENT_WIDGET, PRICING } from "@career-craft/shared/content";
-import {
-  createEnrollmentAction,
-  mockPayEnrollmentAction,
-  type EnrollState,
-  type PayState,
-} from "@/app/enroll/actions";
-import { formatINRFromPaise, listPrices } from "@/lib/format";
+import { createEnrollmentAction, type EnrollState } from "@/app/enroll/actions";
+import { RazorpayPayButton } from "@/components/razorpay-pay-button";
+import { messages } from "@career-craft/shared/content";
+import { discountPercentOff, formatINRFromPaise, listPrices } from "@/lib/format";
+import { buildEnrollPath, buildLoginPath, buildRegisterPath } from "@/lib/referral-url";
 import { ViewingNowBanner } from "@/components/viewing-now-banner";
 
 type Mode = "marketing" | "enroll";
 
 const initialEnroll: EnrollState = { status: "idle" };
-const initialPay: PayState = { status: "idle" };
 
 const ctaClass =
   "flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-amber-500 via-orange-500 to-orange-600 py-3.5 text-base font-bold text-slate-950 shadow-lg shadow-orange-500/35 transition hover:from-amber-400 hover:via-orange-400 hover:to-orange-500 hover:shadow-orange-500/45 disabled:opacity-60";
@@ -65,18 +62,6 @@ function useCountdown(targetMs: number | null): string {
   return formatCountdown(targetMs, now);
 }
 
-function buildEnrollHref(appliedCode: string, continueFlow: boolean): string {
-  const params = new URLSearchParams();
-  if (appliedCode) {
-    params.set("ref", appliedCode);
-  }
-  if (continueFlow) {
-    params.set("continue", "1");
-  }
-  const q = params.toString();
-  return q ? `/enroll?${q}` : "/enroll";
-}
-
 export function EnrollmentPricingWidget({
   mode = "marketing",
   defaultReferralCode = "",
@@ -99,43 +84,77 @@ export function EnrollmentPricingWidget({
   }, []);
 
   const [referralInput, setReferralInput] = useState(defaultReferralCode);
-  const [appliedCode, setAppliedCode] = useState(defaultReferralCode.trim().toUpperCase());
+  const [appliedCode, setAppliedCode] = useState("");
+  const [referrerFirstName, setReferrerFirstName] = useState<string | null>(null);
+  const [referralLookupError, setReferralLookupError] = useState<string | null>(null);
+  const [referralChecking, setReferralChecking] = useState(false);
+
+  const lookupReferral = async (rawCode: string): Promise<boolean> => {
+    const code = rawCode.trim().toUpperCase();
+    if (code.length < 4) {
+      setAppliedCode("");
+      setReferrerFirstName(null);
+      setReferralLookupError(null);
+      return false;
+    }
+
+    setReferralChecking(true);
+    setReferralLookupError(null);
+    try {
+      const res = await fetch(`/api/referral/lookup?code=${encodeURIComponent(code)}`);
+      const data = (await res.json()) as {
+        valid: boolean;
+        referrerFirstName?: string;
+      };
+      if (!data.valid || !data.referrerFirstName) {
+        setAppliedCode("");
+        setReferrerFirstName(null);
+        setReferralLookupError(messages.enroll.referralInvalid);
+        return false;
+      }
+      setAppliedCode(code);
+      setReferrerFirstName(data.referrerFirstName);
+      setReferralInput(code);
+      return true;
+    } catch {
+      setReferralLookupError(messages.errors.network);
+      return false;
+    } finally {
+      setReferralChecking(false);
+    }
+  };
 
   useEffect(() => {
-    if (defaultReferralCode) {
-      const code = defaultReferralCode.trim().toUpperCase();
-      setReferralInput(code);
-      setAppliedCode(code);
+    if (!defaultReferralCode.trim()) {
+      return;
     }
+    const code = defaultReferralCode.trim().toUpperCase();
+    setReferralInput(code);
+    void lookupReferral(code);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- only when URL/default code changes
   }, [defaultReferralCode]);
 
   const [enrollState, enrollAction, enrollPending] = useActionState(createEnrollmentAction, initialEnroll);
-  const [payState, payAction, payPending] = useActionState(mockPayEnrollmentAction, initialPay);
   const enrollFormRef = useRef<HTMLFormElement>(null);
   const autoSubmittedRef = useRef(false);
 
-  const hasReferral = appliedCode.length >= 4;
-  const displayPaise = hasReferral ? PRICING.withReferralCodeInPaise : PRICING.standardInPaise;
+  const hasValidReferral = appliedCode.length >= 4 && referrerFirstName !== null;
+  const displayPaise = hasValidReferral ? PRICING.withReferralCodeInPaise : PRICING.standardInPaise;
   const displayPrice = formatINRFromPaise(displayPaise);
+  const badgePercent = hasValidReferral
+    ? discountPercentOff(PRICING.standardInPaise, PRICING.withReferralCodeInPaise)
+    : discountPercentOff(ENROLLMENT_WIDGET.listPriceInPaise, PRICING.standardInPaise);
+  const referralEmi = formatINRFromPaise(
+    Math.round(PRICING.withReferralCodeInPaise / ENROLLMENT_WIDGET.emiMonths),
+  );
   const seatsPct = Math.round(
     ((ENROLLMENT_WIDGET.seats.total - ENROLLMENT_WIDGET.seats.remaining) / ENROLLMENT_WIDGET.seats.total) * 100,
   );
 
   const created = enrollState.status === "created" ? enrollState : null;
-  const enrollHref = useMemo(() => buildEnrollHref(appliedCode, true), [appliedCode]);
-
-  const signInHref = useMemo(() => {
-    return `/login?next=${encodeURIComponent(enrollHref)}`;
-  }, [enrollHref]);
-
-  const registerHref = useMemo(() => {
-    const params = new URLSearchParams();
-    if (appliedCode) {
-      params.set("ref", appliedCode);
-    }
-    params.set("continue", "1");
-    return `/register?${params.toString()}`;
-  }, [appliedCode]);
+  const enrollHref = useMemo(() => buildEnrollPath(appliedCode, true), [appliedCode]);
+  const registerHref = useMemo(() => buildRegisterPath(appliedCode), [appliedCode]);
+  const signInHref = useMemo(() => buildLoginPath(appliedCode), [appliedCode]);
 
   useEffect(() => {
     if (!autoContinue || mode !== "enroll" || autoSubmittedRef.current || created) {
@@ -144,15 +163,34 @@ export function EnrollmentPricingWidget({
     if (enrollState.status !== "idle" || enrollPending) {
       return;
     }
+    const waitingOnRefLookup =
+      defaultReferralCode.trim().length >= 4 &&
+      !hasValidReferral &&
+      !referralLookupError &&
+      (referralChecking || referrerFirstName === null);
+    if (waitingOnRefLookup) {
+      return;
+    }
     autoSubmittedRef.current = true;
     enrollFormRef.current?.requestSubmit();
-  }, [autoContinue, mode, created, enrollState.status, enrollPending]);
+  }, [
+    autoContinue,
+    mode,
+    created,
+    enrollState.status,
+    enrollPending,
+    defaultReferralCode,
+    hasValidReferral,
+    referralLookupError,
+    referralChecking,
+    referrerFirstName,
+  ]);
 
   useEffect(() => {
     if (!autoContinue || mode !== "enroll" || !created) {
       return;
     }
-    router.replace(buildEnrollHref(appliedCode, false));
+    router.replace(buildEnrollPath(appliedCode, false));
   }, [autoContinue, mode, created, appliedCode, router]);
 
   return (
@@ -189,39 +227,59 @@ export function EnrollmentPricingWidget({
               <p className="bg-gradient-to-r from-amber-600 via-orange-600 to-rose-600 bg-clip-text text-4xl font-extrabold tracking-tight text-transparent sm:text-5xl">
                 {displayPrice}
               </p>
-              <span className="rounded-md bg-gradient-to-r from-amber-500 to-orange-600 px-2.5 py-1 text-xs font-bold text-white shadow-sm shadow-orange-500/30">
-                50% OFF
-              </span>
+              {badgePercent > 0 ? (
+                <span className="rounded-md bg-gradient-to-r from-amber-500 to-orange-600 px-2.5 py-1 text-xs font-bold text-white shadow-sm shadow-orange-500/30">
+                  {badgePercent}% OFF
+                </span>
+              ) : null}
             </div>
           </div>
-          <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">
-            Use referral code →{" "}
-            <span className="font-semibold text-amber-700 dark:text-amber-400">{prices.withReferral}</span>
-            <span className="text-slate-400 dark:text-slate-500"> · EMI from {prices.emi}/mo</span>
-          </p>
-          <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">Have a referral code? Save 50% more</p>
+          {hasValidReferral && referrerFirstName ? (
+            <p className="mt-2 text-sm font-medium text-emerald-800 dark:text-emerald-300">
+              {messages.enroll.referredBy(referrerFirstName)}
+              <span className="font-normal text-slate-600 dark:text-slate-400"> · EMI from {referralEmi}/mo</span>
+            </p>
+          ) : (
+            <>
+              <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">
+                Use referral code →{" "}
+                <span className="font-semibold text-amber-700 dark:text-amber-400">{prices.withReferral}</span>
+                <span className="text-slate-400 dark:text-slate-500"> · EMI from {prices.emi}/mo</span>
+              </p>
+              <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                Have a referral code? Save{" "}
+                {discountPercentOff(PRICING.standardInPaise, PRICING.withReferralCodeInPaise)}% more
+              </p>
+            </>
+          )}
 
           <div className="mt-4 flex flex-col gap-2 sm:flex-row">
             <input
               type="text"
               value={referralInput}
-              onChange={(e) => setReferralInput(e.target.value.toUpperCase())}
+              onChange={(e) => {
+                setReferralInput(e.target.value.toUpperCase());
+                if (referralLookupError) {
+                  setReferralLookupError(null);
+                }
+              }}
               placeholder={ENROLLMENT_WIDGET.referralPlaceholder}
-              className="min-w-0 flex-1 rounded-lg border border-amber-200/80 bg-amber-50/50 px-3 py-2.5 text-sm uppercase tracking-wide text-slate-900 placeholder:text-slate-400 outline-none transition focus:border-amber-400 focus:bg-white focus:ring-2 focus:ring-amber-400/25 dark:border-amber-500/30 dark:bg-slate-800/80 dark:text-white dark:placeholder:text-slate-500 dark:focus:border-amber-500/60 dark:focus:bg-slate-800"
+              readOnly={hasValidReferral}
+              disabled={hasValidReferral || referralChecking}
+              className="min-w-0 flex-1 rounded-lg border border-amber-200/80 bg-amber-50/50 px-3 py-2.5 text-sm uppercase tracking-wide text-slate-900 placeholder:text-slate-400 outline-none transition focus:border-amber-400 focus:bg-white focus:ring-2 focus:ring-amber-400/25 disabled:cursor-not-allowed disabled:opacity-70 dark:border-amber-500/30 dark:bg-slate-800/80 dark:text-white dark:placeholder:text-slate-500 dark:focus:border-amber-500/60 dark:focus:bg-slate-800"
             />
             <button
               type="button"
-              onClick={() => setAppliedCode(referralInput.trim().toUpperCase())}
-              className="shrink-0 rounded-lg bg-gradient-to-r from-slate-800 to-slate-900 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:from-slate-700 hover:to-slate-800 sm:self-stretch dark:from-amber-600 dark:to-orange-600 dark:hover:from-amber-500 dark:hover:to-orange-500"
+              disabled={hasValidReferral || referralChecking}
+              onClick={() => void lookupReferral(referralInput)}
+              className="shrink-0 rounded-lg bg-gradient-to-r from-slate-800 to-slate-900 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:from-slate-700 hover:to-slate-800 disabled:cursor-not-allowed disabled:opacity-50 sm:self-stretch dark:from-amber-600 dark:to-orange-600 dark:hover:from-amber-500 dark:hover:to-orange-500"
             >
-              Apply
+              {referralChecking ? "Checking…" : "Apply"}
             </button>
           </div>
 
-          {hasReferral ? (
-            <p className="mt-2 rounded-lg bg-emerald-50 px-3 py-2 text-xs font-medium text-emerald-800 dark:bg-emerald-500/15 dark:text-emerald-300">
-              Code applied — you pay {prices.withReferral}
-            </p>
+          {referralLookupError ? (
+            <p className="mt-2 text-xs font-medium text-rose-600 dark:text-rose-400">{referralLookupError}</p>
           ) : null}
 
           <div className="mt-5">
@@ -241,15 +299,15 @@ export function EnrollmentPricingWidget({
 
           {mode === "marketing" ? (
             <div className="mt-5 space-y-2">
-              <Link href={isLoggedIn ? enrollHref : signInHref} className={ctaClass}>
+              <Link href={isLoggedIn ? enrollHref : registerHref} className={ctaClass}>
                 <span aria-hidden>🚀</span>
                 Enroll Now at {displayPrice}
               </Link>
               {!isLoggedIn ? (
                 <p className="text-center text-xs text-slate-500 dark:text-slate-400">
-                  New here?{" "}
-                  <Link href={registerHref} className="font-semibold text-amber-600 hover:underline dark:text-amber-400">
-                    Create an account
+                  Already have an account?{" "}
+                  <Link href={signInHref} className="font-semibold text-amber-600 hover:underline dark:text-amber-400">
+                    Sign in
                   </Link>
                 </p>
               ) : null}
@@ -268,35 +326,18 @@ export function EnrollmentPricingWidget({
                   </button>
                 </form>
               ) : (
-                <form action={payAction}>
-                  <input type="hidden" name="enrollmentId" value={created.enrollmentId} />
+                <>
                   <p className="mb-2 text-center text-sm text-slate-600 dark:text-slate-300">
                     Enrollment created · pay {formatINRFromPaise(created.amountInPaise)}
                   </p>
-                  {payState.status === "error" ? (
-                    <p className="mb-2 text-sm text-rose-600 dark:text-rose-400">{payState.message}</p>
-                  ) : null}
-                  {payState.status === "paid" ? (
-                    <p className="mb-2 text-center text-sm font-semibold text-emerald-700 dark:text-emerald-400">
-                      Payment complete!{" "}
-                      <button
-                        type="button"
-                        className="text-amber-600 underline hover:text-amber-500 dark:text-amber-400"
-                        onClick={() => router.push("/dashboard")}
-                      >
-                        Open dashboard
-                      </button>
-                    </p>
-                  ) : (
-                    <button
-                      type="submit"
-                      disabled={payPending}
-                      className="flex w-full items-center justify-center rounded-xl bg-gradient-to-r from-slate-800 to-slate-900 py-3.5 text-base font-bold text-white shadow-lg transition hover:from-slate-700 hover:to-slate-800 disabled:opacity-60 dark:from-amber-600 dark:to-orange-600"
-                    >
-                      {payPending ? "Processing…" : "Complete secure payment"}
-                    </button>
-                  )}
-                </form>
+                  <RazorpayPayButton
+                    enrollmentId={created.enrollmentId}
+                    amountLabel={formatINRFromPaise(created.amountInPaise)}
+                    className="flex w-full items-center justify-center rounded-xl bg-gradient-to-r from-slate-800 to-slate-900 py-3.5 text-base font-bold text-white shadow-lg transition hover:from-slate-700 hover:to-slate-800 disabled:opacity-60 dark:from-amber-600 dark:to-orange-600"
+                  >
+                    {({ pending }) => (pending ? "Processing…" : "Complete secure payment")}
+                  </RazorpayPayButton>
+                </>
               )}
             </div>
           )}

@@ -9,6 +9,14 @@ export function formatINRFromPaise(paise: number): string {
   }).format(rupees);
 }
 
+/** Rounded percent discount from `fromPaise` down to `toPaise`. */
+export function discountPercentOff(fromPaise: number, toPaise: number): number {
+  if (fromPaise <= 0 || toPaise >= fromPaise) {
+    return 0;
+  }
+  return Math.round((1 - toPaise / fromPaise) * 100);
+}
+
 export const listPrices = () => {
   const standardPaise = PRICING.standardInPaise;
   const emiPaise = Math.round(standardPaise / ENROLLMENT_WIDGET.emiMonths);

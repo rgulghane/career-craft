@@ -1,9 +1,11 @@
 import type { ObjectId } from "mongodb";
 
-/** MongoDB _id / FK — ObjectId (new) or string (legacy Prisma cuid). */
+/** MongoDB _id / FK — ObjectId or legacy string id. */
 export type DbId = ObjectId | string;
 
-/** Prisma-compatible collection names (existing Atlas data). */
+export type UserType = "influencer" | "student" | "partner" | "college-ambassador";
+
+/** MongoDB collection names (PascalCase, matches existing Atlas data). */
 export const COLLECTIONS = {
   users: "User",
   enrollments: "Enrollment",
@@ -13,11 +15,14 @@ export const COLLECTIONS = {
 export interface UserDocument {
   _id: DbId;
   email: string;
-  passwordHash: string;
+  /** Omitted for Google-only accounts. */
+  passwordHash?: string;
   fullName: string;
-  referralCode?: string | null;
+  googleId?: string | null;
   createdAt: Date;
   updatedAt: Date;
+  referralCode?: string | null;
+  userType?: UserType | null;
 }
 
 export interface EnrollmentDocument {
@@ -29,6 +34,7 @@ export interface EnrollmentDocument {
   referralCodeUsed?: string | null;
   referrerId?: DbId | null;
   paymentId?: string | null;
+  razorpayOrderId?: string | null;
   paidAt?: Date | null;
   createdAt: Date;
 }
@@ -63,6 +69,7 @@ export interface Enrollment {
   referralCodeUsed: string | null;
   referrerId: string | null;
   paymentId: string | null;
+  razorpayOrderId: string | null;
   paidAt: Date | null;
   createdAt: Date;
 }

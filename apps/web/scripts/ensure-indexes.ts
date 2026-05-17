@@ -1,7 +1,7 @@
-import { ensureIndexes } from "../src/server/db/ensure-indexes";
+import { establishDatabaseConnection } from "../src/server/db/startup";
 
 async function main() {
-  await ensureIndexes();
+  await establishDatabaseConnection();
   console.log("MongoDB indexes are up to date.");
 }
 

@@ -13,17 +13,9 @@ import {
 } from "../db/mongo-client";
 import { serverConfig } from "@/lib/config";
 import { generateReferralCode } from "../util/referral-code";
+import { EnrollmentError } from "../errors";
 
-export class EnrollmentError extends Error {
-  constructor(
-    public status: number,
-    public code: string,
-    message: string,
-  ) {
-    super(message);
-    this.name = "EnrollmentError";
-  }
-}
+export { EnrollmentError };
 
 const REFERRAL_CODE_GENERATION_ATTEMPTS = 5;
 
@@ -63,18 +55,60 @@ export async function createEnrollment(
   }
 
   const enrollments = await enrollmentsCollection();
-  const doc = {
-    _id: new ObjectId(),
+
+  const paidDoc = await enrollments.findOne({
     userId: toDbId(user.id),
+    status: "PAID",
+  });
+  if (paidDoc) {
+    throw new EnrollmentError(409, "already_enrolled", "You are already enrolled.");
+  }
+
+  const pendingDoc = await enrollments.findOne(
+    { userId: toDbId(user.id), status: "PENDING" },
+    { sort: { createdAt: -1 } },
+  );
+
+  const now = new Date();
+  const enrollmentFields = {
     amountInPaise,
     currency: PROGRAM.defaultCurrency,
-    status: "PENDING",
+    status: "PENDING" as const,
     referralCodeUsed: normalizedCode ?? null,
     referrerId: referrerId ? toDbId(referrerId) : null,
-    createdAt: new Date(),
+    createdAt: now,
   };
-  await enrollments.insertOne(doc);
-  const enrollment = mapEnrollment(doc);
+
+  let enrollment;
+
+  if (pendingDoc) {
+    const pendingId = pendingDoc._id;
+    await enrollments.updateOne(
+      { _id: pendingId },
+      {
+        $set: enrollmentFields,
+        $unset: { razorpayOrderId: "", paymentId: "", paidAt: "" },
+      },
+    );
+    await enrollments.deleteMany({
+      userId: toDbId(user.id),
+      status: "PENDING",
+      _id: { $ne: pendingId },
+    });
+    const updated = await enrollments.findOne({ _id: pendingId });
+    if (!updated) {
+      throw new EnrollmentError(500, "update_failed", "Could not update enrollment.");
+    }
+    enrollment = mapEnrollment(updated);
+  } else {
+    const doc = {
+      _id: new ObjectId(),
+      userId: toDbId(user.id),
+      ...enrollmentFields,
+    };
+    await enrollments.insertOne(doc);
+    enrollment = mapEnrollment(doc);
+  }
 
   return {
     id: enrollment.id,
@@ -85,10 +119,13 @@ export async function createEnrollment(
 }
 
 /**
- * Mock payment completion — replace with your PSP webhook handler.
- * Idempotent via paymentId uniqueness on enrollment.
+ * Mark enrollment paid after PSP confirmation. Idempotent via paymentId uniqueness.
  */
-export async function mockPayEnrollment(userId: string, enrollmentId: string): Promise<{ alreadyPaid: boolean }> {
+export async function completeEnrollmentPayment(
+  userId: string,
+  enrollmentId: string,
+  paymentId: string,
+): Promise<{ alreadyPaid: boolean }> {
   const enrollments = await enrollmentsCollection();
   const enrollmentDoc = await enrollments.findOne({
     _id: toDbId(enrollmentId),
@@ -102,7 +139,6 @@ export async function mockPayEnrollment(userId: string, enrollmentId: string): P
     return { alreadyPaid: true };
   }
 
-  const paymentId = `mock_${randomUUID()}`;
   const paidAt = new Date();
   const client = await mongoClient();
   const session = client.startSession();
@@ -164,4 +200,9 @@ export async function mockPayEnrollment(userId: string, enrollmentId: string): P
   }
 
   return { alreadyPaid: false };
+}
+
+/** Dev-only mock payment — use Razorpay in production. */
+export async function mockPayEnrollment(userId: string, enrollmentId: string): Promise<{ alreadyPaid: boolean }> {
+  return completeEnrollmentPayment(userId, enrollmentId, `mock_${randomUUID()}`);
 }

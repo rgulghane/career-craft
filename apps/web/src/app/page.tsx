@@ -5,7 +5,7 @@ import { LandingHero } from "@/components/landing/hero";
 import { LandingPricingReferrals } from "@/components/landing/pricing-referrals";
 import { LandingStudentStories } from "@/components/landing/student-stories";
 import { LandingToolsMentors } from "@/components/landing/tools-mentors";
-import { getSessionUser } from "@/lib/server-api";
+import { getSessionUser, userHasPaidEnrollment } from "@/lib/server-api";
 
 export default async function HomePage({
   searchParams,
@@ -14,10 +14,18 @@ export default async function HomePage({
 }) {
   const user = await getSessionUser();
   const ref = (await searchParams).ref?.trim().toUpperCase() ?? "";
+  const isEnrolled = user ? await userHasPaidEnrollment(user.id) : false;
+  const firstName = user ? (user.fullName.split(/\s+/)[0] ?? user.fullName) : undefined;
 
   return (
     <div className="-mt-px">
-      <LandingHero isLoggedIn={user !== null} defaultReferralCode={ref} />
+      <LandingHero
+        isLoggedIn={user !== null}
+        isEnrolled={isEnrolled}
+        firstName={firstName}
+        referralCode={user?.referralCode ?? null}
+        defaultReferralCode={ref}
+      />
       <LandingCurriculum />
       <LandingToolsMentors />
       <LandingStudentStories />

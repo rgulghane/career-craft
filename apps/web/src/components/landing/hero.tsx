@@ -1,12 +1,19 @@
 import Link from "next/link";
 import { LANDING, PROGRAM } from "@career-craft/shared";
+import { EnrolledCongratulationsCard } from "@/components/enrolled-congratulations-card";
 import { EnrollmentPricingWidget } from "@/components/enrollment-pricing-widget";
 
 export function LandingHero({
   isLoggedIn = false,
+  isEnrolled = false,
+  firstName,
+  referralCode = null,
   defaultReferralCode = "",
 }: {
   isLoggedIn?: boolean;
+  isEnrolled?: boolean;
+  firstName?: string;
+  referralCode?: string | null;
   defaultReferralCode?: string;
 }) {
   return (
@@ -18,8 +25,8 @@ export function LandingHero({
       </div>
 
       <div className="relative mx-auto max-w-6xl px-4 pb-16 pt-12 sm:px-6 sm:pb-24 sm:pt-16 lg:px-8 lg:pb-28 lg:pt-20">
-        <div className="grid items-start gap-10 lg:grid-cols-[1fr_minmax(0,28rem)] lg:gap-12 xl:gap-16">
-          <div>
+        <div className="grid items-start gap-10 grid-cols-1 enroll:grid-cols-[1fr_minmax(0,28rem)] enroll:gap-12 xl:gap-16">
+          <div className="order-2 min-w-0 enroll:order-1">
             <div className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-1.5 text-xs font-medium text-amber-700 backdrop-blur-sm sm:text-sm dark:border-white/10 dark:bg-white/5 dark:text-amber-200">
               <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 dark:bg-emerald-400" />
               {LANDING.hero.badge}
@@ -39,7 +46,7 @@ export function LandingHero({
             </p>
             <p className="mt-3 text-sm text-slate-500">{LANDING.hero.poweredBy}</p>
 
-            <div className="mt-8 lg:hidden">
+            <div className="mt-8 enroll:hidden">
               <Link
                 href="/enroll"
                 className="inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-amber-500 to-orange-600 px-6 py-3.5 text-sm font-semibold text-slate-950 shadow-lg shadow-orange-500/25 transition hover:from-amber-400 hover:to-orange-500"
@@ -48,7 +55,7 @@ export function LandingHero({
               </Link>
             </div>
 
-            <dl className="mt-12 grid grid-cols-2 gap-4 sm:grid-cols-4 lg:grid-cols-2 xl:grid-cols-4">
+            <dl className="mt-12 grid grid-cols-2 gap-4 sm:grid-cols-4 enroll:grid-cols-2 xl:grid-cols-4">
               {LANDING.stats.map((s) => (
                 <div
                   key={s.label}
@@ -70,12 +77,16 @@ export function LandingHero({
             </Link>
           </div>
 
-          <div className="min-w-0 lg:sticky lg:top-24">
-            <EnrollmentPricingWidget
-              mode="marketing"
-              isLoggedIn={isLoggedIn}
-              defaultReferralCode={defaultReferralCode}
-            />
+          <div className="order-1 min-w-0 enroll:order-2 enroll:sticky enroll:top-24">
+            {isEnrolled ? (
+              <EnrolledCongratulationsCard firstName={firstName} referralCode={referralCode} />
+            ) : (
+              <EnrollmentPricingWidget
+                mode="marketing"
+                isLoggedIn={isLoggedIn}
+                defaultReferralCode={defaultReferralCode}
+              />
+            )}
           </div>
         </div>
       </div>

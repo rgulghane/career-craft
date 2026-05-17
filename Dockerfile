@@ -13,7 +13,7 @@ WORKDIR /app
 
 COPY package.json package-lock.json ./
 COPY packages/shared/package.json packages/shared/package-lock.json packages/shared/
-COPY apps/web/package.json apps/web/package-lock.json apps/web/
+COPY apps/web/package.json apps/web/
 
 RUN --mount=type=cache,target=/root/.npm \
     npm install --prefix packages/shared --no-audit --no-fund && \
@@ -55,7 +55,8 @@ USER nextjs
 
 EXPOSE 3000
 
-HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
+HEALTHCHECK --interval=30s --timeout=5s --start-period=90s --retries=3 \
   CMD curl -fsS http://127.0.0.1:3000/api/health || exit 1
 
+# DB connect + index setup run in src/instrumentation.ts before the server listens.
 CMD ["node", "apps/web/server.js"]

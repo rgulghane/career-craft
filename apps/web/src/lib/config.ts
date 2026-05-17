@@ -62,6 +62,17 @@ export const serverConfig = {
   get appOrigin() {
     return readString("APP_ORIGIN", "http://localhost:3000");
   },
+  google: {
+    get clientId() {
+      return readString("GOOGLE_CLIENT_ID", "");
+    },
+    get clientSecret() {
+      return readString("GOOGLE_CLIENT_SECRET", "");
+    },
+    get configured() {
+      return Boolean(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET);
+    },
+  },
   pricing: {
     get standardInPaise() {
       return readNumber("STANDARD_PRICE_PAISE", 500_000);
@@ -76,6 +87,23 @@ export const serverConfig = {
     },
     get refundWindowDays() {
       return readNumber("REFUND_WINDOW_DAYS", 7);
+    },
+  },
+  razorpay: {
+    get keyId() {
+      return readRequired("RAZORPAY_KEY_ID", "");
+    },
+    get keySecret() {
+      return readRequired("RAZORPAY_KEY_SECRET", "");
+    },
+    get webhookSecret() {
+      return readRequired("RAZORPAY_WEBHOOK_SECRET", "");
+    },
+    get configured() {
+      return Boolean(process.env.RAZORPAY_KEY_ID && process.env.RAZORPAY_KEY_SECRET);
+    },
+    get webhookConfigured() {
+      return Boolean(process.env.RAZORPAY_WEBHOOK_SECRET);
     },
   },
 } as const;

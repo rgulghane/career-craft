@@ -39,6 +39,7 @@ export async function createEnrollmentAction(_prev: EnrollState, formData: FormD
     if (err instanceof EnrollmentError) {
       return { status: "error", message: err.message };
     }
+    console.error("[createEnrollmentAction]", err);
     return { status: "error", message: messages.errors.generic };
   }
 }

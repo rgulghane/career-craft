@@ -11,4 +11,8 @@ apps/*/.env.local
 packages/*/.env
 *.db
 *.db-journal
+# Prisma (removed — MongoDB native driver only)
+**/prisma/
+**/.prisma/
 .DS_Store
+*.tsbuildinfo

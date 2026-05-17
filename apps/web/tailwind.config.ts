@@ -9,6 +9,10 @@ const config: Config = {
   ],
   theme: {
     extend: {
+      screens: {
+        /** Page layout: pricing widget sidebar at/above this width. */
+        enroll: "1020px",
+      },
       colors: {
         brand: {
           50: "#f0f9ff",

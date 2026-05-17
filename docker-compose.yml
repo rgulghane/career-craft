@@ -9,12 +9,30 @@ services:
     restart: unless-stopped
     environment:
       NODE_ENV: production
-      DATABASE_URL: ${DATABASE_URL}
+      DATABASE_URL: ${DATABASE_URL:-mongodb://mongo:27017/career_craft}
       JWT_SECRET: ${JWT_SECRET:-dev-only-change-me-please-32chars-min}
       CRON_SECRET: ${CRON_SECRET:-dev-cron-secret}
       APP_ORIGIN: ${APP_ORIGIN:-http://localhost:3000}
-    command: >
-      sh -c "cd /app/apps/web && npm run db:setup &&
-             cd /app && node apps/web/server.js"
+    depends_on:
+      mongo:
+        condition: service_healthy
     ports:
       - "3000:3000"
+    command: ["node", "apps/web/server.js"]
+
+  mongo:
+    image: mongo:7
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+volumes:
+  mongo_data:

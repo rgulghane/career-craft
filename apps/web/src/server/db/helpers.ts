@@ -30,7 +30,7 @@ export function mapUser(doc: UserDocument): User {
   return {
     id: toIdString(doc._id),
     email: doc.email,
-    passwordHash: doc.passwordHash,
+    passwordHash: doc.passwordHash ?? "",
     fullName: doc.fullName,
     referralCode: doc.referralCode ?? null,
     createdAt: doc.createdAt,
@@ -48,6 +48,7 @@ export function mapEnrollment(doc: EnrollmentDocument): Enrollment {
     referralCodeUsed: doc.referralCodeUsed ?? null,
     referrerId: doc.referrerId ? toIdString(doc.referrerId) : null,
     paymentId: doc.paymentId ?? null,
+    razorpayOrderId: doc.razorpayOrderId ?? null,
     paidAt: doc.paidAt ?? null,
     createdAt: doc.createdAt,
   };

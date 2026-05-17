@@ -2,16 +2,15 @@
 
 import { useActionState } from "react";
 import { messages } from "@career-craft/shared/content";
+import { RazorpayPayButton } from "@/components/razorpay-pay-button";
 import { formatINRFromPaise } from "@/lib/format";
 import { theme } from "@/lib/theme";
-import { createEnrollmentAction, mockPayEnrollmentAction, type EnrollState, type PayState } from "./actions";
+import { createEnrollmentAction, type EnrollState } from "./actions";
 
 const initialEnroll: EnrollState = { status: "idle" };
-const initialPay: PayState = { status: "idle" };
 
 export function EnrollFlow({ defaultReferralCode = "" }: { defaultReferralCode?: string }) {
   const [enrollState, enrollAction, enrollPending] = useActionState(createEnrollmentAction, initialEnroll);
-  const [payState, payAction, payPending] = useActionState(mockPayEnrollmentAction, initialPay);
 
   const created = enrollState.status === "created" ? enrollState : null;
   const enrollmentId = created?.enrollmentId;
@@ -46,19 +45,16 @@ export function EnrollFlow({ defaultReferralCode = "" }: { defaultReferralCode?:
             Currency: {created.currency} · Enrollment ID:{" "}
             <span className="font-mono text-amber-200">{created.enrollmentId}</span>
           </p>
-          <p className={`mt-4 ${theme.body}`}>{messages.enroll.success}</p>
-          <form action={payAction} className="mt-6">
-            <input type="hidden" name="enrollmentId" value={enrollmentId ?? ""} />
-            {payState.status === "error" ? <p className={`mb-3 ${theme.error}`}>{payState.message}</p> : null}
-            {payState.status === "paid" ? (
-              <p className={`mb-3 ${theme.success}`}>
-                Mock payment captured. Your referral code is available on the dashboard.
-              </p>
-            ) : null}
-            <button className={`w-full sm:w-auto ${theme.btnSecondary}`} type="submit" disabled={payPending}>
-              {payPending ? "Processing…" : "Complete mock payment"}
-            </button>
-          </form>
+          <p className={`mt-4 ${theme.body}`}>{messages.enroll.paymentReady}</p>
+          <div className="mt-6">
+            <RazorpayPayButton
+              enrollmentId={enrollmentId ?? ""}
+              amountLabel={formatINRFromPaise(created.amountInPaise)}
+              className={`w-full sm:w-auto ${theme.btnSecondary}`}
+            >
+              {({ pending }) => (pending ? "Processing…" : messages.enroll.payNowCta)}
+            </RazorpayPayButton>
+          </div>
         </div>
       ) : null}
     </div>

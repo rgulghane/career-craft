@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { messages } from "@career-craft/shared/content";
+import { GoogleSignInButton } from "@/components/google-sign-in-button";
 import { theme } from "@/lib/theme";
 
 type Mode = "login" | "register";
@@ -18,19 +19,31 @@ export function AuthCard({
   heading,
   redirectTo = "/dashboard",
   sessionUser = null,
+  alternateAuthHref,
+  referralCode = "",
+  googleAuthEnabled = false,
+  initialError = null,
 }: {
   mode: Mode;
   heading: string;
   redirectTo?: string;
   sessionUser?: SessionUser | null;
+  /** Login ↔ register link that preserves referral / return path. */
+  alternateAuthHref?: string;
+  referralCode?: string;
+  googleAuthEnabled?: boolean;
+  initialError?: string | null;
 }) {
   const router = useRouter();
   const emailLocked = sessionUser !== null;
   const [email, setEmail] = useState(sessionUser?.email ?? "");
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState(sessionUser?.fullName ?? "");
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(initialError);
   const [loading, setLoading] = useState(false);
+
+  const switchHref =
+    alternateAuthHref ?? (mode === "login" ? "/register" : "/login");
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -70,24 +83,42 @@ export function AuthCard({
     <div className={theme.card}>
       <p className={theme.eyebrow}>{mode === "login" ? "Welcome back" : "Join Cohort 4"}</p>
       <h1 className={`mt-2 ${theme.title}`}>{heading}</h1>
+      {referralCode ? (
+        <p className="mt-3 rounded-lg bg-amber-50 px-3 py-2 text-sm font-medium text-amber-900 dark:bg-amber-500/15 dark:text-amber-200">
+          Referral code <span className="font-mono tracking-wide">{referralCode}</span> will be applied when you
+          enroll.
+        </p>
+      ) : null}
       <p className={`mt-3 ${theme.body}`}>
         {mode === "login" ? (
           <>
             New here?{" "}
-            <Link className={theme.link} href="/register">
+            <Link className={theme.link} href={switchHref}>
               {messages.nav.register}
             </Link>
           </>
         ) : (
           <>
             Already have an account?{" "}
-            <Link className={theme.link} href="/login">
+            <Link className={theme.link} href={switchHref}>
               {messages.nav.signIn}
             </Link>
           </>
         )}
       </p>
-      <form className="mt-8 space-y-4" onSubmit={onSubmit}>
+      {googleAuthEnabled && !emailLocked ? (
+        <div className="mt-8">
+          <GoogleSignInButton redirectTo={redirectTo} disabled={loading} />
+          <p className="mt-4 text-center text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">
+            {messages.auth.orContinueWithEmail}
+          </p>
+        </div>
+      ) : null}
+
+      <form
+        className={`space-y-4 ${googleAuthEnabled && !emailLocked ? "mt-6" : "mt-8"}`}
+        onSubmit={onSubmit}
+      >
         {mode === "register" ? (
           <label className="block">
             <span className={theme.label}>{messages.auth.fullNameLabel}</span>

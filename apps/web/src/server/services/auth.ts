@@ -37,7 +37,7 @@ export async function registerUser(body: RegisterBody): Promise<AuthResult> {
     email: body.email,
     passwordHash: await bcrypt.hash(body.password, AUTH.bcryptCostFactor),
     fullName: body.fullName,
-    referralCode: null,
+    userType: "student" as const,
     createdAt: now,
     updatedAt: now,
   };
@@ -57,7 +57,14 @@ export async function loginUser(body: LoginBody): Promise<AuthResult> {
     throw new AuthError(401, "invalid_credentials", "Invalid credentials");
   }
   const user = mapUser(doc);
-  const ok = await bcrypt.compare(body.password, user.passwordHash);
+  if (!doc.passwordHash) {
+    throw new AuthError(
+      401,
+      "use_google",
+      "This account uses Google sign-in. Please use the Google button below.",
+    );
+  }
+  const ok = await bcrypt.compare(body.password, doc.passwordHash);
   if (!ok) {
     throw new AuthError(401, "invalid_credentials", "Invalid credentials");
   }

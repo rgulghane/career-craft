@@ -19,13 +19,36 @@ async function safeCreateIndex(
   }
 }
 
-export async function ensureIndexes(): Promise<void> {
-  await safeCreateIndex(COLLECTIONS.users, { email: 1 }, { unique: true, name: "User_email_key" });
+async function ensureReferralCodeIndex(): Promise<void> {
+  const db = (await mongoClient()).db();
+  const users = db.collection(COLLECTIONS.users);
+
+  // Legacy unique index allowed only one document with referralCode: null — migrate to partial unique.
+  await users.updateMany({ referralCode: null }, { $unset: { referralCode: "" } });
+
+  const indexes = await users.indexes();
+  const existing = indexes.find((i) => i.name === "User_referralCode_key");
+  const hasPartial =
+    existing?.partialFilterExpression !== undefined && existing.partialFilterExpression !== null;
+
+  if (existing && !hasPartial) {
+    await users.dropIndex("User_referralCode_key");
+  }
+
   await safeCreateIndex(
     COLLECTIONS.users,
     { referralCode: 1 },
-    { unique: true, sparse: true, name: "User_referralCode_key" },
+    {
+      unique: true,
+      name: "User_referralCode_key",
+      partialFilterExpression: { referralCode: { $type: "string" } },
+    },
   );
+}
+
+export async function ensureIndexes(): Promise<void> {
+  await safeCreateIndex(COLLECTIONS.users, { email: 1 }, { unique: true, name: "User_email_key" });
+  await ensureReferralCodeIndex();
 
   await safeCreateIndex(
     COLLECTIONS.enrollments,
@@ -36,6 +59,11 @@ export async function ensureIndexes(): Promise<void> {
     COLLECTIONS.enrollments,
     { paymentId: 1 },
     { unique: true, sparse: true, name: "Enrollment_paymentId_key" },
+  );
+  await safeCreateIndex(
+    COLLECTIONS.enrollments,
+    { razorpayOrderId: 1 },
+    { unique: true, sparse: true, name: "Enrollment_razorpayOrderId_key" },
   );
 
   await safeCreateIndex(
