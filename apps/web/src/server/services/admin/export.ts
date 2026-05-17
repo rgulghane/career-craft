@@ -22,7 +22,10 @@ function row(values: string[]): string {
 export async function exportAdminCsv(type: "users" | "enrollments" | "referrals"): Promise<string> {
   if (type === "users") {
     const users = await usersCollection();
-    const docs = await users.find({ userType: { $ne: "admin" } }).sort({ createdAt: -1 }).toArray();
+    const docs = await users
+      .find({ userType: { $nin: ["admin", "admin-readonly"] } })
+      .sort({ createdAt: -1 })
+      .toArray();
     let csv = row(["id", "email", "fullName", "userType", "referralCode", "createdAt"]);
     for (const doc of docs) {
       const u = mapUser(doc);

@@ -2,7 +2,7 @@ import "server-only";
 
 import bcrypt from "bcryptjs";
 import { ObjectId } from "mongodb";
-import { AUTH, isAdminUserType, messages, type LoginBody, type RegisterBody } from "@career-craft/shared";
+import { AUTH, isPortalAdminUserType, messages, type LoginBody, type RegisterBody } from "@career-craft/shared";
 import "../db/load-env";
 import { mapUser } from "../db/helpers";
 import { usersCollection } from "../db/mongo-client";
@@ -57,7 +57,7 @@ export async function loginUser(body: LoginBody): Promise<AuthResult> {
     throw new AuthError(401, "invalid_credentials", "Invalid credentials");
   }
   const user = mapUser(doc);
-  if (isAdminUserType(user.userType)) {
+  if (isPortalAdminUserType(user.userType)) {
     throw new AuthError(403, "use_admin_portal", messages.admin.useAdminPortal);
   }
   if (!doc.passwordHash) {

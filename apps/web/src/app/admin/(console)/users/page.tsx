@@ -20,7 +20,8 @@ export default async function AdminUsersPage({
 
   const { items, total, limit } = await listAdminUsers({
     q: params.q,
-    userType: userType && userType !== "admin" ? userType : undefined,
+    userType:
+      userType && userType !== "admin" && userType !== "admin-readonly" ? userType : undefined,
     enrolled,
     page,
     limit: 25,

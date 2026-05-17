@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { AdminCard } from "@/components/admin/admin-card";
+import { useAdminAccess } from "@/components/admin/admin-access";
 
 export function EnrollmentEditor({
   enrollmentId,
@@ -16,12 +17,17 @@ export function EnrollmentEditor({
     referrerId: string;
   };
 }) {
+  const { readOnly } = useAdminAccess();
   const router = useRouter();
   const [amountInPaise, setAmountInPaise] = useState(String(initial.amountInPaise));
   const [referralCodeUsed, setReferralCodeUsed] = useState(initial.referralCodeUsed);
   const [referrerId, setReferrerId] = useState(initial.referrerId);
   const [message, setMessage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+
+  if (readOnly) {
+    return null;
+  }
 
   async function patch(body: Record<string, unknown>) {
     setLoading(true);

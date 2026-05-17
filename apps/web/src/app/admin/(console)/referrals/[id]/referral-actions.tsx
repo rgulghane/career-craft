@@ -3,12 +3,18 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { AdminCard } from "@/components/admin/admin-card";
+import { useAdminAccess } from "@/components/admin/admin-access";
 
 export function ReferralActions({ referralId, status }: { referralId: string; status: string }) {
+  const { readOnly } = useAdminAccess();
   const router = useRouter();
   const [voidReason, setVoidReason] = useState("");
   const [message, setMessage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+
+  if (readOnly) {
+    return null;
+  }
 
   async function qualify() {
     setLoading(true);

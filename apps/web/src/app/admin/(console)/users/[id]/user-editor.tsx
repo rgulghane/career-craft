@@ -4,6 +4,8 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { USER_TYPES, type UserType } from "@career-craft/shared";
 import { AdminCard } from "@/components/admin/admin-card";
+import { useAdminAccess } from "@/components/admin/admin-access";
+import { PORTAL_ADMIN_TYPES } from "@career-craft/shared";
 
 type UserRow = {
   id: string;
@@ -14,6 +16,7 @@ type UserRow = {
 };
 
 export function UserEditor({ userId, initial }: { userId: string; initial: UserRow }) {
+  const { readOnly } = useAdminAccess();
   const router = useRouter();
   const [fullName, setFullName] = useState(initial.fullName);
   const [email, setEmail] = useState(initial.email);
@@ -49,6 +52,10 @@ export function UserEditor({ userId, initial }: { userId: string; initial: UserR
     } finally {
       setLoading(false);
     }
+  }
+
+  if (readOnly) {
+    return null;
   }
 
   async function regenerateCode() {
@@ -98,7 +105,7 @@ export function UserEditor({ userId, initial }: { userId: string; initial: UserR
             value={userType}
             onChange={(e) => setUserType(e.target.value as UserType)}
           >
-            {USER_TYPES.filter((t) => t !== "admin").map((t) => (
+            {USER_TYPES.filter((t) => !(PORTAL_ADMIN_TYPES as readonly string[]).includes(t)).map((t) => (
               <option key={t} value={t}>
                 {t}
               </option>

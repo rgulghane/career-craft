@@ -23,7 +23,7 @@ export async function getAdminOverviewStats(): Promise<AdminOverviewStats> {
 
   const [totalUsers, paidEnrollments, pendingEnrollments, totalReferrals, qualifiedReferrals, inRefundWindowReferrals, voidedReferrals] =
     await Promise.all([
-      users.countDocuments({ userType: { $ne: "admin" } }),
+      users.countDocuments({ userType: { $nin: ["admin", "admin-readonly"] } }),
       enrollments.countDocuments({ status: "PAID" }),
       enrollments.countDocuments({ status: "PENDING" }),
       referrals.countDocuments({}),

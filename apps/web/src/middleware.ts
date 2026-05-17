@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { COOKIE_NAMES } from "@career-craft/shared";
+import { absolutePublicUrl } from "@/lib/app-origin";
 
 const ADMIN_PUBLIC_PATHS = ["/admin/login"];
 const ADMIN_AUTH_API_PREFIX = "/api/admin/auth/";
@@ -20,7 +21,7 @@ export function middleware(request: NextRequest) {
   const token = request.cookies.get(COOKIE_NAMES.authToken)?.value;
 
   if (isAdminPage && !isPublicAdminPage && !token) {
-    const login = new URL("/admin/login", request.url);
+    const login = new URL(absolutePublicUrl("/admin/login", request.nextUrl.origin));
     login.searchParams.set("next", pathname);
     return NextResponse.redirect(login);
   }

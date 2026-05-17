@@ -2,7 +2,7 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import { AdminSignOutButton } from "./admin-sign-out-button";
 
-const links = [
+const baseLinks = [
   { href: "/admin", label: "Overview" },
   { href: "/admin/users", label: "Users" },
   { href: "/admin/enrollments", label: "Enrollments" },
@@ -13,10 +13,14 @@ const links = [
 export function AdminShell({
   children,
   adminName,
+  isFullAdmin = false,
 }: {
   children: ReactNode;
   adminName: string;
+  isFullAdmin?: boolean;
 }) {
+  const links = isFullAdmin ? [...baseLinks, { href: "/admin/team", label: "Team" }] : baseLinks;
+
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100">
       <header className="border-b border-white/10 bg-slate-900/80 backdrop-blur">

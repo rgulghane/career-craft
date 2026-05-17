@@ -59,6 +59,13 @@ export const adminExportQuerySchema = z.object({
   type: z.enum(["users", "enrollments", "referrals"]),
 });
 
+export const adminCreateReadonlyAdminBodySchema = z.object({
+  email: emailSchema,
+  password: passwordSchema,
+  fullName: z.string().trim().min(1).max(120),
+});
+
 export type AdminLoginBody = z.infer<typeof adminLoginBodySchema>;
+export type AdminCreateReadonlyAdminBody = z.infer<typeof adminCreateReadonlyAdminBodySchema>;
 export type AdminUpdateUserBody = z.infer<typeof adminUpdateUserBodySchema>;
 export type AdminUpdateEnrollmentBody = z.infer<typeof adminUpdateEnrollmentBodySchema>;

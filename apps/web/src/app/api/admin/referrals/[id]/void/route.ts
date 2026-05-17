@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { adminVoidReferralBodySchema } from "@career-craft/shared";
-import { withAdminApi, adminServiceErrorResponse } from "@/server/admin-api";
+import { withFullAdminApi, adminServiceErrorResponse } from "@/server/admin-api";
 import { voidAdminReferral } from "@/server/services/admin/referrals";
 
 export const dynamic = "force-dynamic";
@@ -8,7 +8,7 @@ export const dynamic = "force-dynamic";
 type Params = { params: Promise<{ id: string }> };
 
 export async function POST(req: Request, { params }: Params) {
-  return withAdminApi(async () => {
+  return withFullAdminApi(async () => {
     const { id } = await params;
     let json: unknown;
     try {

@@ -1,0 +1,3 @@
+# email,fullName,password — one account per line
+viewer1@example.com,Analytics Viewer,change-me-8chars-min
+viewer2@example.com,Support Viewer,change-me-8chars-min

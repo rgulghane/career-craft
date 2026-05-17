@@ -40,19 +40,23 @@ npm run dev
 
 The app is at [http://localhost:3000](http://localhost:3000). All API endpoints live under `/api/*` on the same origin — there's no separate API process.
 
-**Admin portal:** [http://localhost:3000/admin/login](http://localhost:3000/admin/login) — create an admin with `ADMIN_EMAIL=you@example.com ADMIN_PASSWORD='…' npm run db:create-admin`.
+**Admin portal:** [http://localhost:3000/admin/login](http://localhost:3000/admin/login) — full admin: `ADMIN_EMAIL=… ADMIN_PASSWORD='…' npm run db:create-admin`. Read-only admins: `npm run db:create-admin-readonly` or **Admin → Team** in the UI (full admin only). Batch: `ADMIN_USERS_FILE=apps/web/scripts/readonly-admins.example.csv npm run db:create-readonly-admins-batch`.
 
 ## Useful scripts
 
-| Script              | What it does                                                   |
-| ------------------- | -------------------------------------------------------------- |
-| `npm run dev`       | Builds `@career-craft/shared` then starts Next.js in dev mode  |
-| `npm run dev:clean` | Same, but wipes `.next/` first                                 |
-| `npm run build`     | Builds shared + Next.js for production                         |
-| `npm start`         | Runs the production server (`next start`)                      |
-| `npm run db:setup`  | Create MongoDB indexes (idempotent)                            |
-| `npm run db:create-admin` | Create/update admin user (`ADMIN_EMAIL`, `ADMIN_PASSWORD`) |
-| `npm run lint`      | Next.js lint                                                   |
+
+| Script                                    | What it does                                                   |
+| ----------------------------------------- | -------------------------------------------------------------- |
+| `npm run dev`                             | Builds `@career-craft/shared` then starts Next.js in dev mode  |
+| `npm run dev:clean`                       | Same, but wipes `.next/` first                                 |
+| `npm run build`                           | Builds shared + Next.js for production                         |
+| `npm start`                               | Runs the production server (`next start`)                      |
+| `npm run db:setup`                        | Create MongoDB indexes (idempotent)                            |
+| `npm run db:create-admin`                 | Create/update **full** admin (`ADMIN_EMAIL`, `ADMIN_PASSWORD`) |
+| `npm run db:create-admin-readonly`        | Create/update **read-only** admin (same env vars)              |
+| `npm run db:create-readonly-admins-batch` | Batch read-only admins from CSV (`ADMIN_USERS_FILE`)           |
+| `npm run lint`                            | Next.js lint                                                   |
+
 
 ## Referral flow (demo)
 
@@ -60,12 +64,10 @@ The app is at [http://localhost:3000](http://localhost:3000). All API endpoints 
 2. **Enroll** — optional referral code (must match an existing user's code **after** they paid).
 3. **Mock payment** — assigns the student their own `referralCode` and attributes a referral when one was used.
 4. After the **refund window** (default 7 days, configurable), hit the internal qualify job:
-
-   ```bash
+  ```bash
    curl -X POST http://localhost:3000/api/internal/qualify-referrals \
      -H "x-cron-secret: dev-cron-secret"
-   ```
-
+  ```
    In production, schedule this via your host's cron (Render Cron Job, Fly machines schedule, systemd timer, etc.) using the real `CRON_SECRET`.
 
 ## Configuration
@@ -108,10 +110,12 @@ Runs `npm run db:setup` on boot, then serves on port 3000. Set real `JWT_SECRET`
 
 - Use a 32+ char random `JWT_SECRET` and `CRON_SECRET` in production.
 - Replace the mock payment flow with your PSP webhooks; keep referral qualification **after** the refund window.
-- Never commit `.env*` files. Rotate database credentials if they were ever exposed.
+- Never commit `.env`* files. Rotate database credentials if they were ever exposed.
 
 ## Build verification
 
 ```bash
 npm run build
 ```
+
+[ADMIN_EMAIL=admin@uniconnect.com](mailto:ADMIN_EMAIL=viewer@company.com) ADMIN_PASSWORD='technospectra' ADMIN_NAME='Analytics Viewer' npm run db:create-admin-readonly

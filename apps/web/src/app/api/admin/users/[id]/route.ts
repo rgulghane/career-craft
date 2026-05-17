@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { adminUpdateUserBodySchema } from "@career-craft/shared";
-import { withAdminApi, adminServiceErrorResponse } from "@/server/admin-api";
+import { withAdminApi, withFullAdminApi, adminServiceErrorResponse } from "@/server/admin-api";
 import { getAdminUser, updateAdminUser } from "@/server/services/admin/users";
 
 export const dynamic = "force-dynamic";
@@ -19,7 +19,7 @@ export async function GET(_req: Request, { params }: Params) {
 }
 
 export async function PATCH(req: Request, { params }: Params) {
-  return withAdminApi(async () => {
+  return withFullAdminApi(async () => {
     const { id } = await params;
     let json: unknown;
     try {

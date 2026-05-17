@@ -2,11 +2,17 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { useAdminAccess } from "@/components/admin/admin-access";
 
 export function QualifyDueButton() {
+  const { readOnly } = useAdminAccess();
   const router = useRouter();
   const [message, setMessage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+
+  if (readOnly) {
+    return null;
+  }
 
   async function run() {
     setLoading(true);

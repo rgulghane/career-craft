@@ -2,9 +2,14 @@ import "server-only";
 
 import { NextResponse } from "next/server";
 import { redirect } from "next/navigation";
-import { messages } from "@career-craft/shared";
 import { cookies } from "next/headers";
-import { COOKIE_NAMES, isAdminUserType } from "@career-craft/shared";
+import {
+  COOKIE_NAMES,
+  isPortalAdminUserType,
+  isReadOnlyAdminUserType,
+  messages,
+  type PortalAdminType,
+} from "@career-craft/shared";
 import { verifyToken } from "./auth-tokens";
 import { getSession, type SessionUser } from "./auth-session";
 
@@ -18,27 +23,41 @@ export class AdminAuthError extends Error {
   }
 }
 
-export type AdminSessionUser = SessionUser & { userType: "admin" };
+export type AdminSessionUser = SessionUser & {
+  userType: PortalAdminType;
+  readOnly: boolean;
+};
 
-/** Resolve session and ensure the account is an admin (JWT + DB check). */
+function toAdminSession(session: SessionUser): AdminSessionUser | null {
+  if (!isPortalAdminUserType(session.userType)) {
+    return null;
+  }
+  return {
+    ...session,
+    userType: session.userType,
+    readOnly: isReadOnlyAdminUserType(session.userType),
+  };
+}
+
+/** Resolve session for any portal admin (full or read-only). */
 export async function getAdminSession(): Promise<AdminSessionUser | null> {
   const jar = await cookies();
   const token = jar.get(COOKIE_NAMES.authToken)?.value;
   if (token) {
     const payload = verifyToken(token);
-    if (!payload || !isAdminUserType(payload.userType)) {
+    if (!payload || !isPortalAdminUserType(payload.userType)) {
       return null;
     }
   }
 
   const session = await getSession();
-  if (!session || !isAdminUserType(session.userType)) {
+  if (!session) {
     return null;
   }
-  return session as AdminSessionUser;
+  return toAdminSession(session);
 }
 
-/** Server Component / server action guard — redirects to admin login. */
+/** Server Component guard — any portal admin. */
 export async function requireAdminPage(nextPath?: string): Promise<AdminSessionUser> {
   const admin = await getAdminSession();
   if (!admin) {
@@ -48,11 +67,29 @@ export async function requireAdminPage(nextPath?: string): Promise<AdminSessionU
   return admin;
 }
 
-/** API route guard — returns admin session or throws AdminAuthError. */
+/** Full admin only — redirects read-only users to overview. */
+export async function requireFullAdminPage(): Promise<AdminSessionUser> {
+  const admin = await requireAdminPage();
+  if (admin.readOnly) {
+    redirect("/admin?error=read_only");
+  }
+  return admin;
+}
+
+/** API — any portal admin (read). */
 export async function requireAdminApi(): Promise<AdminSessionUser> {
   const admin = await getAdminSession();
   if (!admin) {
     throw new AdminAuthError(401, messages.errors.unauthorized);
+  }
+  return admin;
+}
+
+/** API — full admin only (write). */
+export async function requireFullAdminApi(): Promise<AdminSessionUser> {
+  const admin = await requireAdminApi();
+  if (admin.readOnly) {
+    throw new AdminAuthError(403, messages.admin.editForbidden);
   }
   return admin;
 }

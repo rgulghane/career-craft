@@ -1,7 +1,7 @@
 import "server-only";
 
 import bcrypt from "bcryptjs";
-import { isAdminUserType, messages, type AdminLoginBody } from "@career-craft/shared";
+import { isPortalAdminUserType, messages, type AdminLoginBody, type PortalAdminType } from "@career-craft/shared";
 import { signToken } from "../auth-tokens";
 import { mapUser } from "../db/helpers";
 import { usersCollection } from "../db/mongo-client";
@@ -19,7 +19,7 @@ export async function loginAdminUser(body: AdminLoginBody): Promise<AdminAuthRes
     throw new AuthError(401, "invalid_credentials", messages.auth.invalidCredentials);
   }
   const user = mapUser(doc);
-  if (!isAdminUserType(user.userType)) {
+  if (!isPortalAdminUserType(user.userType)) {
     throw new AuthError(403, "not_admin", messages.admin.forbidden);
   }
   if (!doc.passwordHash) {
@@ -30,7 +30,7 @@ export async function loginAdminUser(body: AdminLoginBody): Promise<AdminAuthRes
     throw new AuthError(401, "invalid_credentials", messages.auth.invalidCredentials);
   }
   return {
-    token: signToken(user.id, user.email, "admin"),
+    token: signToken(user.id, user.email, user.userType as PortalAdminType),
     user: { id: user.id, email: user.email, fullName: user.fullName },
   };
 }

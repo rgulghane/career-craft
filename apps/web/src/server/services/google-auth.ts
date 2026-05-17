@@ -3,7 +3,7 @@ import "server-only";
 import { ObjectId } from "mongodb";
 import { serverConfig } from "@/lib/config";
 import "../db/load-env";
-import { isAdminUserType, messages } from "@career-craft/shared";
+import { isPortalAdminUserType, messages } from "@career-craft/shared";
 import { mapUser } from "../db/helpers";
 import { usersCollection } from "../db/mongo-client";
 import { signToken } from "../auth-tokens";
@@ -121,7 +121,7 @@ export async function signInWithGoogle(profile: GoogleUserInfo): Promise<AuthRes
   }
 
   const user = mapUser(doc);
-  if (isAdminUserType(user.userType)) {
+  if (isPortalAdminUserType(user.userType)) {
     throw new Error(messages.admin.useAdminPortal);
   }
   return {

@@ -1,16 +1,16 @@
 import { NextResponse } from "next/server";
 import { withFullAdminApi, adminServiceErrorResponse } from "@/server/admin-api";
-import { qualifyAdminReferral } from "@/server/services/admin/referrals";
+import { revokeReadonlyPortalAdmin } from "@/server/services/admin/team";
 
 export const dynamic = "force-dynamic";
 
 type Params = { params: Promise<{ id: string }> };
 
-export async function POST(_req: Request, { params }: Params) {
+export async function DELETE(_req: Request, { params }: Params) {
   return withFullAdminApi(async () => {
     const { id } = await params;
     try {
-      await qualifyAdminReferral(id);
+      await revokeReadonlyPortalAdmin(id);
       return NextResponse.json({ ok: true });
     } catch (err) {
       return adminServiceErrorResponse(err);

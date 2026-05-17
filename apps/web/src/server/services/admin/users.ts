@@ -1,6 +1,7 @@
 import "server-only";
 
 import type { AdminUpdateUserBody, UserType } from "@career-craft/shared";
+import { PORTAL_ADMIN_TYPES } from "@career-craft/shared";
 import "../../db/load-env";
 import { mapEnrollment, mapReferral, mapUser, toDbId, toIdString } from "../../db/helpers";
 import {
@@ -55,7 +56,7 @@ export async function listAdminUsers(params: {
   const users = await usersCollection();
   const enrollments = await enrollmentsCollection();
 
-  const filter: Record<string, unknown> = { userType: { $ne: "admin" } };
+  const filter: Record<string, unknown> = { userType: { $nin: [...PORTAL_ADMIN_TYPES] } };
   if (params.userType) {
     filter.userType = params.userType;
   }
@@ -210,6 +211,9 @@ export async function updateAdminUser(
     $set.email = body.email;
   }
   if (body.userType !== undefined) {
+    if ((PORTAL_ADMIN_TYPES as readonly string[]).includes(body.userType)) {
+      throw new AdminServiceError(400, "Use Admin team to manage portal admins.");
+    }
     $set.userType = body.userType;
   }
   const $unset: Record<string, ""> = {};

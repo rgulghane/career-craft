@@ -10,6 +10,8 @@
     "lint": "next lint",
     "db:setup": "npm run db:env -- npx --yes tsx scripts/ensure-indexes.ts",
     "db:create-admin": "npm run db:env -- npx --yes tsx scripts/create-admin.ts",
+    "db:create-admin-readonly": "npm run db:env -- npx --yes tsx scripts/create-admin-readonly.ts",
+    "db:create-readonly-admins-batch": "npm run db:env -- npx --yes tsx scripts/create-readonly-admins-batch.ts",
     "db:env": "sh -c 'set -a; [ -f .env.local ] && . ./.env.local; [ -f .env ] && . ./.env; set +a; exec \"$@\"' sh"
   },
   "dependencies": {

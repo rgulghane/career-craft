@@ -24,7 +24,17 @@ export const messages = {
     signInCta: "Sign in to admin",
     useAdminPortal: "This account uses the admin portal. Sign in at /admin/login.",
     forbidden: "Admin access required.",
+    editForbidden: "You don't have permission to perform this action.",
     signedOut: "Admin session ended.",
+    teamTitle: "Admin team",
+    teamSubtitle: "Add team members who can view data in the admin portal without making changes.",
+    createTeamMemberCta: "Add team member",
+    teamMemberCreated: "Team member created. Share credentials securely.",
+    roleAdministrator: "Administrator",
+    roleViewer: "Viewer",
+    teamPageIntro: "Create viewer accounts for your team. They sign in at the same admin login URL.",
+    revokeTeamMemberConfirm: (email: string) =>
+      `Remove portal access for ${email}? Their account will become a regular student account.`,
   },
   auth: {
     emailLabel: "Email",

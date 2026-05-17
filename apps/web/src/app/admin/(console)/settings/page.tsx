@@ -7,7 +7,7 @@ export default function AdminSettingsPage() {
   return (
     <div className="space-y-6">
       <h1 className="text-3xl font-bold text-white">Settings</h1>
-      <p className="text-sm text-slate-400">Read-only policy values (override via environment variables).</p>
+      <p className="text-sm text-slate-400">Current policy values (override via environment variables).</p>
       <AdminCard title="Pricing">
         <dl className="space-y-2 text-sm">
           <div className="flex justify-between">
