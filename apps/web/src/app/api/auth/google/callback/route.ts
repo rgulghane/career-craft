@@ -1,10 +1,25 @@
 import { NextResponse } from "next/server";
 import { absoluteAppUrl } from "@/lib/app-url";
 import { verifyOAuthState } from "@/server/oauth-state";
-import { exchangeGoogleCode, isGoogleAuthConfigured, signInWithGoogle } from "@/server/services/google-auth";
+import {
+  exchangeGoogleCode,
+  GoogleAuthError,
+  isGoogleAuthConfigured,
+  loginWithGoogle,
+  registerWithGoogle,
+} from "@/server/services/google-auth";
 import { setSessionCookie } from "@/server/session-cookie";
 
 export const dynamic = "force-dynamic";
+
+function authErrorRedirect(intent: "login" | "register", code: string, next?: string): string {
+  const base = intent === "register" ? "/register" : "/login";
+  const params = new URLSearchParams({ error: `google_${code}` });
+  if (next && next !== "/dashboard") {
+    params.set("next", next);
+  }
+  return absoluteAppUrl(`${base}?${params.toString()}`);
+}
 
 export async function GET(request: Request) {
   if (!isGoogleAuthConfigured()) {
@@ -14,26 +29,35 @@ export async function GET(request: Request) {
   const url = new URL(request.url);
   const error = url.searchParams.get("error");
   if (error) {
-    return NextResponse.redirect(
-      absoluteAppUrl(`/login?error=google_${encodeURIComponent(error)}`),
-    );
+    return NextResponse.redirect(absoluteAppUrl(`/login?error=google_${encodeURIComponent(error)}`));
   }
 
   const code = url.searchParams.get("code");
   const state = url.searchParams.get("state");
-  const redirectTo = state ? verifyOAuthState(state) : null;
+  const verified = state ? verifyOAuthState(state) : null;
 
-  if (!code || !redirectTo) {
+  if (!code || !verified) {
     return NextResponse.redirect(absoluteAppUrl("/login?error=google_failed"));
   }
 
+  if (verified.intent === "register" && !verified.profile) {
+    return NextResponse.redirect(authErrorRedirect("register", "profile_required", verified.redirectTo));
+  }
+
   try {
-    const profile = await exchangeGoogleCode(code);
-    const result = await signInWithGoogle(profile);
-    const res = NextResponse.redirect(absoluteAppUrl(redirectTo));
+    const googleProfile = await exchangeGoogleCode(code);
+    const result =
+      verified.intent === "login"
+        ? await loginWithGoogle(googleProfile)
+        : await registerWithGoogle(googleProfile, verified.profile!);
+
+    const res = NextResponse.redirect(absoluteAppUrl(verified.redirectTo));
     setSessionCookie(res, result.token);
     return res;
-  } catch {
-    return NextResponse.redirect(absoluteAppUrl("/login?error=google_failed"));
+  } catch (err) {
+    if (err instanceof GoogleAuthError) {
+      return NextResponse.redirect(authErrorRedirect("login", err.code, verified.redirectTo));
+    }
+    return NextResponse.redirect(authErrorRedirect(verified.intent, "failed", verified.redirectTo));
   }
 }

@@ -4,6 +4,7 @@ import { messages } from "@career-craft/shared";
 import { AppPageShell } from "@/components/app-page-shell";
 import { getSessionUser } from "@/lib/server-api";
 import { buildEnrollPath, buildLoginPath } from "@/lib/referral-url";
+import { googleAuthErrorMessage } from "@/lib/google-auth-error-message";
 import { isGoogleAuthConfigured } from "@/server/services/google-auth";
 import { AuthCard } from "../login/ui";
 
@@ -14,10 +15,11 @@ export const metadata: Metadata = {
 export default async function RegisterPage({
   searchParams,
 }: {
-  searchParams: Promise<{ ref?: string }>;
+  searchParams: Promise<{ ref?: string; error?: string }>;
 }) {
+  const params = await searchParams;
   const user = await getSessionUser();
-  const ref = (await searchParams).ref?.trim().toUpperCase() ?? "";
+  const ref = params.ref?.trim().toUpperCase() ?? "";
   const enrollAfterAuth = buildEnrollPath(ref, true);
 
   if (user && ref) {
@@ -34,6 +36,7 @@ export default async function RegisterPage({
         alternateAuthHref={buildLoginPath(ref)}
         referralCode={ref}
         googleAuthEnabled={isGoogleAuthConfigured() && !user}
+        initialError={googleAuthErrorMessage(params.error)}
       />
     </AppPageShell>
   );

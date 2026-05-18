@@ -1,5 +1,7 @@
 import "server-only";
 
+import { getSiteOrigin } from "@career-craft/shared";
+
 /**
  * Single source of truth for server-side runtime configuration.
  *
@@ -60,7 +62,11 @@ export const serverConfig = {
     return readRequired("CRON_SECRET", "dev-cron-secret");
   },
   get appOrigin() {
-    return readString("APP_ORIGIN", "http://localhost:3000");
+    const fromEnv = getSiteOrigin();
+    if (fromEnv) {
+      return fromEnv;
+    }
+    return readRequired("APP_ORIGIN", "http://localhost:3000");
   },
   google: {
     get clientId() {

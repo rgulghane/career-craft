@@ -9,14 +9,9 @@ import { ThemeToggle } from "./theme-toggle";
 import type { SessionUser } from "./user-avatar";
 import { UserMenu } from "./user-menu";
 
-const publicAppLinks = [{ href: "/login", label: messages.nav.signIn }];
-
 const authedAppLinks = [{ href: "/dashboard", label: messages.nav.dashboard }];
 
-const marketingLinks = [
-  { href: "/curriculum", label: "Curriculum" },
-  { href: "/#referrals", label: "Referrals" },
-];
+const marketingLinks = [{ href: "/curriculum", label: "Curriculum" }];
 
 const enrollNowClass =
   "inline-flex items-center justify-center rounded-lg bg-gradient-to-r from-amber-500 to-orange-600 px-4 py-2 text-sm font-semibold text-slate-950 shadow-md transition hover:from-amber-400 hover:to-orange-500";
@@ -34,8 +29,7 @@ export function SiteHeader({ user }: { user: SessionUser | null }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
 
-  const appLinks = user ? authedAppLinks : publicAppLinks;
-  const navLinks = [...marketingLinks, ...appLinks];
+  const navLinks = [...marketingLinks, ...(user ? authedAppLinks : [])];
 
   return (
     <header className="sticky top-0 z-50 border-b border-slate-200 bg-white/90 text-slate-900 backdrop-blur-md dark:border-white/10 dark:bg-slate-950/90 dark:text-white">

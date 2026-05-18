@@ -1,42 +1,83 @@
 import { messages } from "@career-craft/shared/content";
 
-export function GoogleSignInButton({
-  redirectTo,
-  disabled = false,
-}: {
-  redirectTo: string;
-  disabled?: boolean;
-}) {
-  const href = `/api/auth/google?next=${encodeURIComponent(redirectTo)}`;
+const sharedClass =
+  "flex w-full items-center justify-center gap-3 rounded-xl border px-4 py-3 text-sm font-semibold";
+
+type GoogleSignInButtonProps =
+  | {
+      intent: "login";
+      redirectTo: string;
+      disabled?: boolean;
+    }
+  | {
+      intent: "register";
+      redirectTo: string;
+      fullName: string;
+      phone: string;
+      collegeName?: string;
+      disabled?: boolean;
+    };
+
+export function GoogleSignInButton(props: GoogleSignInButtonProps) {
+  const { redirectTo, disabled = false } = props;
+  const label =
+    props.intent === "login" ? messages.auth.signInWithGoogle : messages.auth.signUpWithGoogle;
 
   if (disabled) {
     return (
       <span
         aria-disabled
-        className="flex w-full cursor-not-allowed items-center justify-center gap-3 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-400 dark:border-slate-700 dark:bg-slate-800/50 dark:text-slate-500"
+        className={`${sharedClass} cursor-not-allowed border-slate-200 bg-slate-50 text-slate-400 dark:border-slate-700 dark:bg-slate-800/50 dark:text-slate-500`}
       >
-        <GoogleIcon />
-        {messages.auth.signInWithGoogle}
+        <GoogleIcon muted />
+        {label}
       </span>
     );
   }
 
-  // Plain <a> — OAuth must be a full document navigation. Next.js <Link> prefetches
-  // /api/auth/google via fetch/RSC; the 302 to Google then fails CORS in the browser.
+  if (props.intent === "login") {
+    const href = `/api/auth/google?next=${encodeURIComponent(redirectTo)}&intent=login`;
+
+    return (
+      <a
+        href={href}
+        className={`${sharedClass} border-slate-200 bg-white text-slate-800 shadow-sm transition hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700`}
+      >
+        <GoogleIcon />
+        {label}
+      </a>
+    );
+  }
+
+  const { fullName, phone, collegeName = "" } = props;
+
   return (
-    <a
-      href={href}
-      className="flex w-full items-center justify-center gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-800 shadow-sm transition hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700"
-    >
-      <GoogleIcon />
-      {messages.auth.signInWithGoogle}
-    </a>
+    <form method="POST" action="/api/auth/google" className="w-full">
+      <input type="hidden" name="intent" value="register" />
+      <input type="hidden" name="next" value={redirectTo} />
+      <input type="hidden" name="fullName" value={fullName.trim()} />
+      <input type="hidden" name="phone" value={phone} />
+      {collegeName.trim() ? <input type="hidden" name="collegeName" value={collegeName.trim()} /> : null}
+      <button
+        type="submit"
+        className={`${sharedClass} border-slate-200 bg-white text-slate-800 shadow-sm transition hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700`}
+      >
+        <GoogleIcon />
+        {label}
+      </button>
+    </form>
   );
 }
 
-function GoogleIcon() {
+function GoogleIcon({ muted = false }: { muted?: boolean }) {
   return (
-    <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden>
+    <svg
+      width="20"
+      height="20"
+      viewBox="0 0 24 24"
+      aria-hidden
+      className={muted ? "opacity-50" : undefined}
+    >
       <path
         fill="#4285F4"
         d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"

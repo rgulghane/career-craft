@@ -37,6 +37,8 @@ export async function registerUser(body: RegisterBody): Promise<AuthResult> {
     email: body.email,
     passwordHash: await bcrypt.hash(body.password, AUTH.bcryptCostFactor),
     fullName: body.fullName,
+    phone: body.phone,
+    collegeName: body.collegeName ?? null,
     userType: "student" as const,
     createdAt: now,
     updatedAt: now,

@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { headers } from "next/headers";
 import { SiteFooter } from "./site-footer";
 import { SiteHeader } from "./site-header";
+import { WhatsAppFloatLoader } from "./whatsapp-float-loader";
 import { getSessionUser } from "@/lib/server-api";
 
 export async function SiteShell({ children }: { children: ReactNode }) {
@@ -17,6 +18,7 @@ export async function SiteShell({ children }: { children: ReactNode }) {
       <SiteHeader user={user} />
       <main className="flex-1">{children}</main>
       <SiteFooter />
+      <WhatsAppFloatLoader />
     </div>
   );
 }

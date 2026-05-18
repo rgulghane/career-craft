@@ -3,7 +3,7 @@ import "server-only";
 import { ObjectId } from "mongodb";
 import { serverConfig } from "@/lib/config";
 import "../db/load-env";
-import { isPortalAdminUserType, messages } from "@career-craft/shared";
+import { type AuthSignupProfile, isPortalAdminUserType, messages } from "@career-craft/shared";
 import { mapUser } from "../db/helpers";
 import { usersCollection } from "../db/mongo-client";
 import { signToken } from "../auth-tokens";
@@ -39,6 +39,16 @@ interface GoogleUserInfo {
   email?: string;
   email_verified?: boolean;
   name?: string;
+}
+
+export class GoogleAuthError extends Error {
+  constructor(
+    public code: string,
+    message: string,
+  ) {
+    super(message);
+    this.name = "GoogleAuthError";
+  }
 }
 
 async function fetchGoogleUserInfo(accessToken: string): Promise<GoogleUserInfo> {
@@ -78,13 +88,56 @@ export async function exchangeGoogleCode(code: string): Promise<GoogleUserInfo> 
   return fetchGoogleUserInfo(tokenJson.access_token);
 }
 
-export async function signInWithGoogle(profile: GoogleUserInfo): Promise<AuthResult> {
+function assertVerifiedGoogleEmail(profile: GoogleUserInfo): string {
   if (!profile.email || !profile.email_verified) {
     throw new Error("Google account must have a verified email");
   }
+  return profile.email.trim().toLowerCase();
+}
 
-  const email = profile.email.trim().toLowerCase();
-  const fullName = (profile.name?.trim() || email.split("@")[0] || "Student").slice(0, 120);
+function finishAuth(doc: Parameters<typeof mapUser>[0]): AuthResult {
+  const user = mapUser(doc);
+  if (isPortalAdminUserType(user.userType)) {
+    throw new Error(messages.admin.useAdminPortal);
+  }
+  return {
+    token: signToken(user.id, user.email, user.userType ?? "student"),
+    user: { id: user.id, email: user.email, fullName: user.fullName },
+  };
+}
+
+/** Sign in with Google — existing accounts only. */
+export async function loginWithGoogle(profile: GoogleUserInfo): Promise<AuthResult> {
+  const email = assertVerifiedGoogleEmail(profile);
+  const googleId = profile.sub;
+
+  const users = await usersCollection();
+  const byGoogle = await users.findOne({ googleId });
+  const byEmail = byGoogle ? null : await users.findOne({ email });
+
+  const doc = byGoogle ?? byEmail;
+  if (!doc) {
+    throw new GoogleAuthError("not_registered", messages.auth.googleNotRegistered);
+  }
+
+  const now = new Date();
+  if (!doc.googleId) {
+    await users.updateOne({ _id: doc._id }, { $set: { googleId, updatedAt: now } });
+    return finishAuth({ ...doc, googleId, updatedAt: now });
+  }
+
+  return finishAuth(doc);
+}
+
+/** Register or sign in with Google — creates account when new. */
+export async function registerWithGoogle(
+  profile: GoogleUserInfo,
+  signupProfile: AuthSignupProfile,
+): Promise<AuthResult> {
+  const email = assertVerifiedGoogleEmail(profile);
+  const fullName = signupProfile.fullName.trim().slice(0, 120);
+  const phone = signupProfile.phone;
+  const collegeName = signupProfile.collegeName ?? null;
   const googleId = profile.sub;
 
   const users = await usersCollection();
@@ -95,22 +148,30 @@ export async function signInWithGoogle(profile: GoogleUserInfo): Promise<AuthRes
   let doc = byGoogle ?? byEmail;
 
   if (doc) {
+    const $set: Record<string, unknown> = { updatedAt: now };
     if (!doc.googleId) {
-      await users.updateOne(
-        { _id: doc._id },
-        { $set: { googleId, updatedAt: now } },
-      );
-      doc = { ...doc, googleId, updatedAt: now };
+      $set.googleId = googleId;
     }
-    if (!doc.fullName && fullName) {
-      await users.updateOne({ _id: doc._id }, { $set: { fullName, updatedAt: now } });
-      doc = { ...doc, fullName, updatedAt: now };
+    if (!doc.fullName) {
+      $set.fullName = fullName;
+    }
+    if (!doc.phone) {
+      $set.phone = phone;
+    }
+    if (!doc.collegeName && collegeName) {
+      $set.collegeName = collegeName;
+    }
+    if (Object.keys($set).length > 1) {
+      await users.updateOne({ _id: doc._id }, { $set });
+      doc = { ...doc, ...$set, updatedAt: now };
     }
   } else {
     doc = {
       _id: new ObjectId(),
       email,
       fullName,
+      phone,
+      collegeName,
       googleId,
       userType: "student",
       referralCode: null,
@@ -120,12 +181,5 @@ export async function signInWithGoogle(profile: GoogleUserInfo): Promise<AuthRes
     await users.insertOne(doc);
   }
 
-  const user = mapUser(doc);
-  if (isPortalAdminUserType(user.userType)) {
-    throw new Error(messages.admin.useAdminPortal);
-  }
-  return {
-    token: signToken(user.id, user.email, user.userType ?? "student"),
-    user: { id: user.id, email: user.email, fullName: user.fullName },
-  };
+  return finishAuth(doc);
 }

@@ -24,18 +24,114 @@ export const LANDING = {
     "Claude",
     "Gemini",
     "Google Analytics",
-    "LinkedIn AI",
+    "LinkedIn",
     "Zapier",
+    "Notion",
+    "Slack",
+    "Figma",
+    "Python",
+    "Tableau",
+    "GitHub",
+    "HubSpot",
+    "Jira",
   ],
   mentors: [
-    "Flipkart",
-    "CRED",
-    "Amazon India",
-    "Nykaa",
-    "Google India",
-    "TCS",
-    "Myntra",
-    "Deloitte",
+    {
+      name: "Priya Nair",
+      designation: "Senior Product Manager",
+      company: "Flipkart",
+      location: "Bengaluru",
+      photo:
+        "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=480&h=480&q=80",
+    },
+    {
+      name: "Arjun Mehta",
+      designation: "Engineering Lead · Payments",
+      company: "CRED",
+      location: "Mumbai",
+      photo:
+        "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=480&h=480&q=80",
+    },
+    {
+      name: "Sneha Reddy",
+      designation: "Data Science Manager",
+      company: "Amazon India",
+      location: "Hyderabad",
+      photo:
+        "https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=480&h=480&q=80",
+    },
+    {
+      name: "Kavya Iyer",
+      designation: "Head of Growth Marketing",
+      company: "Nykaa",
+      location: "Mumbai",
+      photo:
+        "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=480&h=480&q=80",
+    },
+    {
+      name: "Rohan Kapoor",
+      designation: "Cloud Solutions Architect",
+      company: "Google India",
+      location: "Gurugram",
+      photo:
+        "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=480&h=480&q=80",
+    },
+    {
+      name: "Anita Desai",
+      designation: "Director · Digital Consulting",
+      company: "TCS",
+      location: "Pune",
+      photo:
+        "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=480&h=480&q=80",
+    },
+    {
+      name: "Vikram Singh",
+      designation: "Category Lead · Fashion",
+      company: "Myntra",
+      location: "Bengaluru",
+      photo:
+        "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=480&h=480&q=80",
+    },
+    {
+      name: "Meera Joshi",
+      designation: "Strategy Partner",
+      company: "Deloitte",
+      location: "Mumbai",
+      photo:
+        "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=480&h=480&q=80",
+    },
+    {
+      name: "Kabir Malhotra",
+      designation: "VP · Business Analytics",
+      company: "Swiggy",
+      location: "Bengaluru",
+      photo:
+        "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=480&h=480&q=80",
+    },
+    {
+      name: "Divya Krishnan",
+      designation: "Lead UX Researcher",
+      company: "Razorpay",
+      location: "Bengaluru",
+      photo:
+        "https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?auto=format&fit=crop&w=480&h=480&q=80",
+    },
+    {
+      name: "Imran Sheikh",
+      designation: "Senior AI Product Manager",
+      company: "PhonePe",
+      location: "Pune",
+      photo:
+        "https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&w=480&h=480&q=80",
+    },
+    {
+      name: "Neha Banerjee",
+      designation: "Marketing Analytics Lead",
+      company: "Zomato",
+      location: "Gurugram",
+      photo:
+        "https://images.unsplash.com/photo-1594744803329-e58b31de8df5?auto=format&fit=crop&w=480&h=480&q=80",
+    },
   ],
   certifications: ["MSME", "Skill India", "BFSI", "ISO 9001:2015", "FICCI"],
   studentStories: {
@@ -77,6 +173,53 @@ export const LANDING = {
       { name: "BFSI", icon: "🏦" },
       { name: "ISO 9001:2015", icon: "🔵" },
       { name: "FICCI", icon: "📋" },
+    ],
+  },
+  faq: {
+    eyebrow: "FAQ",
+    title: "Questions students ask before enrolling",
+    subtitle: "Straight answers about the program, pricing, referrals, and what happens after you join.",
+    items: [
+      {
+        question: "Who is CareerCraft AI built for?",
+        answer:
+          "Final-year students, fresh graduates, and career switchers from Tier II & III colleges. No coding or prior AI experience is required — we start from workplace fundamentals and build up to industry tools.",
+      },
+      {
+        question: "What is the class schedule?",
+        answer:
+          "Live sessions run on Saturdays, 2:00 – 4:00 PM IST. If you miss a session, recordings are uploaded within 24 hours on the UniConnect app, and you keep access for 12 months.",
+      },
+      {
+        question: "How much does the program cost?",
+        answer:
+          "Standard enrollment is ₹5,000. Enter a valid referral code at checkout to unlock the referral price of ₹2,500 (50% off). Payments are processed securely through Razorpay.",
+      },
+      {
+        question: "What is the refund policy?",
+        answer:
+          "You get a 7-day full refund from the date of payment if the program is not the right fit. After that, enrollment is non-refundable except where required by law.",
+      },
+      {
+        question: "How do referrals work?",
+        answer:
+          "Every enrolled student receives a unique referral code. When someone enrolls with your code and completes the refund window, you earn ₹500 per qualified referral. Milestone rewards unlock at 50, 100, and 500 qualified referrals.",
+      },
+      {
+        question: "Are the certifications government recognised?",
+        answer:
+          "Graduates receive credentials aligned with MSME, Skill India, BFSI sector standards, ISO 9001:2015 quality frameworks, and FICCI industry recognition — the same logos employers see on your completion kit.",
+      },
+      {
+        question: "What placement support is included?",
+        answer:
+          "Six months of placement support: resume and LinkedIn optimisation with AI, mock interviews, capstone review, and alumni network access. Outcomes depend on your effort, location, and cohort — we guide, you execute.",
+      },
+      {
+        question: "What do I need to get started?",
+        answer:
+          "A laptop with a stable internet connection, a personal email, and willingness to show up for live Saturdays. Free tiers of ChatGPT and Canva are enough for the first few weeks; we share tool setup in Week 1.",
+      },
     ],
   },
   phases: [

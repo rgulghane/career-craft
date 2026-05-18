@@ -25,10 +25,42 @@ export const REFERRAL_POLICY = {
   },
 } as const;
 
-export const SITE_DEFAULTS = {
-  /** Used as a last-resort origin for share links when no env is set. */
-  fallbackOrigin: "http://localhost:3000",
+const APP_ORIGIN_ENV_KEYS = ["APP_ORIGIN", "NEXT_PUBLIC_APP_ORIGIN"] as const;
+
+/**
+ * Canonical site origin from env (no trailing slash).
+ * Set `APP_ORIGIN` in apps/web — see `.env.example`.
+ */
+export function getSiteOrigin(): string {
+  for (const key of APP_ORIGIN_ENV_KEYS) {
+    const raw = process.env[key]?.trim();
+    if (raw) {
+      return raw.replace(/\/$/, "");
+    }
+  }
+  return "";
+}
+
+/** WhatsApp support chat copy. */
+export const SUPPORT_WHATSAPP = {
+  defaultMessage: "Hi! I'd like to know more about CareerCraft AI.",
 } as const;
+
+const WHATSAPP_ENV_KEYS = ["NEXT_PUBLIC_WHATSAPP_NUMBER", "WHATSAPP_NUMBER"] as const;
+
+/**
+ * WhatsApp number from env (country code + number, digits only).
+ * Set `NEXT_PUBLIC_WHATSAPP_NUMBER` or `WHATSAPP_NUMBER` in apps/web.
+ */
+export function getSupportWhatsAppNumber(): string {
+  for (const key of WHATSAPP_ENV_KEYS) {
+    const raw = process.env[key]?.trim();
+    if (raw) {
+      return raw.replace(/\D/g, "");
+    }
+  }
+  return "";
+}
 
 export const COOKIE_NAMES = {
   authToken: "cc_auth_token",

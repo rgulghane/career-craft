@@ -32,6 +32,8 @@ export function mapUser(doc: UserDocument): User {
     email: doc.email,
     passwordHash: doc.passwordHash ?? "",
     fullName: doc.fullName,
+    phone: doc.phone ?? null,
+    collegeName: doc.collegeName ?? null,
     referralCode: doc.referralCode ?? null,
     userType: doc.userType ?? "student",
     createdAt: doc.createdAt,

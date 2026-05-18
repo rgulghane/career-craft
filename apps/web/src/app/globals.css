@@ -23,6 +23,41 @@ body {
 }
 
 @layer components {
+  .social-proof-toast {
+    transform: translateY(1rem);
+    opacity: 0;
+    transition:
+      transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+      opacity 0.35s ease;
+  }
+
+  .social-proof-toast--enter,
+  .social-proof-toast--visible {
+    transform: translateY(0);
+    opacity: 1;
+  }
+
+  .social-proof-toast--exit {
+    transform: translateY(0.5rem);
+    opacity: 0;
+    transition-duration: 0.28s;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .social-proof-toast {
+      transition: opacity 0.2s ease;
+      transform: none;
+    }
+
+    .social-proof-toast--exit {
+      transform: none;
+    }
+
+    .social-proof-toast .animate-ping {
+      animation: none;
+    }
+  }
+
   .enrollment-widget-body {
     display: grid;
     grid-template-columns: 1fr;

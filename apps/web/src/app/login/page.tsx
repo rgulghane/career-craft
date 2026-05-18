@@ -4,6 +4,7 @@ import { messages } from "@career-craft/shared";
 import { AppPageShell } from "@/components/app-page-shell";
 import { getSessionUser } from "@/lib/server-api";
 import { buildRegisterPath } from "@/lib/referral-url";
+import { googleAuthErrorMessage } from "@/lib/google-auth-error-message";
 import { isGoogleAuthConfigured } from "@/server/services/google-auth";
 import { AuthCard } from "./ui";
 
@@ -27,12 +28,6 @@ function refFromNext(next: string): string {
   }
 }
 
-function googleErrorMessage(error: string | undefined): string | null {
-  if (!error?.startsWith("google")) {
-    return null;
-  }
-  return messages.auth.googleSignInFailed;
-}
 
 export default async function LoginPage({
   searchParams,
@@ -57,7 +52,7 @@ export default async function LoginPage({
         alternateAuthHref={buildRegisterPath(ref)}
         referralCode={ref}
         googleAuthEnabled={isGoogleAuthConfigured()}
-        initialError={googleErrorMessage(params.error)}
+        initialError={googleAuthErrorMessage(params.error)}
       />
     </AppPageShell>
   );

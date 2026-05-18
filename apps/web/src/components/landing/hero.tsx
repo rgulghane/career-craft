@@ -26,7 +26,7 @@ export function LandingHero({
 
       <div className="relative mx-auto max-w-6xl px-4 pb-16 pt-12 sm:px-6 sm:pb-24 sm:pt-16 lg:px-8 lg:pb-28 lg:pt-20">
         <div className="grid items-start gap-10 grid-cols-1 enroll:grid-cols-[1fr_minmax(0,28rem)] enroll:gap-12 xl:gap-16">
-          <div className="order-2 min-w-0 enroll:order-1">
+          <div className="order-1 min-w-0">
             <div className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-1.5 text-xs font-medium text-amber-700 backdrop-blur-sm sm:text-sm dark:border-white/10 dark:bg-white/5 dark:text-amber-200">
               <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 dark:bg-emerald-400" />
               {LANDING.hero.badge}
@@ -48,7 +48,7 @@ export function LandingHero({
 
             <div className="mt-8 enroll:hidden">
               <Link
-                href="/enroll"
+                href="#pricing"
                 className="inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-amber-500 to-orange-600 px-6 py-3.5 text-sm font-semibold text-slate-950 shadow-lg shadow-orange-500/25 transition hover:from-amber-400 hover:to-orange-500"
               >
                 View enrollment offer
@@ -71,13 +71,13 @@ export function LandingHero({
 
             <Link
               href="/curriculum"
-              className="mt-6 inline-flex items-center justify-center rounded-xl border border-slate-300 bg-white px-6 py-3 text-sm font-semibold text-slate-900 shadow-sm transition hover:border-amber-400 hover:bg-amber-50 dark:border-white/20 dark:bg-white/5 dark:text-white dark:hover:border-amber-500/50 dark:hover:bg-amber-500/10"
+              className="mt-6 hidden items-center justify-center rounded-xl border border-slate-300 bg-white px-6 py-3 text-sm font-semibold text-slate-900 shadow-sm transition hover:border-amber-400 hover:bg-amber-50 sm:inline-flex dark:border-white/20 dark:bg-white/5 dark:text-white dark:hover:border-amber-500/50 dark:hover:bg-amber-500/10"
             >
               View full curriculum
             </Link>
           </div>
 
-          <div className="order-1 min-w-0 enroll:order-2 enroll:sticky enroll:top-24">
+          <div className="order-2 hidden min-w-0 enroll:block enroll:sticky enroll:top-24">
             {isEnrolled && referralCode ? (
               <EnrolledCongratulationsCard firstName={firstName} referralCode={referralCode} />
             ) : !isEnrolled ? (

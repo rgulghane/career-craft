@@ -1,3 +1,4 @@
+export * from "./auth-profile.js";
 export * from "./admin-schemas.js";
 export * from "./constants.js";
 export * from "./curriculum.js";

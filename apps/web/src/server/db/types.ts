@@ -19,6 +19,8 @@ export interface UserDocument {
   /** Omitted for Google-only accounts. */
   passwordHash?: string;
   fullName: string;
+  phone?: string | null;
+  collegeName?: string | null;
   googleId?: string | null;
   createdAt: Date;
   updatedAt: Date;
@@ -56,6 +58,8 @@ export interface User {
   email: string;
   passwordHash: string;
   fullName: string;
+  phone: string | null;
+  collegeName: string | null;
   referralCode: string | null;
   userType: UserType | null;
   createdAt: Date;

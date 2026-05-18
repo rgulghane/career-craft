@@ -1,8 +1,9 @@
 import { LandingCertifications } from "@/components/landing/certifications";
-import { LandingCta } from "@/components/landing/cta";
+import { LandingFaq } from "@/components/landing/faq";
 import { LandingCurriculum } from "@/components/landing/curriculum";
 import { LandingHero } from "@/components/landing/hero";
-import { LandingPricingReferrals } from "@/components/landing/pricing-referrals";
+import { SocialProofToast } from "@/components/landing/social-proof-toast";
+import { LandingMobileEnrollment } from "@/components/landing/mobile-enrollment";
 import { LandingStudentStories } from "@/components/landing/student-stories";
 import { LandingToolsMentors } from "@/components/landing/tools-mentors";
 import { getSessionUser, userHasPaidEnrollment } from "@/lib/server-api";
@@ -19,6 +20,7 @@ export default async function HomePage({
 
   return (
     <div className="-mt-px">
+      <SocialProofToast />
       <LandingHero
         isLoggedIn={user !== null}
         isEnrolled={isEnrolled}
@@ -30,8 +32,14 @@ export default async function HomePage({
       <LandingToolsMentors />
       <LandingStudentStories />
       <LandingCertifications />
-      <LandingPricingReferrals />
-      <LandingCta isLoggedIn={user !== null} />
+      <LandingFaq />
+      <LandingMobileEnrollment
+        isLoggedIn={user !== null}
+        isEnrolled={isEnrolled}
+        firstName={firstName}
+        referralCode={user?.referralCode ?? null}
+        defaultReferralCode={ref}
+      />
     </div>
   );
 }

@@ -1,14 +1,18 @@
 import { z } from "zod";
+import { authSignupProfileSchema, fullNameTwoWordsSchema, phoneTenDigitsSchema } from "./auth-profile.js";
 
 export const emailSchema = z.string().trim().email();
 
 export const passwordSchema = z.string().min(8, "Password must be at least 8 characters");
 
-export const registerBodySchema = z.object({
-  email: emailSchema,
-  password: passwordSchema,
-  fullName: z.string().trim().min(1).max(120),
-});
+export const registerBodySchema = z
+  .object({
+    email: emailSchema,
+    password: passwordSchema,
+  })
+  .merge(authSignupProfileSchema);
+
+export { fullNameTwoWordsSchema, phoneTenDigitsSchema };
 
 export const loginBodySchema = z.object({
   email: emailSchema,
