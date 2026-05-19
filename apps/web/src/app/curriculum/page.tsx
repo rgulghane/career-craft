@@ -3,6 +3,7 @@ import Link from "next/link";
 import { CURRICULUM_PAGE, LANDING, PROGRAM } from "@career-craft/shared";
 import { AppPageShell } from "@/components/app-page-shell";
 import { CurriculumWeekGrid } from "@/components/curriculum/week-grid";
+import { getSessionUser, userHasPaidEnrollment } from "@/lib/server-api";
 
 export const metadata: Metadata = {
   title: `Curriculum — ${PROGRAM.name}`,
@@ -10,7 +11,10 @@ export const metadata: Metadata = {
     "12-week industry AI accelerator: ChatGPT, Excel, SQL, Power BI, Canva, automation, case studies, and placement week.",
 };
 
-export default function CurriculumPage() {
+export default async function CurriculumPage() {
+  const user = await getSessionUser();
+  const isEnrolled = user ? await userHasPaidEnrollment(user.id) : false;
+
   return (
     <AppPageShell>
       <div className="max-w-3xl">
@@ -32,14 +36,16 @@ export default function CurriculumPage() {
 
       <p className="mt-8 text-center text-xs text-slate-500 dark:text-slate-400">{LANDING.legal.placementNote}</p>
 
-      <div className="mt-8 flex justify-center">
-        <Link
-          href="/#pricing"
-          className="inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-amber-500 to-orange-600 px-6 py-3.5 text-sm font-semibold text-slate-950 shadow-lg shadow-orange-500/25 transition hover:from-amber-400 hover:to-orange-500"
-        >
-          View enrollment offer
-        </Link>
-      </div>
+      {!isEnrolled ? (
+        <div className="mt-8 flex justify-center">
+          <Link
+            href="/#pricing"
+            className="inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-amber-500 to-orange-600 px-6 py-3.5 text-sm font-semibold text-slate-950 shadow-lg shadow-orange-500/25 transition hover:from-amber-400 hover:to-orange-500"
+          >
+            View enrollment offer
+          </Link>
+        </div>
+      ) : null}
     </AppPageShell>
   );
 }

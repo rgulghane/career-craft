@@ -20,6 +20,6 @@ export const ENROLLMENT_WIDGET = {
     "5 govt-backed certifications",
     "Referral agent perks on joining",
   ],
-  trust: "Secure payment · 7-day refund · EMI available",
-  referralPlaceholder: "e.g. RAHUL4M",
+  trust: "Secure payment · 7-day refund",
+  referralPlaceholder: "e.g. ABC123",
 } as const;

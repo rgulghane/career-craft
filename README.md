@@ -118,4 +118,5 @@ Runs `npm run db:setup` on boot, then serves on port 3000. Set real `JWT_SECRET`
 npm run build
 ```
 
-[ADMIN_EMAIL=admin@uniconnect.com](mailto:ADMIN_EMAIL=viewer@company.com) ADMIN_PASSWORD='technospectra' ADMIN_NAME='Analytics Viewer' npm run db:create-admin-readonly
+
+
