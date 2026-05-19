@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-import { messages } from "@career-craft/shared";
 import { EnrollmentError } from "@/server/errors";
 import { paymentRouteErrorResponse, requirePaymentSession } from "@/server/payments-api";
 import { getEnrollmentPaymentStatus } from "@/server/services/razorpay";

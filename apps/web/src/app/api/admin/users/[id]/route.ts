@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import { adminUpdateUserBodySchema } from "@career-craft/shared";
 import { withAdminApi, withFullAdminApi, adminServiceErrorResponse } from "@/server/admin-api";
-import { getAdminUser, updateAdminUser } from "@/server/services/admin/users";
+import { requireFullAdminApi } from "@/server/auth-guards";
+import { deleteAdminUser, getAdminUser, updateAdminUser } from "@/server/services/admin/users";
 
 export const dynamic = "force-dynamic";
 
