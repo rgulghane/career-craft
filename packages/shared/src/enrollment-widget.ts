@@ -21,5 +21,5 @@ export const ENROLLMENT_WIDGET = {
     "Referral agent perks on joining",
   ],
   trust: "Secure payment · 7-day refund · EMI available",
-  referralPlaceholder: "e.g. CC-RAHUL7821",
+  referralPlaceholder: "e.g. RAHUL4M",
 } as const;

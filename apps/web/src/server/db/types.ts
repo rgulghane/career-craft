@@ -11,7 +11,10 @@ export const COLLECTIONS = {
   users: "User",
   enrollments: "Enrollment",
   referrals: "Referral",
+  razorpayWebhookEvents: "RazorpayWebhookEvent",
 } as const;
+
+export type EnrollmentStatus = "PENDING" | "PAID" | "REFUNDED";
 
 export interface UserDocument {
   _id: DbId;
@@ -38,8 +41,16 @@ export interface EnrollmentDocument {
   referrerId?: DbId | null;
   paymentId?: string | null;
   razorpayOrderId?: string | null;
+  razorpayRefundId?: string | null;
   paidAt?: Date | null;
+  refundedAt?: Date | null;
   createdAt: Date;
+}
+
+export interface RazorpayWebhookEventDocument {
+  _id: string;
+  event: string;
+  receivedAt: Date;
 }
 
 export interface ReferralDocument {
@@ -76,7 +87,9 @@ export interface Enrollment {
   referrerId: string | null;
   paymentId: string | null;
   razorpayOrderId: string | null;
+  razorpayRefundId: string | null;
   paidAt: Date | null;
+  refundedAt: Date | null;
   createdAt: Date;
 }
 

@@ -2,7 +2,7 @@ import "server-only";
 
 import { randomUUID } from "node:crypto";
 import { ObjectId } from "mongodb";
-import { PROGRAM } from "@career-craft/shared";
+import { isValidReferralCodeFormat, normalizeReferralCode, PROGRAM } from "@career-craft/shared";
 import "../db/load-env";
 import { mapEnrollment, mapUser, toDbId } from "../db/helpers";
 import {
@@ -37,8 +37,11 @@ export async function createEnrollment(
   }
   const user = mapUser(userDoc);
 
-  const trimmed = rawReferralCode?.trim();
-  const normalizedCode = trimmed && trimmed !== "" ? trimmed.toUpperCase() : undefined;
+  const normalizedCode = rawReferralCode ? normalizeReferralCode(rawReferralCode) || undefined : undefined;
+
+  if (normalizedCode && !isValidReferralCodeFormat(normalizedCode)) {
+    throw new EnrollmentError(400, "invalid_referral", "Referral code must be 6 characters");
+  }
 
   let referrerId: string | undefined;
   let amountInPaise = serverConfig.pricing.standardInPaise;
@@ -87,7 +90,13 @@ export async function createEnrollment(
       { _id: pendingId },
       {
         $set: enrollmentFields,
-        $unset: { razorpayOrderId: "", paymentId: "", paidAt: "" },
+        $unset: {
+          razorpayOrderId: "",
+          paymentId: "",
+          paidAt: "",
+          razorpayRefundId: "",
+          refundedAt: "",
+        },
       },
     );
     await enrollments.deleteMany({
@@ -202,7 +211,63 @@ export async function completeEnrollmentPayment(
   return { alreadyPaid: false };
 }
 
+/**
+ * Mark enrollment refunded after Razorpay refund confirmation. Idempotent.
+ * Voids referrals still in the refund window for this enrollment.
+ */
+export async function completeEnrollmentRefund(
+  enrollmentId: string,
+  razorpayRefundId: string,
+): Promise<{ alreadyRefunded: boolean }> {
+  const enrollments = await enrollmentsCollection();
+  const enrollmentDoc = await enrollments.findOne({ _id: toDbId(enrollmentId) });
+  if (!enrollmentDoc) {
+    throw new EnrollmentError(404, "not_found", "Enrollment not found");
+  }
+  const enrollment = mapEnrollment(enrollmentDoc);
+  if (enrollment.status === "REFUNDED") {
+    return { alreadyRefunded: true };
+  }
+  if (enrollment.status !== "PAID") {
+    throw new EnrollmentError(400, "not_refundable", "Only paid enrollments can be refunded.");
+  }
+
+  const refundedAt = new Date();
+  const client = await mongoClient();
+  const session = client.startSession();
+
+  try {
+    await session.withTransaction(async () => {
+      await enrollments.updateOne(
+        { _id: toDbId(enrollment.id) },
+        { $set: { status: "REFUNDED", razorpayRefundId, refundedAt } },
+        { session },
+      );
+
+      const referrals = await referralsCollection();
+      await referrals.updateMany(
+        { enrollmentId: toDbId(enrollment.id), status: "IN_REFUND_WINDOW" },
+        {
+          $set: {
+            status: "VOIDED",
+            voidReason: "Enrollment refunded",
+            qualifiedAt: null,
+          },
+        },
+        { session },
+      );
+    });
+  } finally {
+    await session.endSession();
+  }
+
+  return { alreadyRefunded: false };
+}
+
 /** Dev-only mock payment — use Razorpay in production. */
 export async function mockPayEnrollment(userId: string, enrollmentId: string): Promise<{ alreadyPaid: boolean }> {
+  if (process.env.NODE_ENV === "production") {
+    throw new EnrollmentError(403, "forbidden", "Mock payments are disabled in production.");
+  }
   return completeEnrollmentPayment(userId, enrollmentId, `mock_${randomUUID()}`);
 }

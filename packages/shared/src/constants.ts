@@ -15,7 +15,7 @@ export const REFERRAL_POLICY = {
   cashPerReferralPaise: 50_000, // ₹500
   /** Days after payment before a referral qualifies (refund window). */
   refundWindowDays: 7,
-  referralCodeLength: 10,
+  referralCodeLength: 6,
   /** Character set used to generate referral codes (omits visually ambiguous chars). */
   referralCodeAlphabet: "ABCDEFGHJKLMNPQRSTUVWXYZ23456789",
   milestones: {
@@ -24,6 +24,28 @@ export const REFERRAL_POLICY = {
     diamondReferrals: 500,
   },
 } as const;
+
+/** Trim and uppercase; strips non-alphanumeric characters. */
+export function normalizeReferralCode(raw: string): string {
+  return raw
+    .trim()
+    .toUpperCase()
+    .replace(/[^A-Z0-9]/g, "");
+}
+
+function referralCodeUsesAlphabet(code: string): boolean {
+  for (const char of code) {
+    if (!REFERRAL_POLICY.referralCodeAlphabet.includes(char)) {
+      return false;
+    }
+  }
+  return true;
+}
+
+/** Validates referral codes (exactly `referralCodeLength` chars from the allowed alphabet). */
+export function isValidReferralCodeFormat(code: string): boolean {
+  return code.length === REFERRAL_POLICY.referralCodeLength && referralCodeUsesAlphabet(code);
+}
 
 const APP_ORIGIN_ENV_KEYS = ["APP_ORIGIN", "NEXT_PUBLIC_APP_ORIGIN"] as const;
 

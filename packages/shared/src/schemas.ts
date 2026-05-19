@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { REFERRAL_POLICY, isValidReferralCodeFormat, normalizeReferralCode } from "./constants.js";
 import { authSignupProfileSchema, fullNameTwoWordsSchema, phoneTenDigitsSchema } from "./auth-profile.js";
 
 export const emailSchema = z.string().trim().email();
@@ -19,14 +20,24 @@ export const loginBodySchema = z.object({
   password: passwordSchema,
 });
 
+const referralCodeMessage = `Referral code must be ${REFERRAL_POLICY.referralCodeLength} characters`;
+
+/** Required 6-character referral code. */
+export const referralCodeSchema = z
+  .string()
+  .trim()
+  .transform(normalizeReferralCode)
+  .refine(isValidReferralCodeFormat, { message: referralCodeMessage });
+
+/** Empty string or a valid 6-character referral code. */
+export const optionalReferralCodeSchema = z
+  .string()
+  .trim()
+  .transform(normalizeReferralCode)
+  .refine((code) => code === "" || isValidReferralCodeFormat(code), { message: referralCodeMessage });
+
 export const enrollBodySchema = z.object({
-  referralCode: z
-    .string()
-    .trim()
-    .min(4, "Referral code is too short")
-    .max(32)
-    .optional()
-    .or(z.literal("")),
+  referralCode: optionalReferralCodeSchema.optional().or(z.literal("")),
 });
 
 export type RegisterBody = z.infer<typeof registerBodySchema>;

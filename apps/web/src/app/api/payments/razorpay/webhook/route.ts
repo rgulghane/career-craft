@@ -9,8 +9,8 @@ export async function POST(req: Request) {
   const signature = req.headers.get("x-razorpay-signature") ?? "";
 
   try {
-    await processRazorpayWebhook(rawBody, signature);
-    return NextResponse.json({ received: true });
+    const result = await processRazorpayWebhook(rawBody, signature);
+    return NextResponse.json({ received: true, ...result });
   } catch (err) {
     if (err instanceof EnrollmentError) {
       return NextResponse.json({ error: err.message }, { status: err.status });

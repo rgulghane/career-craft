@@ -24,7 +24,7 @@ export interface AdminEnrollmentListItem {
 }
 
 export async function listAdminEnrollments(params: {
-  status?: "PENDING" | "PAID";
+  status?: "PENDING" | "PAID" | "REFUNDED";
   userId?: string;
   page: number;
   limit: number;

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useActionState, useEffect, useMemo, useRef, useState } from "react";
+import { REFERRAL_POLICY, isValidReferralCodeFormat, normalizeReferralCode } from "@career-craft/shared";
 import { ENROLLMENT_WIDGET, PRICING } from "@career-craft/shared/content";
 import { createEnrollmentAction, type EnrollState } from "@/app/enroll/actions";
 import { RazorpayPayButton } from "@/components/razorpay-pay-button";
@@ -90,11 +91,11 @@ export function EnrollmentPricingWidget({
   const [referralChecking, setReferralChecking] = useState(false);
 
   const lookupReferral = async (rawCode: string): Promise<boolean> => {
-    const code = rawCode.trim().toUpperCase();
-    if (code.length < 4) {
+    const code = normalizeReferralCode(rawCode);
+    if (!isValidReferralCodeFormat(code)) {
       setAppliedCode("");
       setReferrerFirstName(null);
-      setReferralLookupError(null);
+      setReferralLookupError(code ? messages.enroll.referralInvalid : null);
       return false;
     }
 
@@ -128,8 +129,12 @@ export function EnrollmentPricingWidget({
     if (!defaultReferralCode.trim()) {
       return;
     }
-    const code = defaultReferralCode.trim().toUpperCase();
-    setReferralInput(code);
+    const code = normalizeReferralCode(defaultReferralCode);
+    setReferralInput(code.slice(0, REFERRAL_POLICY.referralCodeLength));
+    if (!isValidReferralCodeFormat(code)) {
+      setReferralLookupError(messages.enroll.referralInvalid);
+      return;
+    }
     void lookupReferral(code);
     // eslint-disable-next-line react-hooks/exhaustive-deps -- only when URL/default code changes
   }, [defaultReferralCode]);
@@ -138,15 +143,12 @@ export function EnrollmentPricingWidget({
   const enrollFormRef = useRef<HTMLFormElement>(null);
   const autoSubmittedRef = useRef(false);
 
-  const hasValidReferral = appliedCode.length >= 4 && referrerFirstName !== null;
+  const hasValidReferral = isValidReferralCodeFormat(appliedCode) && referrerFirstName !== null;
   const displayPaise = hasValidReferral ? PRICING.withReferralCodeInPaise : PRICING.standardInPaise;
   const displayPrice = formatINRFromPaise(displayPaise);
   const badgePercent = hasValidReferral
     ? discountPercentOff(PRICING.standardInPaise, PRICING.withReferralCodeInPaise)
     : discountPercentOff(ENROLLMENT_WIDGET.listPriceInPaise, PRICING.standardInPaise);
-  const referralEmi = formatINRFromPaise(
-    Math.round(PRICING.withReferralCodeInPaise / ENROLLMENT_WIDGET.emiMonths),
-  );
   const seatsPct = Math.round(
     ((ENROLLMENT_WIDGET.seats.total - ENROLLMENT_WIDGET.seats.remaining) / ENROLLMENT_WIDGET.seats.total) * 100,
   );
@@ -164,7 +166,7 @@ export function EnrollmentPricingWidget({
       return;
     }
     const waitingOnRefLookup =
-      defaultReferralCode.trim().length >= 4 &&
+      isValidReferralCodeFormat(normalizeReferralCode(defaultReferralCode)) &&
       !hasValidReferral &&
       !referralLookupError &&
       (referralChecking || referrerFirstName === null);
@@ -196,7 +198,6 @@ export function EnrollmentPricingWidget({
   return (
     <aside
       className="enrollment-widget w-full max-w-none overflow-hidden rounded-2xl border border-amber-200/60 bg-white text-slate-900 shadow-xl shadow-amber-500/10 ring-1 ring-slate-900/5 dark:border-amber-500/20 dark:bg-slate-900 dark:text-white dark:shadow-2xl dark:shadow-black/40 dark:ring-white/10"
-      id="pricing"
     >
       <ViewingNowBanner />
 
@@ -237,28 +238,23 @@ export function EnrollmentPricingWidget({
           {hasValidReferral && referrerFirstName ? (
             <p className="mt-2 text-sm font-medium text-emerald-800 dark:text-emerald-300">
               {messages.enroll.referredBy(referrerFirstName)}
-              <span className="font-normal text-slate-600 dark:text-slate-400"> · EMI from {referralEmi}/mo</span>
             </p>
           ) : (
-            <>
-              <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">
-                Use referral code →{" "}
-                <span className="font-semibold text-amber-700 dark:text-amber-400">{prices.withReferral}</span>
-                <span className="text-slate-400 dark:text-slate-500"> · EMI from {prices.emi}/mo</span>
-              </p>
-              <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-                Have a referral code? Save{" "}
-                {discountPercentOff(PRICING.standardInPaise, PRICING.withReferralCodeInPaise)}% more
-              </p>
-            </>
+            <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
+              Have a referral code? Save{" "}
+              {discountPercentOff(PRICING.standardInPaise, PRICING.withReferralCodeInPaise)}% more
+            </p>
           )}
 
           <div className="mt-4 flex flex-col gap-2 sm:flex-row">
             <input
               type="text"
               value={referralInput}
+              maxLength={REFERRAL_POLICY.referralCodeLength}
               onChange={(e) => {
-                setReferralInput(e.target.value.toUpperCase());
+                setReferralInput(
+                  normalizeReferralCode(e.target.value).slice(0, REFERRAL_POLICY.referralCodeLength),
+                );
                 if (referralLookupError) {
                   setReferralLookupError(null);
                 }

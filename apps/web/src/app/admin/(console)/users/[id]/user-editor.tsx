@@ -2,10 +2,16 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { USER_TYPES, type UserType } from "@career-craft/shared";
+import {
+  PORTAL_ADMIN_TYPES,
+  REFERRAL_POLICY,
+  USER_TYPES,
+  isValidReferralCodeFormat,
+  normalizeReferralCode,
+  type UserType,
+} from "@career-craft/shared";
 import { AdminCard } from "@/components/admin/admin-card";
 import { useAdminAccess } from "@/components/admin/admin-access";
-import { PORTAL_ADMIN_TYPES } from "@career-craft/shared";
 
 type UserRow = {
   id: string;
@@ -27,6 +33,11 @@ export function UserEditor({ userId, initial }: { userId: string; initial: UserR
 
   async function save(e: React.FormEvent) {
     e.preventDefault();
+    const code = normalizeReferralCode(referralCode);
+    if (code && !isValidReferralCodeFormat(code)) {
+      setMessage(`Referral code must be ${REFERRAL_POLICY.referralCodeLength} characters`);
+      return;
+    }
     setLoading(true);
     setMessage(null);
     try {
@@ -37,7 +48,7 @@ export function UserEditor({ userId, initial }: { userId: string; initial: UserR
           fullName,
           email,
           userType,
-          referralCode: referralCode.trim() === "" ? null : referralCode.trim().toUpperCase(),
+          referralCode: code === "" ? null : code,
         }),
       });
       const body = (await r.json()) as { error?: string };
@@ -117,7 +128,12 @@ export function UserEditor({ userId, initial }: { userId: string; initial: UserR
           <input
             className="mt-1 w-full rounded-lg border border-white/15 bg-white/5 px-3 py-2 font-mono text-white"
             value={referralCode}
-            onChange={(e) => setReferralCode(e.target.value.toUpperCase())}
+            maxLength={REFERRAL_POLICY.referralCodeLength}
+            onChange={(e) =>
+              setReferralCode(
+                normalizeReferralCode(e.target.value).slice(0, REFERRAL_POLICY.referralCodeLength),
+              )
+            }
           />
         </label>
         <div className="flex flex-wrap gap-3">

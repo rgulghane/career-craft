@@ -77,4 +77,10 @@ export async function ensureIndexes(): Promise<void> {
     { unique: true, name: "Referral_enrollmentId_key" },
   );
   await safeCreateIndex(COLLECTIONS.referrals, { status: 1 }, { name: "Referral_status" });
+
+  await safeCreateIndex(
+    COLLECTIONS.razorpayWebhookEvents,
+    { receivedAt: 1 },
+    { name: "RazorpayWebhookEvent_receivedAt" },
+  );
 }

@@ -75,7 +75,7 @@ export async function confirmRazorpayPaymentAction(
 
 export type PaymentStatusResult =
   | { ok: false; error: string }
-  | { ok: true; status: "PENDING" | "PAID" };
+  | { ok: true; status: "PENDING" | "PAID" | "REFUNDED" };
 
 export async function getEnrollmentPaymentStatusAction(
   enrollmentId: string,

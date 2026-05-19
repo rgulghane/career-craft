@@ -57,3 +57,37 @@ export function readAuthToken(request: Request): string | null {
   }
   return null;
 }
+
+async function sessionUserFromToken(token: string): Promise<SessionUser | null> {
+  const payload = verifyToken(token);
+  if (!payload) {
+    return null;
+  }
+  const users = await usersCollection();
+  const doc = await users.findOne({ _id: toDbId(payload.sub) });
+  if (!doc) {
+    return null;
+  }
+  const user = mapUser(doc);
+  return {
+    id: user.id,
+    email: user.email,
+    fullName: user.fullName,
+    referralCode: user.referralCode,
+    userType: user.userType ?? "student",
+  };
+}
+
+/**
+ * Session from Bearer token or auth cookie — for payment API route handlers.
+ */
+export async function getSessionFromRequest(request: Request): Promise<SessionUser | null> {
+  const bearer = readAuthToken(request);
+  if (bearer) {
+    const fromBearer = await sessionUserFromToken(bearer);
+    if (fromBearer) {
+      return fromBearer;
+    }
+  }
+  return getSession();
+}

@@ -23,7 +23,7 @@ export function LandingMobileEnrollment({
   }
 
   return (
-    <Section id="pricing" dark className="enroll:hidden">
+    <Section id="pricing" dark className="scroll-mt-24 enroll:hidden">
       {showEnrolled ? (
         <EnrolledCongratulationsCard firstName={firstName} referralCode={referralCode} />
       ) : (

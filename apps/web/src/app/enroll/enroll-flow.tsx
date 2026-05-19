@@ -1,7 +1,8 @@
 "use client";
 
 import { useActionState } from "react";
-import { messages } from "@career-craft/shared/content";
+import { REFERRAL_POLICY } from "@career-craft/shared";
+import { ENROLLMENT_WIDGET, messages } from "@career-craft/shared/content";
 import { RazorpayPayButton } from "@/components/razorpay-pay-button";
 import { formatINRFromPaise } from "@/lib/format";
 import { theme } from "@/lib/theme";
@@ -26,8 +27,9 @@ export function EnrollFlow({ defaultReferralCode = "" }: { defaultReferralCode?:
           <input
             name="referralCode"
             defaultValue={defaultReferralCode}
+            maxLength={REFERRAL_POLICY.referralCodeLength}
             className={`${theme.input} uppercase tracking-wide`}
-            placeholder="E.g. ABCD12EFGH"
+            placeholder={ENROLLMENT_WIDGET.referralPlaceholder}
             autoCapitalize="characters"
           />
         </label>

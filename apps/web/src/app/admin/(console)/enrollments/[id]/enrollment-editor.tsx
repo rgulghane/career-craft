@@ -2,6 +2,11 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import {
+  REFERRAL_POLICY,
+  isValidReferralCodeFormat,
+  normalizeReferralCode,
+} from "@career-craft/shared";
 import { AdminCard } from "@/components/admin/admin-card";
 import { useAdminAccess } from "@/components/admin/admin-access";
 
@@ -58,9 +63,14 @@ export function EnrollmentEditor({
         className="space-y-4"
         onSubmit={(e) => {
           e.preventDefault();
+          const code = normalizeReferralCode(referralCodeUsed);
+          if (code && !isValidReferralCodeFormat(code)) {
+            setMessage(`Referral code must be ${REFERRAL_POLICY.referralCodeLength} characters`);
+            return;
+          }
           void patch({
             amountInPaise: Number(amountInPaise),
-            referralCodeUsed: referralCodeUsed.trim() || null,
+            referralCodeUsed: code || null,
             referrerId: referrerId.trim() || null,
           });
         }}
@@ -78,7 +88,12 @@ export function EnrollmentEditor({
           <input
             className="mt-1 w-full rounded-lg border border-white/15 bg-white/5 px-3 py-2 font-mono text-white"
             value={referralCodeUsed}
-            onChange={(ev) => setReferralCodeUsed(ev.target.value.toUpperCase())}
+            maxLength={REFERRAL_POLICY.referralCodeLength}
+            onChange={(ev) =>
+              setReferralCodeUsed(
+                normalizeReferralCode(ev.target.value).slice(0, REFERRAL_POLICY.referralCodeLength),
+              )
+            }
           />
         </label>
         <label className="block text-sm">

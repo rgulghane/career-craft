@@ -46,7 +46,7 @@ const CITIES = [
   "Thiruvananthapuram",
 ] as const;
 
-const REFERRAL_CODES = ["KAVYA9X2", "ROHAN4M", "PRIYA7K", "ARJUN2P", "NEHA8Q", "VIKRAM3N"] as const;
+const REFERRAL_CODES = ["KAVYA9", "ROHAN4M", "PRIYA7", "ARJUN2P", "NEHA8Q", "VIKRA3"] as const;
 
 function pick<T>(items: readonly T[]): T {
   return items[Math.floor(Math.random() * items.length)]!;

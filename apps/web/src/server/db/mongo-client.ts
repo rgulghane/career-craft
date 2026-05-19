@@ -2,6 +2,7 @@ import { MongoClient, type Collection, type MongoClientOptions } from "mongodb";
 import {
   COLLECTIONS,
   type EnrollmentDocument,
+  type RazorpayWebhookEventDocument,
   type ReferralDocument,
   type UserDocument,
 } from "./types";
@@ -125,4 +126,12 @@ export async function enrollmentsCollection(): Promise<Collection<EnrollmentDocu
 
 export async function referralsCollection(): Promise<Collection<ReferralDocument>> {
   return (await mongoClient()).db().collection<ReferralDocument>(COLLECTIONS.referrals);
+}
+
+export async function razorpayWebhookEventsCollection(): Promise<
+  Collection<RazorpayWebhookEventDocument>
+> {
+  return (await mongoClient())
+    .db()
+    .collection<RazorpayWebhookEventDocument>(COLLECTIONS.razorpayWebhookEvents);
 }

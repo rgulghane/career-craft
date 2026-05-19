@@ -52,7 +52,9 @@ export function mapEnrollment(doc: EnrollmentDocument): Enrollment {
     referrerId: doc.referrerId ? toIdString(doc.referrerId) : null,
     paymentId: doc.paymentId ?? null,
     razorpayOrderId: doc.razorpayOrderId ?? null,
+    razorpayRefundId: doc.razorpayRefundId ?? null,
     paidAt: doc.paidAt ?? null,
+    refundedAt: doc.refundedAt ?? null,
     createdAt: doc.createdAt,
   };
 }
