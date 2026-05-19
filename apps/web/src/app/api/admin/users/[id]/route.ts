@@ -39,3 +39,16 @@ export async function PATCH(req: Request, { params }: Params) {
     }
   });
 }
+
+export async function DELETE(_req: Request, { params }: Params) {
+  return withFullAdminApi(async () => {
+    const admin = await requireFullAdminApi();
+    const { id } = await params;
+    try {
+      await deleteAdminUser(id, admin.id);
+      return NextResponse.json({ ok: true });
+    } catch (err) {
+      return adminServiceErrorResponse(err);
+    }
+  });
+}

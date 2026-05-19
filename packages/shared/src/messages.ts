@@ -35,6 +35,10 @@ export const messages = {
     teamPageIntro: "Create viewer accounts for your team. They sign in at the same admin login URL.",
     revokeTeamMemberConfirm: (email: string) =>
       `Remove portal access for ${email}? Their account will become a regular student account.`,
+    deleteUserConfirm: (name: string, email: string) =>
+      `Permanently delete ${name} (${email})? This removes their enrollments and referrals. This cannot be undone.`,
+    deleteUserCta: "Delete user",
+    deleteUserSuccess: "User deleted.",
   },
   auth: {
     emailLabel: "Email",

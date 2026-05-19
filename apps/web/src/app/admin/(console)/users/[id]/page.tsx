@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { AdminCard } from "@/components/admin/admin-card";
 import { getAdminUser } from "@/server/services/admin/users";
+import { DeleteUserButton } from "./delete-user-button";
 import { UserEditor } from "./user-editor";
 
 type Params = { params: Promise<{ id: string }> };
@@ -45,6 +46,7 @@ export default async function AdminUserDetailPage({ params }: Params) {
           ))}
         </ul>
       </AdminCard>
+      <DeleteUserButton userId={id} fullName={data.user.fullName} email={data.user.email} />
     </div>
   );
 }

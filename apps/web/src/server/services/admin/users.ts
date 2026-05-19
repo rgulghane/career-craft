@@ -274,3 +274,45 @@ export async function regenerateAdminUserReferralCode(userId: string): Promise<s
   }
   throw new AdminServiceError(500, "Could not generate unique referral code");
 }
+
+/** Permanently remove a student account and related enrollments/referrals. */
+export async function deleteAdminUser(userId: string, actingAdminId: string): Promise<void> {
+  if (userId === actingAdminId) {
+    throw new AdminServiceError(400, "You cannot delete your own account.");
+  }
+
+  const users = await usersCollection();
+  const doc = await users.findOne({ _id: toDbId(userId) });
+  if (!doc) {
+    throw new AdminServiceError(404, "User not found");
+  }
+
+  const userType = doc.userType ?? "student";
+  if ((PORTAL_ADMIN_TYPES as readonly string[]).includes(userType)) {
+    throw new AdminServiceError(400, "Portal admin accounts cannot be deleted here. Use Admin team.");
+  }
+
+  const uid = toDbId(userId);
+  const enrollments = await enrollmentsCollection();
+  const referralsCol = await referralsCollection();
+
+  const enrollmentIds = (
+    await enrollments.find({ userId: uid }).project({ _id: 1 }).toArray()
+  ).map((e) => e._id);
+
+  await referralsCol.deleteMany({
+    $or: [
+      { referrerId: uid },
+      { refereeId: uid },
+      ...(enrollmentIds.length > 0 ? [{ enrollmentId: { $in: enrollmentIds } }] : []),
+    ],
+  });
+
+  await enrollments.deleteMany({ userId: uid });
+  await enrollments.updateMany({ referrerId: uid }, { $unset: { referrerId: "" } });
+
+  const result = await users.deleteOne({ _id: uid });
+  if (result.deletedCount !== 1) {
+    throw new AdminServiceError(500, "Delete failed");
+  }
+}
