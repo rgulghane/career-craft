@@ -12,7 +12,7 @@
     "db:create-admin": "npm run db:env -- npx --yes tsx scripts/create-admin.ts",
     "db:create-admin-readonly": "npm run db:env -- npx --yes tsx scripts/create-admin-readonly.ts",
     "db:create-readonly-admins-batch": "npm run db:env -- npx --yes tsx scripts/create-readonly-admins-batch.ts",
-    "db:env": "sh -c 'set -a; [ -f .env.local ] && . ./.env.local; [ -f .env ] && . ./.env; set +a; exec \"$@\"' sh"
+    "db:env": "dotenv -c development --"
   },
   "dependencies": {
     "@career-craft/shared": "file:../../packages/shared",
@@ -33,6 +33,7 @@
     "@types/react": "^19.0.2",
     "@types/react-dom": "^19.0.2",
     "autoprefixer": "^10.4.20",
+    "dotenv-cli": "^11.0.0",
     "eslint": "^9.17.0",
     "eslint-config-next": "^15.1.3",
     "postcss": "^8.4.49",

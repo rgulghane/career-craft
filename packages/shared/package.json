@@ -32,6 +32,7 @@
     "typescript": "^5.7.2"
   },
   "dependencies": {
+    "career-craft": "file:../..",
     "zod": "^3.24.1"
   }
 }
