@@ -206,7 +206,7 @@ export const CURRICULUM_WEEKS = [
         "How placement support works for 6 months post-cohort",
         "Job board hygiene: alerts, trackers, and weekly targets",
         "Warm outreach scripts that get replies",
-        "Alumni network intro and referral program recap",
+        "Alumni network intro and referral program recap ritesh",
       ],
       handsOn: "Set up job alerts, apply to 5 curated roles, schedule 2 informational chats.",
       deliverable: "Placement tracker sheet + 30-day action plan",
