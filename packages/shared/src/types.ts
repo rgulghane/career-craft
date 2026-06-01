@@ -20,7 +20,7 @@ export interface DashboardResponse {
     referralCode: string | null;
   };
   pricing: {
-    amountInPaise: number;
+    amountInRupees: number;
     currency: "INR";
     label: string;
   };

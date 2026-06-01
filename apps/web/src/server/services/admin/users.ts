@@ -27,7 +27,7 @@ export interface AdminUserDetail {
   enrollments: Array<{
     id: string;
     status: string;
-    amountInPaise: number;
+    amountInRupees: number;
     referralCodeUsed: string | null;
     paidAt: string | null;
     createdAt: string;
@@ -162,7 +162,7 @@ export async function getAdminUser(userId: string): Promise<AdminUserDetail | nu
       return {
         id: en.id,
         status: en.status,
-        amountInPaise: en.amountInPaise,
+        amountInRupees: en.amountInRupees,
         referralCodeUsed: en.referralCodeUsed,
         paidAt: en.paidAt?.toISOString() ?? null,
         createdAt: en.createdAt.toISOString(),

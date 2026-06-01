@@ -1,12 +1,12 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { messages, REFERRAL_POLICY } from "@career-craft/shared";
+import { messages } from "@career-craft/shared";
 import { AppPageShell } from "@/components/app-page-shell";
 import { CopyShareLinkButton } from "@/components/copy-share-link-button";
 import { SignOutButton } from "@/components/sign-out-button";
 import { serverConfig } from "@/lib/config";
 import { fetchDashboard, getSessionUser } from "@/lib/server-api";
-import { formatINRFromPaise } from "@/lib/format";
+import { formatINR } from "@/lib/format";
 import { theme } from "@/lib/theme";
 
 export const metadata: Metadata = {
@@ -62,7 +62,7 @@ export default async function DashboardPage() {
   const origin = serverConfig.appOrigin;
   const sharePath = data.user.referralCode ? `/enroll?ref=${encodeURIComponent(data.user.referralCode)}` : "";
   const shareUrl = sharePath ? `${origin}${sharePath}` : "";
-  const reward = formatINRFromPaise(REFERRAL_POLICY.cashPerReferralPaise);
+  const reward = formatINR(serverConfig.referral.cashPerReferralRupees);
 
   return (
     <AppPageShell>
@@ -90,7 +90,7 @@ export default async function DashboardPage() {
               <p className={`mt-3 ${theme.body}`}>{messages.dashboard.shareLink}</p>
               <p className="mt-1 break-all font-mono text-xs text-slate-600 dark:text-slate-300">{shareUrl}</p>
               <p className={`mt-3 text-xs ${theme.body}`}>
-                Qualify after {REFERRAL_POLICY.refundWindowDays}-day refund window · {reward} per qualified referral
+                Qualify after {serverConfig.referral.refundWindowDays}-day refund window · {reward} per qualified referral
               </p>
             </>
           ) : (

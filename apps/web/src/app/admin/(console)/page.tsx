@@ -1,14 +1,14 @@
 import Link from "next/link";
 import { REFERRAL_POLICY } from "@career-craft/shared";
 import { AdminCard } from "@/components/admin/admin-card";
-import { formatINRFromPaise } from "@/lib/format";
+import { formatINR } from "@/lib/format";
 import { getAdminOverviewStats } from "@/server/services/admin/stats";
 import { QualifyDueButton } from "./qualify-due-button";
 
 export default async function AdminOverviewPage() {
   const stats = await getAdminOverviewStats();
-  const reward = formatINRFromPaise(stats.cashPerReferralPaise);
-  const estimatedPayout = formatINRFromPaise(stats.qualifiedReferrals * stats.cashPerReferralPaise);
+  const reward = formatINR(stats.cashPerReferralRupees);
+  const estimatedPayout = formatINR(stats.qualifiedReferrals * stats.cashPerReferralRupees);
 
   return (
     <div className="space-y-8">

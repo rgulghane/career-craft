@@ -5,14 +5,70 @@ export const PROGRAM = {
   defaultCurrency: "INR",
 } as const;
 
-export const PRICING = {
-  standardInPaise: 500_000, // ₹5,000
-  withReferralCodeInPaise: 250_000, // ₹2,500
+/** Default amounts when env overrides are not set (INR rupees). */
+export const DEFAULT_PRICING = {
+  standardInRupees: 5_000,
+  withReferralCodeInRupees: 2_500,
 } as const;
 
+/** Server + build-time; use for payments and SSR. */
+const STANDARD_PRICE_ENV_KEYS = ["STANDARD_PRICE", "NEXT_PUBLIC_STANDARD_PRICE"] as const;
+
+/** Server + build-time; use for payments and SSR. */
+const REFERRAL_PRICE_ENV_KEYS = ["REFERRAL_PRICE", "NEXT_PUBLIC_REFERRAL_PRICE"] as const;
+
+const CASH_PER_REFERRAL_ENV_KEYS = ["CASH_PER_REFERRAL", "NEXT_PUBLIC_CASH_PER_REFERRAL"] as const;
+
+function readMoneyRupees(
+  keys: readonly string[],
+  fallback: number,
+): number {
+  for (const key of keys) {
+    const raw = process.env[key]?.trim();
+    if (!raw) {
+      continue;
+    }
+    const parsed = Number(raw);
+    if (Number.isNaN(parsed)) {
+      throw new Error(`Invalid number for env var ${key}: ${raw}`);
+    }
+    return parsed;
+  }
+  return fallback;
+}
+
+/** Standard enrollment price (rupees). Override via `STANDARD_PRICE`. */
+export function getStandardPriceInRupees(): number {
+  return readMoneyRupees(
+    STANDARD_PRICE_ENV_KEYS,
+    DEFAULT_PRICING.standardInRupees,
+  );
+}
+
+/** Price when a valid referral code is applied (rupees). Override via `REFERRAL_PRICE`. */
+export function getReferralPriceInRupees(): number {
+  return readMoneyRupees(
+    REFERRAL_PRICE_ENV_KEYS,
+    DEFAULT_PRICING.withReferralCodeInRupees,
+  );
+}
+
+/** Cash reward per qualified referral (rupees). Override via `CASH_PER_REFERRAL`. */
+export function getCashPerReferralInRupees(): number {
+  return readMoneyRupees(CASH_PER_REFERRAL_ENV_KEYS, 500);
+}
+
+/** Env-driven pricing (server + client). Amounts in rupees. */
+export const PRICING = {
+  get standardInRupees(): number {
+    return getStandardPriceInRupees();
+  },
+  get withReferralCodeInRupees(): number {
+    return getReferralPriceInRupees();
+  },
+};
+
 export const REFERRAL_POLICY = {
-  /** Cash reward per qualified referral (paise). */
-  cashPerReferralPaise: 50_000, // ₹500
   /** Days after payment before a referral qualifies (refund window). */
   refundWindowDays: 7,
   referralCodeLength: 6,
@@ -68,11 +124,11 @@ export const SUPPORT_WHATSAPP = {
   defaultMessage: "Hi! I'd like to know more about CareerCraft AI.",
 } as const;
 
-const WHATSAPP_ENV_KEYS = ["NEXT_PUBLIC_WHATSAPP_NUMBER", "WHATSAPP_NUMBER"] as const;
+const WHATSAPP_ENV_KEYS = ["WHATSAPP_NUMBER"] as const;
 
 /**
  * WhatsApp number from env (country code + number, digits only).
- * Set `NEXT_PUBLIC_WHATSAPP_NUMBER` or `WHATSAPP_NUMBER` in apps/web.
+ * Set `WHATSAPP_NUMBER` in apps/web.
  */
 export function getSupportWhatsAppNumber(): string {
   for (const key of WHATSAPP_ENV_KEYS) {

@@ -100,7 +100,7 @@ export async function getAdminReferral(referralId: string) {
       ? {
           id: enrollment.id,
           status: enrollment.status,
-          amountInPaise: enrollment.amountInPaise,
+          amountInRupees: enrollment.amountInRupees,
           paidAt: enrollment.paidAt?.toISOString() ?? null,
         }
       : null,

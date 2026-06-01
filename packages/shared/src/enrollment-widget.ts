@@ -1,7 +1,7 @@
 /** Copy & config for the enrollment pricing card (matches product spec). */
 
 export const ENROLLMENT_WIDGET = {
-  listPriceInPaise: 1_000_000, // ₹10,000 after deadline
+  listPriceInRupees: 10_000, // after deadline
   emiMonths: 12,
   seats: { total: 120, remaining: 4 },
   viewingCount: {

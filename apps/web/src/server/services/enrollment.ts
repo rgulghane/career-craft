@@ -21,7 +21,7 @@ const REFERRAL_CODE_GENERATION_ATTEMPTS = 5;
 
 export interface CreatedEnrollment {
   id: string;
-  amountInPaise: number;
+  amountInRupees: number;
   currency: string;
   status: string;
 }
@@ -44,7 +44,7 @@ export async function createEnrollment(
   }
 
   let referrerId: string | undefined;
-  let amountInPaise = serverConfig.pricing.standardInPaise;
+  let amountInRupees = serverConfig.pricing.standardInRupees;
 
   if (normalizedCode) {
     const referrerDoc = await users.findOne({ referralCode: normalizedCode });
@@ -52,7 +52,7 @@ export async function createEnrollment(
       const referrer = mapUser(referrerDoc);
       if (referrer.id !== user.id) {
         referrerId = referrer.id;
-        amountInPaise = serverConfig.pricing.withReferralInPaise;
+        amountInRupees = serverConfig.pricing.withReferralInRupees;
       }
     }
   }
@@ -74,7 +74,7 @@ export async function createEnrollment(
 
   const now = new Date();
   const enrollmentFields = {
-    amountInPaise,
+    amountInRupees,
     currency: PROGRAM.defaultCurrency,
     status: "PENDING" as const,
     referralCodeUsed: normalizedCode ?? null,
@@ -121,7 +121,7 @@ export async function createEnrollment(
 
   return {
     id: enrollment.id,
-    amountInPaise: enrollment.amountInPaise,
+    amountInRupees: enrollment.amountInRupees,
     currency: enrollment.currency,
     status: enrollment.status,
   };

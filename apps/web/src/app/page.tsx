@@ -6,6 +6,7 @@ import { SocialProofToast } from "@/components/landing/social-proof-toast";
 import { LandingMobileEnrollment } from "@/components/landing/mobile-enrollment";
 import { LandingStudentStories } from "@/components/landing/student-stories";
 import { LandingToolsMentors } from "@/components/landing/tools-mentors";
+import { getEnrollmentPricingRupees } from "@/lib/pricing.server";
 import { getSessionUser, userHasPaidEnrollment } from "@/lib/server-api";
 
 export default async function HomePage({
@@ -17,11 +18,13 @@ export default async function HomePage({
   const ref = (await searchParams).ref?.trim().toUpperCase() ?? "";
   const isEnrolled = user ? await userHasPaidEnrollment(user.id) : false;
   const firstName = user ? (user.fullName.split(/\s+/)[0] ?? user.fullName) : undefined;
+  const pricing = getEnrollmentPricingRupees();
 
   return (
     <div className="-mt-px">
       <SocialProofToast />
       <LandingHero
+        pricing={pricing}
         isLoggedIn={user !== null}
         isEnrolled={isEnrolled}
         firstName={firstName}
@@ -34,6 +37,7 @@ export default async function HomePage({
       <LandingCertifications />
       <LandingFaq />
       <LandingMobileEnrollment
+        pricing={pricing}
         isLoggedIn={user !== null}
         isEnrolled={isEnrolled}
         firstName={firstName}

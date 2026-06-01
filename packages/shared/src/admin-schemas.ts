@@ -31,7 +31,7 @@ export const adminEnrollmentListQuerySchema = z.object({
 
 export const adminUpdateEnrollmentBodySchema = z.object({
   status: z.enum(["PENDING", "PAID", "REFUNDED"]).optional(),
-  amountInPaise: z.number().int().positive().optional(),
+  amountInRupees: z.number().int().positive().optional(),
   referralCodeUsed: optionalReferralCodeSchema.nullable().optional(),
   referrerId: z.string().nullable().optional(),
   markPaid: z.boolean().optional(),

@@ -1,14 +1,17 @@
 import { EnrolledCongratulationsCard } from "@/components/enrolled-congratulations-card";
 import { EnrollmentPricingWidget } from "@/components/enrollment-pricing-widget";
+import type { EnrollmentPricingRupees } from "@/lib/pricing-types";
 import { Section } from "./section";
 
 export function LandingMobileEnrollment({
+  pricing,
   isLoggedIn = false,
   isEnrolled = false,
   firstName,
   referralCode = null,
   defaultReferralCode = "",
 }: {
+  pricing: EnrollmentPricingRupees;
   isLoggedIn?: boolean;
   isEnrolled?: boolean;
   firstName?: string;
@@ -28,6 +31,7 @@ export function LandingMobileEnrollment({
         <EnrolledCongratulationsCard firstName={firstName} referralCode={referralCode} />
       ) : (
         <EnrollmentPricingWidget
+          pricing={pricing}
           mode="marketing"
           isLoggedIn={isLoggedIn}
           defaultReferralCode={defaultReferralCode}

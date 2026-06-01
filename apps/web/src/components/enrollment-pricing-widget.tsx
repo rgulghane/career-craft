@@ -4,11 +4,12 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useActionState, useEffect, useMemo, useRef, useState } from "react";
 import { REFERRAL_POLICY, isValidReferralCodeFormat, normalizeReferralCode } from "@career-craft/shared";
-import { ENROLLMENT_WIDGET, PRICING } from "@career-craft/shared/content";
+import { ENROLLMENT_WIDGET } from "@career-craft/shared/content";
+import type { EnrollmentPricingRupees } from "@/lib/pricing-types";
 import { createEnrollmentAction, type EnrollState } from "@/app/enroll/actions";
 import { RazorpayPayButton } from "@/components/razorpay-pay-button";
 import { messages } from "@career-craft/shared/content";
-import { discountPercentOff, formatINRFromPaise, listPrices } from "@/lib/format";
+import { discountPercentOff, formatINR, listPrices } from "@/lib/format";
 import { buildEnrollPath, buildLoginPath, buildRegisterPath } from "@/lib/referral-url";
 import { ViewingNowBanner } from "@/components/viewing-now-banner";
 
@@ -64,11 +65,13 @@ function useCountdown(targetMs: number | null): string {
 }
 
 export function EnrollmentPricingWidget({
+  pricing,
   mode = "marketing",
   defaultReferralCode = "",
   isLoggedIn = false,
   autoContinue = false,
 }: {
+  pricing: EnrollmentPricingRupees;
   mode?: Mode;
   defaultReferralCode?: string;
   isLoggedIn?: boolean;
@@ -76,7 +79,7 @@ export function EnrollmentPricingWidget({
   autoContinue?: boolean;
 }) {
   const router = useRouter();
-  const prices = listPrices();
+  const prices = useMemo(() => listPrices(pricing), [pricing]);
   const [deadlineMs, setDeadlineMs] = useState<number | null>(null);
   const countdown = useCountdown(deadlineMs);
 
@@ -144,11 +147,11 @@ export function EnrollmentPricingWidget({
   const autoSubmittedRef = useRef(false);
 
   const hasValidReferral = isValidReferralCodeFormat(appliedCode) && referrerFirstName !== null;
-  const displayPaise = hasValidReferral ? PRICING.withReferralCodeInPaise : PRICING.standardInPaise;
-  const displayPrice = formatINRFromPaise(displayPaise);
+  const displayRupees = hasValidReferral ? pricing.withReferralCodeInRupees : pricing.standardInRupees;
+  const displayPrice = formatINR(displayRupees);
   const badgePercent = hasValidReferral
-    ? discountPercentOff(PRICING.standardInPaise, PRICING.withReferralCodeInPaise)
-    : discountPercentOff(ENROLLMENT_WIDGET.listPriceInPaise, PRICING.standardInPaise);
+    ? discountPercentOff(pricing.standardInRupees, pricing.withReferralCodeInRupees)
+    : discountPercentOff(ENROLLMENT_WIDGET.listPriceInRupees, pricing.standardInRupees);
   const seatsPct = Math.round(
     ((ENROLLMENT_WIDGET.seats.total - ENROLLMENT_WIDGET.seats.remaining) / ENROLLMENT_WIDGET.seats.total) * 100,
   );
@@ -242,7 +245,7 @@ export function EnrollmentPricingWidget({
           ) : (
             <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
               Have a referral code? Save{" "}
-              {discountPercentOff(PRICING.standardInPaise, PRICING.withReferralCodeInPaise)}% more
+              {discountPercentOff(pricing.standardInRupees, pricing.withReferralCodeInRupees)}% more
             </p>
           )}
 
@@ -324,11 +327,11 @@ export function EnrollmentPricingWidget({
               ) : (
                 <>
                   <p className="mb-2 text-center text-sm text-slate-600 dark:text-slate-300">
-                    Enrollment created · pay {formatINRFromPaise(created.amountInPaise)}
+                    Enrollment created · pay {formatINR(created.amountInRupees)}
                   </p>
                   <RazorpayPayButton
                     enrollmentId={created.enrollmentId}
-                    amountLabel={formatINRFromPaise(created.amountInPaise)}
+                    amountLabel={formatINR(created.amountInRupees)}
                     className="flex w-full items-center justify-center rounded-xl bg-gradient-to-r from-slate-800 to-slate-900 py-3.5 text-base font-bold text-white shadow-lg transition hover:from-slate-700 hover:to-slate-800 disabled:opacity-60 dark:from-amber-600 dark:to-orange-600"
                   >
                     {({ pending }) => (pending ? "Processing…" : "Complete secure payment")}

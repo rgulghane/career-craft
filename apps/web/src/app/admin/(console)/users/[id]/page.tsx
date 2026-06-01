@@ -29,7 +29,7 @@ export default async function AdminUserDetailPage({ params }: Params) {
                 {e.id.slice(-8)}
               </Link>
               <span>{e.status}</span>
-              <span className="font-mono text-xs">₹{(e.amountInPaise / 100).toLocaleString("en-IN")}</span>
+              <span className="font-mono text-xs">₹{e.amountInRupees.toLocaleString("en-IN")}</span>
             </li>
           ))}
         </ul>

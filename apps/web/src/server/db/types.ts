@@ -34,7 +34,9 @@ export interface UserDocument {
 export interface EnrollmentDocument {
   _id: DbId;
   userId: DbId;
-  amountInPaise: number;
+  amountInRupees?: number;
+  /** @deprecated Legacy documents stored amounts in paise. */
+  amountInPaise?: number;
   currency: string;
   status: string;
   referralCodeUsed?: string | null;
@@ -80,7 +82,7 @@ export interface User {
 export interface Enrollment {
   id: string;
   userId: string;
-  amountInPaise: number;
+  amountInRupees: number;
   currency: string;
   status: string;
   referralCodeUsed: string | null;

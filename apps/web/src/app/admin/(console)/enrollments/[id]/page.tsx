@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { AdminCard } from "@/components/admin/admin-card";
-import { formatINRFromPaise } from "@/lib/format";
+import { formatINR } from "@/lib/format";
 import { getAdminEnrollment } from "@/server/services/admin/enrollments";
 import { EnrollmentEditor } from "./enrollment-editor";
 
@@ -36,7 +36,7 @@ export default async function AdminEnrollmentDetailPage({ params }: Params) {
           </div>
           <div>
             <dt className="text-slate-500">Amount</dt>
-            <dd className="text-white">{formatINRFromPaise(e.amountInPaise)}</dd>
+            <dd className="text-white">{formatINR(e.amountInRupees)}</dd>
           </div>
           <div>
             <dt className="text-slate-500">Referrer</dt>
@@ -64,7 +64,7 @@ export default async function AdminEnrollmentDetailPage({ params }: Params) {
         enrollmentId={id}
         initial={{
           status: e.status,
-          amountInPaise: e.amountInPaise,
+          amountInRupees: e.amountInRupees,
           referralCodeUsed: e.referralCodeUsed ?? "",
           referrerId: e.referrerId ?? "",
         }}

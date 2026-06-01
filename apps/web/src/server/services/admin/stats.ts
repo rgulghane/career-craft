@@ -1,6 +1,6 @@
 import "server-only";
 
-import { REFERRAL_POLICY } from "@career-craft/shared";
+import { serverConfig } from "@/lib/config";
 import "../../db/load-env";
 import { enrollmentsCollection, referralsCollection, usersCollection } from "../../db/mongo-client";
 
@@ -12,7 +12,7 @@ export interface AdminOverviewStats {
   qualifiedReferrals: number;
   inRefundWindowReferrals: number;
   voidedReferrals: number;
-  cashPerReferralPaise: number;
+  cashPerReferralRupees: number;
   refundWindowDays: number;
 }
 
@@ -40,7 +40,7 @@ export async function getAdminOverviewStats(): Promise<AdminOverviewStats> {
     qualifiedReferrals,
     inRefundWindowReferrals,
     voidedReferrals,
-    cashPerReferralPaise: REFERRAL_POLICY.cashPerReferralPaise,
-    refundWindowDays: REFERRAL_POLICY.refundWindowDays,
+    cashPerReferralRupees: serverConfig.referral.cashPerReferralRupees,
+    refundWindowDays: serverConfig.referral.refundWindowDays,
   };
 }

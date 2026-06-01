@@ -17,14 +17,14 @@ export function EnrollmentEditor({
   enrollmentId: string;
   initial: {
     status: string;
-    amountInPaise: number;
+    amountInRupees: number;
     referralCodeUsed: string;
     referrerId: string;
   };
 }) {
   const { readOnly } = useAdminAccess();
   const router = useRouter();
-  const [amountInPaise, setAmountInPaise] = useState(String(initial.amountInPaise));
+  const [amountInRupees, setAmountInRupees] = useState(String(initial.amountInRupees));
   const [referralCodeUsed, setReferralCodeUsed] = useState(initial.referralCodeUsed);
   const [referrerId, setReferrerId] = useState(initial.referrerId);
   const [message, setMessage] = useState<string | null>(null);
@@ -69,18 +69,18 @@ export function EnrollmentEditor({
             return;
           }
           void patch({
-            amountInPaise: Number(amountInPaise),
+            amountInRupees: Number(amountInRupees),
             referralCodeUsed: code || null,
             referrerId: referrerId.trim() || null,
           });
         }}
       >
         <label className="block text-sm">
-          <span className="text-slate-400">Amount (paise)</span>
+          <span className="text-slate-400">Amount (₹)</span>
           <input
             className="mt-1 w-full rounded-lg border border-white/15 bg-white/5 px-3 py-2 text-white"
-            value={amountInPaise}
-            onChange={(ev) => setAmountInPaise(ev.target.value)}
+            value={amountInRupees}
+            onChange={(ev) => setAmountInRupees(ev.target.value)}
           />
         </label>
         <label className="block text-sm">

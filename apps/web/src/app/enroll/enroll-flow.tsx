@@ -4,7 +4,7 @@ import { useActionState } from "react";
 import { REFERRAL_POLICY } from "@career-craft/shared";
 import { ENROLLMENT_WIDGET, messages } from "@career-craft/shared/content";
 import { RazorpayPayButton } from "@/components/razorpay-pay-button";
-import { formatINRFromPaise } from "@/lib/format";
+import { formatINR } from "@/lib/format";
 import { theme } from "@/lib/theme";
 import { createEnrollmentAction, type EnrollState } from "./actions";
 
@@ -42,7 +42,7 @@ export function EnrollFlow({ defaultReferralCode = "" }: { defaultReferralCode?:
       {created ? (
         <div className={theme.cardHighlight}>
           <p className={theme.label}>Amount due</p>
-          <p className="mt-2 text-4xl font-bold text-white">{formatINRFromPaise(created.amountInPaise)}</p>
+          <p className="mt-2 text-4xl font-bold text-white">{formatINR(created.amountInRupees)}</p>
           <p className={`mt-2 ${theme.body}`}>
             Currency: {created.currency} · Enrollment ID:{" "}
             <span className="font-mono text-amber-200">{created.enrollmentId}</span>
@@ -51,7 +51,7 @@ export function EnrollFlow({ defaultReferralCode = "" }: { defaultReferralCode?:
           <div className="mt-6">
             <RazorpayPayButton
               enrollmentId={enrollmentId ?? ""}
-              amountLabel={formatINRFromPaise(created.amountInPaise)}
+              amountLabel={formatINR(created.amountInRupees)}
               className={`w-full sm:w-auto ${theme.btnSecondary}`}
             >
               {({ pending }) => (pending ? "Processing…" : messages.enroll.payNowCta)}

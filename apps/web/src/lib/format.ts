@@ -1,7 +1,8 @@
-import { ENROLLMENT_WIDGET, PRICING } from "@career-craft/shared/content";
+import { ENROLLMENT_WIDGET } from "@career-craft/shared/content";
+import type { EnrollmentPricingRupees } from "@/lib/pricing-types";
 
-export function formatINRFromPaise(paise: number): string {
-  const rupees = paise / 100;
+/** Format a whole-rupee amount as INR (e.g. 5000 → ₹5,000). */
+export function formatINR(rupees: number): string {
   return new Intl.NumberFormat("en-IN", {
     style: "currency",
     currency: "INR",
@@ -9,21 +10,21 @@ export function formatINRFromPaise(paise: number): string {
   }).format(rupees);
 }
 
-/** Rounded percent discount from `fromPaise` down to `toPaise`. */
-export function discountPercentOff(fromPaise: number, toPaise: number): number {
-  if (fromPaise <= 0 || toPaise >= fromPaise) {
+/** Rounded percent discount from `fromRupees` down to `toRupees`. */
+export function discountPercentOff(fromRupees: number, toRupees: number): number {
+  if (fromRupees <= 0 || toRupees >= fromRupees) {
     return 0;
   }
-  return Math.round((1 - toPaise / fromPaise) * 100);
+  return Math.round((1 - toRupees / fromRupees) * 100);
 }
 
-export const listPrices = () => {
-  const standardPaise = PRICING.standardInPaise;
-  const emiPaise = Math.round(standardPaise / ENROLLMENT_WIDGET.emiMonths);
+export function listPrices(pricing: EnrollmentPricingRupees) {
+  const standardRupees = pricing.standardInRupees;
+  const emiRupees = Math.round(standardRupees / ENROLLMENT_WIDGET.emiMonths);
   return {
-    standard: formatINRFromPaise(standardPaise),
-    withReferral: formatINRFromPaise(PRICING.withReferralCodeInPaise),
-    list: formatINRFromPaise(ENROLLMENT_WIDGET.listPriceInPaise),
-    emi: formatINRFromPaise(emiPaise),
+    standard: formatINR(standardRupees),
+    withReferral: formatINR(pricing.withReferralCodeInRupees),
+    list: formatINR(ENROLLMENT_WIDGET.listPriceInRupees),
+    emi: formatINR(emiRupees),
   };
-};
+}

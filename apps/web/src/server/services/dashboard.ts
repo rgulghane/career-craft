@@ -71,7 +71,7 @@ export async function buildDashboardForUser(userId: string): Promise<DashboardRe
       referralCode: paidEnrollment ? user.referralCode : null,
     },
     pricing: {
-      amountInPaise: paidEnrollment?.amountInPaise ?? 0,
+      amountInRupees: paidEnrollment?.amountInRupees ?? 0,
       currency: PROGRAM.defaultCurrency,
       label: pricingLabel,
     },

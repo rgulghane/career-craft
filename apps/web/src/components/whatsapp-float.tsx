@@ -20,9 +20,7 @@ export function WhatsAppFloatButton({ phoneNumber }: { phoneNumber: string }) {
     setMounted(true);
   }, []);
 
-  const digits =
-    normalizeDigits(phoneNumber) ||
-    normalizeDigits(process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? "");
+  const digits = normalizeDigits(phoneNumber);
 
   if (!mounted || !digits) {
     return null;

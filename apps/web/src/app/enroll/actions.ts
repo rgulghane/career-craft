@@ -11,7 +11,7 @@ export type EnrollState =
   | {
       status: "created";
       enrollmentId: string;
-      amountInPaise: number;
+      amountInRupees: number;
       currency: string;
     };
 
@@ -32,7 +32,7 @@ export async function createEnrollmentAction(_prev: EnrollState, formData: FormD
     return {
       status: "created",
       enrollmentId: enrollment.id,
-      amountInPaise: enrollment.amountInPaise,
+      amountInRupees: enrollment.amountInRupees,
       currency: enrollment.currency,
     };
   } catch (err) {

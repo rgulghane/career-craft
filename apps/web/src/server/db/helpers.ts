@@ -41,11 +41,21 @@ export function mapUser(doc: UserDocument): User {
   };
 }
 
+function resolveAmountInRupees(doc: EnrollmentDocument): number {
+  if (doc.amountInRupees != null) {
+    return doc.amountInRupees;
+  }
+  if (doc.amountInPaise != null) {
+    return doc.amountInPaise / 100;
+  }
+  return 0;
+}
+
 export function mapEnrollment(doc: EnrollmentDocument): Enrollment {
   return {
     id: toIdString(doc._id),
     userId: toIdString(doc.userId),
-    amountInPaise: doc.amountInPaise,
+    amountInRupees: resolveAmountInRupees(doc),
     currency: doc.currency,
     status: doc.status,
     referralCodeUsed: doc.referralCodeUsed ?? null,

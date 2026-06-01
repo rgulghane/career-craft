@@ -5,6 +5,7 @@ import { AppPageShell } from "@/components/app-page-shell";
 import { EnrollCurriculumShowcase } from "@/components/enroll-curriculum-showcase";
 import { EnrolledCongratulationsCard } from "@/components/enrolled-congratulations-card";
 import { EnrollmentPricingWidget } from "@/components/enrollment-pricing-widget";
+import { getEnrollmentPricingRupees } from "@/lib/pricing.server";
 import { getSessionUser, userHasPaidEnrollment } from "@/lib/server-api";
 import { buildRegisterPath } from "@/lib/referral-url";
 
@@ -28,6 +29,7 @@ export default async function EnrollPage({
 
   const firstName = user.fullName.split(/\s+/)[0] ?? user.fullName;
   const isEnrolled = await userHasPaidEnrollment(user.id);
+  const pricing = getEnrollmentPricingRupees();
 
   return (
     <AppPageShell>
@@ -52,7 +54,12 @@ export default async function EnrollPage({
           {isEnrolled && user.referralCode ? (
             <EnrolledCongratulationsCard firstName={firstName} referralCode={user.referralCode} />
           ) : !isEnrolled ? (
-            <EnrollmentPricingWidget mode="enroll" defaultReferralCode={ref} autoContinue={continueFlow} />
+            <EnrollmentPricingWidget
+              pricing={pricing}
+              mode="enroll"
+              defaultReferralCode={ref}
+              autoContinue={continueFlow}
+            />
           ) : null}
         </div>
       </div>

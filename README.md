@@ -79,9 +79,9 @@ All runtime configuration lives in `apps/web/.env.example`. Required in producti
 - `CRON_SECRET`    — random string for the internal cron header
 - `APP_ORIGIN`     — canonical site origin (used for referral share links)
 
-Optional overrides (in paise / days):
+Optional overrides (amounts in rupees / days):
 
-- `STANDARD_PRICE_PAISE`, `REFERRAL_PRICE_PAISE`, `CASH_PER_REFERRAL_PAISE`, `REFUND_WINDOW_DAYS`
+- `STANDARD_PRICE`, `REFERRAL_PRICE`, `CASH_PER_REFERRAL`, `REFUND_WINDOW_DAYS` (pricing UI reads these on the server and passes amounts into client components)
 
 All other knobs (cookie max-age, JWT TTL, bcrypt cost factor, referral code alphabet, message strings) live in `packages/shared/src/`.
 

@@ -1,3 +1,4 @@
+import "./configure-dns";
 import { MongoClient, type Collection, type MongoClientOptions } from "mongodb";
 import {
   COLLECTIONS,

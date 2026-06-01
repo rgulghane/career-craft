@@ -3,14 +3,17 @@ import { LANDING, PROGRAM } from "@career-craft/shared";
 import { EnrolledCongratulationsCard } from "@/components/enrolled-congratulations-card";
 import { EnrollmentPricingWidget } from "@/components/enrollment-pricing-widget";
 import { ScrollToEnrollmentButton } from "@/components/landing/scroll-to-enrollment-button";
+import type { EnrollmentPricingRupees } from "@/lib/pricing-types";
 
 export function LandingHero({
+  pricing,
   isLoggedIn = false,
   isEnrolled = false,
   firstName,
   referralCode = null,
   defaultReferralCode = "",
 }: {
+  pricing: EnrollmentPricingRupees;
   isLoggedIn?: boolean;
   isEnrolled?: boolean;
   firstName?: string;
@@ -82,6 +85,7 @@ export function LandingHero({
               <EnrolledCongratulationsCard firstName={firstName} referralCode={referralCode} />
             ) : !isEnrolled ? (
               <EnrollmentPricingWidget
+                pricing={pricing}
                 mode="marketing"
                 isLoggedIn={isLoggedIn}
                 defaultReferralCode={defaultReferralCode}

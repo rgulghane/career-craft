@@ -4,6 +4,7 @@ import { createHmac, timingSafeEqual } from "node:crypto";
 import Razorpay from "razorpay";
 import { revalidatePath } from "next/cache";
 import { serverConfig } from "@/lib/config";
+import { rupeesToPaise } from "@/lib/money";
 import { mapEnrollment, mapUser, toDbId } from "../db/helpers";
 import {
   enrollmentsCollection,
@@ -135,7 +136,7 @@ async function assertOrderMatchesEnrollment(
 async function assertRazorpayPaymentCaptured(
   orderId: string,
   paymentId: string,
-  expectedAmountInPaise: number,
+  expectedAmountInPaise: number, // Razorpay API uses paise
   expectedCurrency: string,
   enrollmentId: string,
 ): Promise<void> {
@@ -184,7 +185,7 @@ async function getOrCreateRazorpayOrder(
       const existing = await client.orders.fetch(enrollment.razorpayOrderId);
       const notes = readOrderNotes(existing);
       const sameEnrollment = notes?.enrollmentId === enrollment.id;
-      const sameAmount = Number(existing.amount) === enrollment.amountInPaise;
+      const sameAmount = Number(existing.amount) === rupeesToPaise(enrollment.amountInRupees);
       const sameCurrency =
         !existing.currency || existing.currency === enrollment.currency;
       if (sameEnrollment && sameAmount && sameCurrency && existing.status !== "paid") {
@@ -196,7 +197,7 @@ async function getOrCreateRazorpayOrder(
   }
 
   return client.orders.create({
-    amount: enrollment.amountInPaise,
+    amount: rupeesToPaise(enrollment.amountInRupees),
     currency: enrollment.currency,
     receipt: enrollment.id.slice(0, 40),
     notes: { enrollmentId: enrollment.id, userId },
@@ -283,7 +284,7 @@ export async function confirmRazorpayCheckoutPayment(
   await assertRazorpayPaymentCaptured(
     razorpayOrderId,
     razorpayPaymentId,
-    enrollment.amountInPaise,
+    rupeesToPaise(enrollment.amountInRupees),
     enrollment.currency,
     enrollment.id,
   );
@@ -325,7 +326,7 @@ async function fulfillEnrollmentByRazorpayOrder(
   await assertRazorpayPaymentCaptured(
     razorpayOrderId,
     razorpayPaymentId,
-    enrollment.amountInPaise,
+    rupeesToPaise(enrollment.amountInRupees),
     enrollment.currency,
     enrollment.id,
   );
@@ -405,7 +406,7 @@ export async function refundEnrollmentPayment(
   const razorpayPaymentId = toRazorpayPaymentId(enrollment.paymentId);
   const client = getClient();
   const refund = await client.payments.refund(razorpayPaymentId, {
-    amount: enrollment.amountInPaise,
+    amount: rupeesToPaise(enrollment.amountInRupees),
     notes: { enrollmentId: enrollment.id, userId },
     speed: "normal",
   });

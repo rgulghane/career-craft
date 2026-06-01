@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { AdminCard } from "@/components/admin/admin-card";
-import { formatINRFromPaise } from "@/lib/format";
+import { formatINR } from "@/lib/format";
 import { listAdminEnrollments } from "@/server/services/admin/enrollments";
 
 export default async function AdminEnrollmentsPage({
@@ -52,7 +52,7 @@ export default async function AdminEnrollmentsPage({
                   <p className="font-mono text-xs text-slate-500">{e.userEmail}</p>
                 </td>
                 <td className="py-3 pr-4">{e.status}</td>
-                <td className="py-3 pr-4">{formatINRFromPaise(e.amountInPaise)}</td>
+                <td className="py-3 pr-4">{formatINR(e.amountInRupees)}</td>
                 <td className="py-3 pr-4 text-xs text-slate-400">{e.referrerEmail ?? "—"}</td>
                 <td className="py-3 text-xs text-slate-400">
                   {e.paidAt ? new Date(e.paidAt).toLocaleDateString() : "—"}

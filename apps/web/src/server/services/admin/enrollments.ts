@@ -14,7 +14,7 @@ export interface AdminEnrollmentListItem {
   userEmail: string;
   userFullName: string;
   status: string;
-  amountInPaise: number;
+  amountInRupees: number;
   referralCodeUsed: string | null;
   referrerId: string | null;
   referrerEmail: string | null;
@@ -65,7 +65,7 @@ export async function listAdminEnrollments(params: {
       userEmail: student?.email ?? "—",
       userFullName: student?.fullName ?? "—",
       status: e.status,
-      amountInPaise: e.amountInPaise,
+      amountInRupees: e.amountInRupees,
       referralCodeUsed: e.referralCodeUsed,
       referrerId: e.referrerId,
       referrerEmail: referrer?.email ?? null,
@@ -137,8 +137,8 @@ export async function updateAdminEnrollment(
   }
 
   const $set: Record<string, unknown> = {};
-  if (body.amountInPaise !== undefined) {
-    $set.amountInPaise = body.amountInPaise;
+  if (body.amountInRupees !== undefined) {
+    $set.amountInRupees = body.amountInRupees;
   }
   if (body.referralCodeUsed !== undefined) {
     $set.referralCodeUsed = body.referralCodeUsed;
@@ -168,7 +168,7 @@ export async function updateAdminEnrollment(
     userEmail: student ? mapUser(student).email : "—",
     userFullName: student ? mapUser(student).fullName : "—",
     status: e.status,
-    amountInPaise: e.amountInPaise,
+    amountInRupees: e.amountInRupees,
     referralCodeUsed: e.referralCodeUsed,
     referrerId: e.referrerId,
     referrerEmail: referrer ? mapUser(referrer).email : null,
