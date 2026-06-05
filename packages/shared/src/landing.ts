@@ -37,10 +37,20 @@ export const LANDING = {
   ],
   mentors: [
     {
+      name: "Eshan Tiwari",
+      designation: "Sr. Staff Data Scientist/TLM",
+      company: "Meta",
+      previouslyAt: "Facebook",
+      linkedInUrl: "https://www.linkedin.com/",
+      photo:
+        "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=480&h=480&q=80",
+    },
+    {
       name: "Priya Nair",
       designation: "Senior Product Manager",
       company: "Flipkart",
-      location: "Bengaluru",
+      previouslyAt: "Amazon India",
+      linkedInUrl: "https://www.linkedin.com/",
       photo:
         "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=480&h=480&q=80",
     },
@@ -48,7 +58,8 @@ export const LANDING = {
       name: "Arjun Mehta",
       designation: "Engineering Lead · Payments",
       company: "CRED",
-      location: "Mumbai",
+      previouslyAt: "Paytm",
+      linkedInUrl: "https://www.linkedin.com/",
       photo:
         "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=480&h=480&q=80",
     },
@@ -56,7 +67,8 @@ export const LANDING = {
       name: "Sneha Reddy",
       designation: "Data Science Manager",
       company: "Amazon India",
-      location: "Hyderabad",
+      previouslyAt: "Microsoft",
+      linkedInUrl: "https://www.linkedin.com/",
       photo:
         "https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=480&h=480&q=80",
     },
@@ -64,7 +76,8 @@ export const LANDING = {
       name: "Kavya Iyer",
       designation: "Head of Growth Marketing",
       company: "Nykaa",
-      location: "Mumbai",
+      previouslyAt: "Unilever",
+      linkedInUrl: "https://www.linkedin.com/",
       photo:
         "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=480&h=480&q=80",
     },
@@ -72,7 +85,8 @@ export const LANDING = {
       name: "Rohan Kapoor",
       designation: "Cloud Solutions Architect",
       company: "Google India",
-      location: "Gurugram",
+      previouslyAt: "IBM",
+      linkedInUrl: "https://www.linkedin.com/",
       photo:
         "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=480&h=480&q=80",
     },
@@ -80,7 +94,8 @@ export const LANDING = {
       name: "Anita Desai",
       designation: "Director · Digital Consulting",
       company: "TCS",
-      location: "Pune",
+      previouslyAt: "Infosys",
+      linkedInUrl: "https://www.linkedin.com/",
       photo:
         "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=480&h=480&q=80",
     },
@@ -88,7 +103,8 @@ export const LANDING = {
       name: "Vikram Singh",
       designation: "Category Lead · Fashion",
       company: "Myntra",
-      location: "Bengaluru",
+      previouslyAt: "Flipkart",
+      linkedInUrl: "https://www.linkedin.com/",
       photo:
         "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=480&h=480&q=80",
     },
@@ -96,7 +112,8 @@ export const LANDING = {
       name: "Meera Joshi",
       designation: "Strategy Partner",
       company: "Deloitte",
-      location: "Mumbai",
+      previouslyAt: "KPMG",
+      linkedInUrl: "https://www.linkedin.com/",
       photo:
         "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=480&h=480&q=80",
     },
@@ -104,7 +121,8 @@ export const LANDING = {
       name: "Kabir Malhotra",
       designation: "VP · Business Analytics",
       company: "Swiggy",
-      location: "Bengaluru",
+      previouslyAt: "Zomato",
+      linkedInUrl: "https://www.linkedin.com/",
       photo:
         "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=480&h=480&q=80",
     },
@@ -112,7 +130,8 @@ export const LANDING = {
       name: "Divya Krishnan",
       designation: "Lead UX Researcher",
       company: "Razorpay",
-      location: "Bengaluru",
+      previouslyAt: "Freshworks",
+      linkedInUrl: "https://www.linkedin.com/",
       photo:
         "https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?auto=format&fit=crop&w=480&h=480&q=80",
     },
@@ -120,7 +139,8 @@ export const LANDING = {
       name: "Imran Sheikh",
       designation: "Senior AI Product Manager",
       company: "PhonePe",
-      location: "Pune",
+      previouslyAt: "Google India",
+      linkedInUrl: "https://www.linkedin.com/",
       photo:
         "https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&w=480&h=480&q=80",
     },
@@ -128,7 +148,8 @@ export const LANDING = {
       name: "Neha Banerjee",
       designation: "Marketing Analytics Lead",
       company: "Zomato",
-      location: "Gurugram",
+      previouslyAt: "Swiggy",
+      linkedInUrl: "https://www.linkedin.com/",
       photo:
         "https://images.unsplash.com/photo-1594744803329-e58b31de8df5?auto=format&fit=crop&w=480&h=480&q=80",
     },
@@ -226,20 +247,20 @@ export const LANDING = {
     {
       phase: "Phase 1",
       weeks: "Weeks 1–4",
-      theme: "Digital Foundations",
-      items: ["MS Office & Google Workspace", "Notion, Slack, Trello", "Professional email & LinkedIn"],
+      theme: "AI & Data Foundations",
+      items: ["ChatGPT, Claude & Gemini", "Prompt engineering workflows", "Excel, Python & SQL fundamentals"],
     },
     {
       phase: "Phase 2",
-      weeks: "Weeks 5–9",
-      theme: "Professional Skills",
-      items: ["Canva & AI tools", "Prompt engineering", "Power BI & digital marketing"],
+      weeks: "Weeks 5–8",
+      theme: "Analytics & Applied AI",
+      items: ["Power BI executive dashboards", "Visual storytelling with Canva", "No-code automation & industry case studies"],
     },
     {
       phase: "Phase 3",
-      weeks: "Weeks 10–12",
-      theme: "Career Readiness",
-      items: ["SQL & no-code automation", "ATS resume + LinkedIn AI", "Capstone demo day"],
+      weeks: "Weeks 9–12",
+      theme: "Career Launch",
+      items: ["ATS resume & personal branding", "Interview mastery & GD drills", "Capstone portfolio & placements"],
     },
   ],
   schedule: {

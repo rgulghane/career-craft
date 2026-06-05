@@ -8,7 +8,7 @@
     "install:web": "npm install --prefix apps/web",
     "dev:prepare": "npm run build --prefix packages/shared && npm run db:setup",
     "dev": "npm run dev:prepare && npm run dev --prefix apps/web",
-    "dev:clean": "rm -rf apps/web/.next && npm run dev",
+    "dev:clean": "node -e \"try{require('fs').rmSync('apps/web/.next',{recursive:true,force:true})}catch(e){}\" && npm run dev",
     "dev:shared": "npm run watch --prefix packages/shared",
     "build": "npm run build --prefix packages/shared && npm run build --prefix apps/web",
     "start": "npm run start --prefix apps/web",

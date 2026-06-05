@@ -1,17 +1,17 @@
 /** 12-week program curriculum — week by week breakdown. */
 
 export const CURRICULUM_PAGE = {
-  eyebrow: "12-week accelerator",
+  eyebrow: "12-week AI & business analytics program",
   title: "Week by week curriculum",
   subtitle:
-    "Live Saturday sessions, recordings within 24 hours, and hands-on projects from AI foundations through placement week.",
+    "Live Saturday sessions, recordings within 24 hours, and hands-on projects from AI tools through career launch.",
 } as const;
 
 export const CURRICULUM_WEEKS = [
   {
     week: 1,
-    title: "AI Foundations & ChatGPT Mastery",
-    tools: ["ChatGPT", "Claude AI", "Gemini"],
+    title: "Introduction to AI Tools & Professional Digital Presence",
+    tools: ["ChatGPT", "Claude AI", "Gemini", "LinkedIn Setup"],
     description: "How LLMs work, prompting basics, AI landscape",
     details: {
       liveSession: "Saturday · 2 hrs · Foundations lab",
@@ -19,15 +19,15 @@ export const CURRICULUM_WEEKS = [
         "What LLMs are and how they differ from search engines",
         "Writing your first effective prompts (role, context, constraints)",
         "Comparing ChatGPT, Claude, and Gemini on the same task",
-        "Responsible AI: hallucinations, privacy, and verification habits",
+        "LinkedIn profile setup: headline, photo, and professional digital presence",
       ],
-      handsOn: "Build a personal AI assistant prompt pack for college assignments and internships.",
-      deliverable: "10-prompt library + 1-page AI use policy for your portfolio",
+      handsOn: "Build a personal AI assistant prompt pack and publish a recruiter-ready LinkedIn profile.",
+      deliverable: "10-prompt library + optimised LinkedIn profile checklist",
     },
   },
   {
     week: 2,
-    title: "Advanced Prompt Engineering",
+    title: "Mastering Prompt Engineering for Real-World Workflows",
     tools: ["Prompt Design", "Chain-of-Thought", "Few-Shot"],
     description: "Chain-of-thought, role prompting, prompt libraries",
     details: {
@@ -44,8 +44,8 @@ export const CURRICULUM_WEEKS = [
   },
   {
     week: 3,
-    title: "Excel for Data Analysis",
-    tools: ["Microsoft Excel", "Power Query", "AI Formulas"],
+    title: "Data Analysis with Excel & Python Fundamentals",
+    tools: ["Microsoft Excel", "Power Query", "AI Formulas", "Python Basics"],
     description: "VLOOKUP, Pivot Tables, AI-assisted formulas",
     details: {
       liveSession: "Saturday · 2 hrs · Spreadsheet sprint",
@@ -53,15 +53,15 @@ export const CURRICULUM_WEEKS = [
         "VLOOKUP, XLOOKUP, and INDEX-MATCH for joining datasets",
         "Pivot tables and slicers for sales-style dashboards",
         "Power Query: clean messy CSV exports in minutes",
-        "Using Copilot / AI formulas to speed up repetitive tasks",
+        "Python basics: reading CSVs, simple aggregations, and AI-assisted analysis",
       ],
-      handsOn: "Analyse a sample e-commerce export: revenue by city, top SKUs, refund rate.",
-      deliverable: "Excel workbook with 3 pivots + short insights memo",
+      handsOn: "Analyse a sample e-commerce export in Excel, then replicate key metrics in Python.",
+      deliverable: "Excel workbook with 3 pivots + Python script with matching insights",
     },
   },
   {
     week: 4,
-    title: "SQL for Business Decisions",
+    title: "SQL for Data-Driven Business Decision Making",
     tools: ["SQL", "PostgreSQL", "BigQuery"],
     description: "JOINs, aggregations, real sales data",
     details: {
@@ -78,7 +78,7 @@ export const CURRICULUM_WEEKS = [
   },
   {
     week: 5,
-    title: "Power BI: Executive Dashboards",
+    title: "Business Intelligence & Executive Dashboard Design",
     tools: ["Power BI", "DAX", "Power Query"],
     description: "DAX measures, live dashboards, storytelling",
     details: {
@@ -95,7 +95,7 @@ export const CURRICULUM_WEEKS = [
   },
   {
     week: 6,
-    title: "Design & Visual Storytelling (Canva)",
+    title: "Visual Storytelling & AI-Powered Design for Business",
     tools: ["Canva", "Adobe Express", "Midjourney"],
     description: "Brand kits, infographics, AI-generated visuals",
     details: {
@@ -112,7 +112,7 @@ export const CURRICULUM_WEEKS = [
   },
   {
     week: 7,
-    title: "Generative AI & No-Code Automation",
+    title: "Workflow Automation & No-Code AI Productivity Systems",
     tools: ["Make.com", "Zapier", "Notion AI", "DALL-E"],
     description: "Workflow automation, document AI, no-code tools",
     details: {
@@ -129,7 +129,7 @@ export const CURRICULUM_WEEKS = [
   },
   {
     week: 8,
-    title: "Industry Case Studies: AI at Scale",
+    title: "Applied AI in Industry — Real-World Case Study Analysis",
     tools: ["Case Study Method", "Miro", "Google Slides"],
     description: "Flipkart, CRED, Amazon — real AI use cases",
     details: {
@@ -146,58 +146,58 @@ export const CURRICULUM_WEEKS = [
   },
   {
     week: 9,
-    title: "Resume & LinkedIn Built with AI",
-    tools: ["Kickresume", "Teal HQ", "LinkedIn AI"],
+    title: "AI-Powered Personal Branding, Resume & Career Positioning",
+    tools: ["Teal HQ", "JAM", "Picture Presentation Bootcamp"],
     description: "ATS-optimised resume, LinkedIn that recruits you",
     details: {
       liveSession: "Saturday · 2 hrs · Personal brand clinic",
       topics: [
         "ATS-friendly resume structure for freshers and switchers",
         "Quantifying impact when you have limited work experience",
-        "LinkedIn headline, About, and featured section optimisation",
+        "JAM and picture-presentation frameworks for campus placements",
         "AI-assisted tailoring per job description (ethically)",
       ],
-      handsOn: "Rewrite resume + LinkedIn for one target role (analyst / marketing / ops).",
-      deliverable: "PDF resume + public LinkedIn checklist (self-reviewed)",
+      handsOn: "Rewrite resume and rehearse a 2-minute JAM + picture presentation for one target role.",
+      deliverable: "PDF resume + recorded JAM / picture presentation practice clip",
     },
   },
   {
     week: 10,
-    title: "Interview Prep with AI Mock Sessions",
-    tools: ["Interview AI", "Pramp", "ChatGPT"],
+    title: "Interview Mastery — AI Mock Drills, GD & Communication",
+    tools: ["Interview AI", "J5M", "GD"],
     description: "Answer frameworks, AI-powered mock interviews",
     details: {
       liveSession: "Saturday · 2 hrs · Mock interview day",
       topics: [
         "STAR and CAR frameworks for behavioural questions",
-        "SQL / Excel / case prompts common in analyst interviews",
-        "Using AI as a mock interviewer (and spotting weak answers)",
+        "Group discussion (GD) structure: opening, building, and closing arguments",
+        "J5M rapid-fire drills and AI-powered mock interview feedback",
         "Salary negotiation and follow-up email templates",
       ],
-      handsOn: "Two 15-minute mock rounds with mentor feedback and recording review.",
-      deliverable: "Interview Q&A doc with your best 2 STAR stories",
+      handsOn: "One GD round, two AI mock interviews, and one J5M drill with mentor feedback.",
+      deliverable: "Interview Q&A doc with your best 2 STAR stories + GD talking points",
     },
   },
   {
     week: 11,
-    title: "Capstone Project — Full Industry Build",
-    tools: ["Power BI", "SQL", "Canva", "ChatGPT"],
+    title: "Capstone Project — End-to-End Industry Build & Portfolio",
+    tools: ["Project Pipeline", "Portfolio Showcase"],
     description: "End-to-end analytics + AI project, mentor review",
     details: {
       liveSession: "Saturday · 2 hrs · Capstone review",
       topics: [
         "Scoping a business problem with a clear north-star metric",
         "End-to-end pipeline: ingest → model → viz → narrative",
+        "Portfolio showcase: GitHub, LinkedIn featured, and demo-day structure",
         "Peer review rubric: clarity, rigour, and design",
-        "Preparing for demo day presentation structure",
       ],
-      handsOn: "Submit capstone v1; receive mentor comments; iterate for demo day.",
-      deliverable: "Capstone repo / deck + 8-minute demo recording",
+      handsOn: "Submit capstone v1; receive mentor comments; iterate for portfolio showcase.",
+      deliverable: "Capstone repo / deck + portfolio showcase link + 8-minute demo recording",
     },
   },
   {
     week: 12,
-    title: "Placement Week & Career Activation",
+    title: "Career Launch — Placements, Network & Industry Activation",
     tools: ["LinkedIn", "Naukri", "Internshala"],
     description: "Referrals, job alerts, alumni network launch",
     details: {

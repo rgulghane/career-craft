@@ -68,7 +68,7 @@ export function LandingCurriculum() {
 
       <div className="hidden max-w-2xl sm:block">
         <p className="text-sm font-semibold uppercase tracking-widest text-amber-600 dark:text-amber-400">
-          12-week accelerator
+          {CURRICULUM_PAGE.eyebrow}
         </p>
         <h2 className="mt-2 text-3xl font-bold tracking-tight sm:text-4xl">Industry-ready in three phases</h2>
         <p className="mt-4 text-slate-600 dark:text-slate-400">

@@ -8,7 +8,7 @@ import { getSessionUser, userHasPaidEnrollment } from "@/lib/server-api";
 export const metadata: Metadata = {
   title: `Curriculum — ${PROGRAM.name}`,
   description:
-    "12-week industry AI accelerator: ChatGPT, Excel, SQL, Power BI, Canva, automation, case studies, and placement week.",
+    "12-week AI & business analytics program: ChatGPT, Excel, Python, SQL, Power BI, Canva, automation, case studies, and career launch.",
 };
 
 export default async function CurriculumPage() {
