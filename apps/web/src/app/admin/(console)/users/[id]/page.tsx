@@ -30,6 +30,11 @@ export default async function AdminUserDetailPage({ params }: Params) {
               </Link>
               <span>{e.status}</span>
               <span className="font-mono text-xs">₹{e.amountInRupees.toLocaleString("en-IN")}</span>
+              {e.directEnrollment ? (
+                <span className="rounded-full bg-amber-500/15 px-2 py-0.5 text-xs font-medium text-amber-300">
+                  Direct
+                </span>
+              ) : null}
             </li>
           ))}
         </ul>

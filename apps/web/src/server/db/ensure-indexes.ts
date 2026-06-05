@@ -83,4 +83,15 @@ export async function ensureIndexes(): Promise<void> {
     { receivedAt: 1 },
     { name: "RazorpayWebhookEvent_receivedAt" },
   );
+
+  await safeCreateIndex(
+    COLLECTIONS.mentors,
+    { order: 1, createdAt: 1 },
+    { name: "Mentor_order_createdAt" },
+  );
+  await safeCreateIndex(
+    COLLECTIONS.mentors,
+    { isPublished: 1, order: 1 },
+    { name: "Mentor_isPublished_order" },
+  );
 }

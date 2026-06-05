@@ -39,6 +39,17 @@ export const messages = {
       `Permanently delete ${name} (${email})? This removes their enrollments and referrals. This cannot be undone.`,
     deleteUserCta: "Delete user",
     deleteUserSuccess: "User deleted.",
+    directEnrollTitle: "Direct enrollment",
+    directEnrollSubtitle:
+      "Search a student by email or name to enroll them without payment and issue their referral code.",
+    directEnrollCta: "Grant direct enrollment",
+    directEnrollConfirm: (name: string, email: string) =>
+      `Enroll ${name} (${email}) without payment? This marks them as paid (direct enrollment) and generates their referral code.`,
+    directEnrollSuccess: (code: string) =>
+      `Direct enrollment granted. Referral code: ${code}.`,
+    directEnrollAlready: "Student already has a paid enrollment.",
+    directEnrollSearchEmpty: "No students match that search.",
+    directEnrollReasonLabel: "Reason (optional)",
   },
   auth: {
     emailLabel: "Email",

@@ -37,6 +37,11 @@ export const adminUpdateEnrollmentBodySchema = z.object({
   markPaid: z.boolean().optional(),
 });
 
+export const adminGrantDirectEnrollmentBodySchema = z.object({
+  /** Optional note explaining why payment is waived (audit trail). */
+  reason: z.string().trim().max(500).optional(),
+});
+
 export const adminReferralListQuerySchema = z.object({
   status: z.string().optional(),
   referrerId: z.string().optional(),
@@ -58,7 +63,39 @@ export const adminCreateReadonlyAdminBodySchema = z.object({
   fullName: z.string().trim().min(1).max(120),
 });
 
+const optionalUrlSchema = z
+  .union([z.string().trim().url().max(1000), z.literal("")])
+  .default("");
+
+/** Editable content fields shown on a mentor spotlight card. */
+export const mentorContentSchema = z.object({
+  name: z.string().trim().min(1).max(120),
+  designation: z.string().trim().min(1).max(160),
+  company: z.string().trim().min(1).max(120),
+  previouslyAt: z.string().trim().max(120).optional().default(""),
+  linkedInUrl: optionalUrlSchema,
+  photo: z.string().trim().url().max(1000),
+});
+
+export const adminCreateMentorBodySchema = mentorContentSchema.extend({
+  order: z.number().int().min(0).optional(),
+});
+
+export const adminUpdateMentorBodySchema = mentorContentSchema.extend({
+  order: z.number().int().min(0).optional(),
+});
+
+export const adminMentorVisibilityBodySchema = z.object({
+  isPublished: z.boolean(),
+});
+
+export type MentorContentInput = z.infer<typeof mentorContentSchema>;
+export type AdminCreateMentorBody = z.infer<typeof adminCreateMentorBodySchema>;
+export type AdminUpdateMentorBody = z.infer<typeof adminUpdateMentorBodySchema>;
+export type AdminMentorVisibilityBody = z.infer<typeof adminMentorVisibilityBodySchema>;
+
 export type AdminLoginBody = z.infer<typeof adminLoginBodySchema>;
 export type AdminCreateReadonlyAdminBody = z.infer<typeof adminCreateReadonlyAdminBodySchema>;
 export type AdminUpdateUserBody = z.infer<typeof adminUpdateUserBodySchema>;
 export type AdminUpdateEnrollmentBody = z.infer<typeof adminUpdateEnrollmentBodySchema>;
+export type AdminGrantDirectEnrollmentBody = z.infer<typeof adminGrantDirectEnrollmentBodySchema>;

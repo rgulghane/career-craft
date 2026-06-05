@@ -29,6 +29,7 @@ export interface AdminUserDetail {
     status: string;
     amountInRupees: number;
     referralCodeUsed: string | null;
+    directEnrollment: boolean;
     paidAt: string | null;
     createdAt: string;
   }>;
@@ -164,6 +165,7 @@ export async function getAdminUser(userId: string): Promise<AdminUserDetail | nu
         status: en.status,
         amountInRupees: en.amountInRupees,
         referralCodeUsed: en.referralCodeUsed,
+        directEnrollment: en.directEnrollment,
         paidAt: en.paidAt?.toISOString() ?? null,
         createdAt: en.createdAt.toISOString(),
       };

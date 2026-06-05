@@ -12,6 +12,7 @@ export const COLLECTIONS = {
   enrollments: "Enrollment",
   referrals: "Referral",
   razorpayWebhookEvents: "RazorpayWebhookEvent",
+  mentors: "Mentor",
 } as const;
 
 export type EnrollmentStatus = "PENDING" | "PAID" | "REFUNDED";
@@ -46,6 +47,11 @@ export interface EnrollmentDocument {
   razorpayRefundId?: string | null;
   paidAt?: Date | null;
   refundedAt?: Date | null;
+  /** Set when an admin enrolled the student without collecting payment. */
+  directEnrollment?: boolean;
+  directEnrollmentReason?: string | null;
+  directEnrolledByAdminId?: DbId | null;
+  directEnrolledAt?: Date | null;
   createdAt: Date;
 }
 
@@ -92,6 +98,10 @@ export interface Enrollment {
   razorpayRefundId: string | null;
   paidAt: Date | null;
   refundedAt: Date | null;
+  directEnrollment: boolean;
+  directEnrollmentReason: string | null;
+  directEnrolledByAdminId: string | null;
+  directEnrolledAt: Date | null;
   createdAt: Date;
 }
 
@@ -112,4 +122,43 @@ export interface ReferralWithEnrollment extends Referral {
 
 export interface ReferralWithReferee extends Referral {
   referee: Pick<User, "email">;
+}
+
+/** Content fields rendered on a public mentor spotlight card. */
+export interface MentorContent {
+  name: string;
+  designation: string;
+  company: string;
+  previouslyAt: string;
+  linkedInUrl: string;
+  photo: string;
+}
+
+/**
+ * A mentor stored in its own collection. Editing updates `draft`; clicking
+ * "Live the changes" copies `draft` into `live`. The public landing page only
+ * ever reads `live` content for mentors where `isPublished` is true.
+ */
+export interface MentorDocument {
+  _id: DbId;
+  order: number;
+  draft: MentorContent;
+  live: MentorContent | null;
+  isPublished: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+  publishedAt?: Date | null;
+}
+
+export interface Mentor {
+  id: string;
+  order: number;
+  draft: MentorContent;
+  live: MentorContent | null;
+  isPublished: boolean;
+  /** True when the draft differs from what is currently live on the site. */
+  hasUnpublishedChanges: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+  publishedAt: Date | null;
 }

@@ -6,7 +6,9 @@ const baseLinks = [
   { href: "/admin", label: "Overview" },
   { href: "/admin/users", label: "Users" },
   { href: "/admin/enrollments", label: "Enrollments" },
+  { href: "/admin/direct-enrollment", label: "Direct enrollment" },
   { href: "/admin/referrals", label: "Referrals" },
+  { href: "/admin/mentors", label: "Mentors" },
   { href: "/admin/settings", label: "Settings" },
 ];
 

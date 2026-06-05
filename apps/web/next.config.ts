@@ -68,6 +68,11 @@ const nextConfig: NextConfig = {
         hostname: "images.unsplash.com",
         pathname: "/**",
       },
+      // Mentor photos are admin-supplied URLs from arbitrary https hosts.
+      {
+        protocol: "https",
+        hostname: "**",
+      },
     ],
   },
   experimental: {

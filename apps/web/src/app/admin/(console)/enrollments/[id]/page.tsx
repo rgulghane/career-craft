@@ -32,7 +32,14 @@ export default async function AdminEnrollmentDetailPage({ params }: Params) {
           </div>
           <div>
             <dt className="text-slate-500">Status</dt>
-            <dd className="text-white">{e.status}</dd>
+            <dd className="text-white">
+              {e.status}
+              {e.directEnrollment ? (
+                <span className="ml-2 rounded-full bg-amber-500/15 px-2 py-0.5 text-xs font-medium text-amber-300">
+                  Direct enrollment
+                </span>
+              ) : null}
+            </dd>
           </div>
           <div>
             <dt className="text-slate-500">Amount</dt>
@@ -50,6 +57,12 @@ export default async function AdminEnrollmentDetailPage({ params }: Params) {
             <dt className="text-slate-500">Payment ID</dt>
             <dd className="font-mono text-xs text-slate-300">{e.paymentId ?? "—"}</dd>
           </div>
+          {e.directEnrollment ? (
+            <div>
+              <dt className="text-slate-500">Direct enrollment reason</dt>
+              <dd className="text-white">{e.directEnrollmentReason ?? "—"}</dd>
+            </div>
+          ) : null}
         </dl>
         {data.referral ? (
           <p className="mt-4 text-sm">

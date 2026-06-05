@@ -51,7 +51,14 @@ export default async function AdminEnrollmentsPage({
                   </Link>
                   <p className="font-mono text-xs text-slate-500">{e.userEmail}</p>
                 </td>
-                <td className="py-3 pr-4">{e.status}</td>
+                <td className="py-3 pr-4">
+                  {e.status}
+                  {e.directEnrollment ? (
+                    <span className="ml-2 rounded-full bg-amber-500/15 px-2 py-0.5 text-xs font-medium text-amber-300">
+                      Direct
+                    </span>
+                  ) : null}
+                </td>
                 <td className="py-3 pr-4">{formatINR(e.amountInRupees)}</td>
                 <td className="py-3 pr-4 text-xs text-slate-400">{e.referrerEmail ?? "—"}</td>
                 <td className="py-3 text-xs text-slate-400">

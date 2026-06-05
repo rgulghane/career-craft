@@ -3,6 +3,9 @@ import type { DbId } from "./types";
 import type {
   Enrollment,
   EnrollmentDocument,
+  Mentor,
+  MentorContent,
+  MentorDocument,
   Referral,
   ReferralDocument,
   User,
@@ -65,7 +68,42 @@ export function mapEnrollment(doc: EnrollmentDocument): Enrollment {
     razorpayRefundId: doc.razorpayRefundId ?? null,
     paidAt: doc.paidAt ?? null,
     refundedAt: doc.refundedAt ?? null,
+    directEnrollment: doc.directEnrollment ?? false,
+    directEnrollmentReason: doc.directEnrollmentReason ?? null,
+    directEnrolledByAdminId: doc.directEnrolledByAdminId
+      ? toIdString(doc.directEnrolledByAdminId)
+      : null,
+    directEnrolledAt: doc.directEnrolledAt ?? null,
     createdAt: doc.createdAt,
+  };
+}
+
+function contentEquals(a: MentorContent | null, b: MentorContent | null): boolean {
+  if (a === null || b === null) {
+    return a === b;
+  }
+  return (
+    a.name === b.name &&
+    a.designation === b.designation &&
+    a.company === b.company &&
+    a.previouslyAt === b.previouslyAt &&
+    a.linkedInUrl === b.linkedInUrl &&
+    a.photo === b.photo
+  );
+}
+
+export function mapMentor(doc: MentorDocument): Mentor {
+  const live = doc.live ?? null;
+  return {
+    id: toIdString(doc._id),
+    order: doc.order ?? 0,
+    draft: doc.draft,
+    live,
+    isPublished: doc.isPublished ?? false,
+    hasUnpublishedChanges: !contentEquals(doc.draft, live),
+    createdAt: doc.createdAt,
+    updatedAt: doc.updatedAt,
+    publishedAt: doc.publishedAt ?? null,
   };
 }
 

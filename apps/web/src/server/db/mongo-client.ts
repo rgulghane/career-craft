@@ -1,8 +1,9 @@
-import "./configure-dns";
+import { configureMongoDns } from "./configure-dns";
 import { MongoClient, type Collection, type MongoClientOptions } from "mongodb";
 import {
   COLLECTIONS,
   type EnrollmentDocument,
+  type MentorDocument,
   type RazorpayWebhookEventDocument,
   type ReferralDocument,
   type UserDocument,
@@ -65,6 +66,7 @@ export async function connectMongo(options?: {
   globalForMongo.mongoReady = (async () => {
     let lastError: unknown;
     for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+      configureMongoDns();
       const client = new MongoClient(connectionString(), mongoClientOptions());
       try {
         await client.connect();
@@ -135,4 +137,8 @@ export async function razorpayWebhookEventsCollection(): Promise<
   return (await mongoClient())
     .db()
     .collection<RazorpayWebhookEventDocument>(COLLECTIONS.razorpayWebhookEvents);
+}
+
+export async function mentorsCollection(): Promise<Collection<MentorDocument>> {
+  return (await mongoClient()).db().collection<MentorDocument>(COLLECTIONS.mentors);
 }

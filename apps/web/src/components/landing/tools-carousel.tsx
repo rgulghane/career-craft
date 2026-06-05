@@ -9,43 +9,57 @@ import {
   type ToolColumn,
 } from "./tool-brands";
 
-const INTERVAL_MS = 3000;
+const INTERVAL_MS = 4500;
 const TRANSITION_MS = 600;
-const VISIBLE_COLS = 3;
-const ROWS = 2;
+const VISIBLE_COLS = 1;
 
 const COLUMNS = buildToolColumns();
 
-function ToolIconCard({ tool }: { tool: ToolBrand }) {
+function ToolCard({ tool }: { tool: ToolBrand }) {
   return (
-    <article className="mx-auto flex w-full min-w-0 flex-col items-center gap-1.5 rounded-xl border border-slate-200 bg-white p-2.5 shadow-md dark:border-slate-600/50 dark:bg-slate-800 dark:shadow-lg sm:gap-2 sm:p-3">
+    <article
+      className="group relative flex h-full min-h-[11rem] w-full min-w-0 flex-col overflow-hidden rounded-[1.35rem] border border-slate-200/90 bg-white shadow-md transition duration-300 hover:-translate-y-1 hover:shadow-xl dark:border-slate-600/50 dark:bg-slate-800 dark:shadow-lg dark:hover:shadow-2xl sm:min-h-[12.5rem] sm:rounded-[1.5rem]"
+    >
       <div
-        className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg sm:h-11 sm:w-11"
-        style={{ backgroundColor: `#${tool.color}22` }}
-      >
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={toolBrandIconUrl(tool.slug)}
-          alt=""
-          width={32}
-          height={32}
-          className="h-7 w-7 object-contain dark:invert sm:h-8 sm:w-8"
-          loading="lazy"
-          decoding="async"
-        />
+        aria-hidden
+        className="h-1.5 w-full shrink-0 sm:h-2"
+        style={{ background: `linear-gradient(90deg, #${tool.color}, #${tool.color}88)` }}
+      />
+      <div className="grid min-h-0 flex-1 grid-cols-2">
+        <div className="flex flex-col items-center justify-center gap-3 border-r border-slate-100 px-4 py-5 dark:border-slate-700/80 sm:gap-4 sm:px-5 sm:py-6">
+          <div
+            className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl sm:h-16 sm:w-16"
+            style={{ backgroundColor: `#${tool.color}20` }}
+          >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={toolBrandIconUrl(tool.slug)}
+              alt=""
+              width={40}
+              height={40}
+              className="h-9 w-9 object-contain dark:invert sm:h-10 sm:w-10"
+              loading="lazy"
+              decoding="async"
+            />
+          </div>
+          <h3 className="text-center text-sm font-bold leading-snug tracking-tight text-slate-900 dark:text-slate-100 sm:text-base">
+            {tool.name}
+          </h3>
+        </div>
+        <div className="flex items-center px-4 py-5 sm:px-5 sm:py-6">
+          <p className="text-xs leading-relaxed text-slate-500 dark:text-slate-400 sm:text-sm sm:leading-relaxed">
+            {tool.description}
+          </p>
+        </div>
       </div>
-      <span className="w-full truncate text-center text-[11px] font-semibold leading-tight text-slate-900 dark:text-slate-100 sm:text-xs">
-        {tool.name}
-      </span>
     </article>
   );
 }
 
 function ToolColumnSlide({ column }: { column: ToolColumn }) {
   return (
-    <div className="flex h-full flex-col gap-2 sm:gap-2.5">
-      <ToolIconCard tool={column.top} />
-      {column.bottom ? <ToolIconCard tool={column.bottom} /> : <div className="flex-1" aria-hidden />}
+    <div className="h-full">
+      <ToolCard tool={column.top} />
     </div>
   );
 }
@@ -109,8 +123,8 @@ export function ToolsCarousel() {
 
   const visibleTools = Array.from({ length: VISIBLE_COLS }, (_, colOffset) => {
     const col = COLUMNS[(index + colOffset) % columnCount]!;
-    return [col.top, col.bottom].filter(Boolean) as ToolBrand[];
-  }).flat();
+    return col.top;
+  });
 
   return (
     <div
@@ -122,12 +136,12 @@ export function ToolsCarousel() {
       <div
         ref={viewportRef}
         className="w-full min-w-0 overflow-hidden"
-        style={{ minHeight: "13.5rem" }}
+        style={{ minHeight: "11.25rem" }}
       >
         {!ready ? (
-          <div className="grid grid-cols-3 grid-rows-2 gap-2 sm:gap-3">
-            {TOOL_BRANDS.slice(0, VISIBLE_COLS * ROWS).map((tool) => (
-              <ToolIconCard key={tool.slug} tool={tool} />
+          <div className="grid grid-cols-1 gap-4">
+            {TOOL_BRANDS.slice(0, VISIBLE_COLS).map((tool) => (
+              <ToolCard key={tool.slug} tool={tool} />
             ))}
           </div>
         ) : (
@@ -141,7 +155,7 @@ export function ToolsCarousel() {
             {extended.map((column, i) => (
               <div
                 key={`${column.top.slug}-${i}`}
-                className="box-border shrink-0 grow-0 px-1 sm:px-1.5"
+                className="box-border shrink-0 grow-0 px-1.5 sm:px-2"
                 style={{ width: colWidth }}
                 aria-hidden={i < index || i >= index + VISIBLE_COLS}
               >

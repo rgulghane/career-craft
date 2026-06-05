@@ -12,6 +12,7 @@
     "db:create-admin": "npm run db:env -- npx --yes tsx scripts/create-admin.ts",
     "db:create-admin-readonly": "npm run db:env -- npx --yes tsx scripts/create-admin-readonly.ts",
     "db:create-readonly-admins-batch": "npm run db:env -- npx --yes tsx scripts/create-readonly-admins-batch.ts",
+    "db:seed-mentors": "npm run db:env -- npx --yes tsx scripts/seed-mentors.ts",
     "db:env": "dotenv -c development --"
   },
   "dependencies": {

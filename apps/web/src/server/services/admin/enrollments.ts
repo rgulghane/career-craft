@@ -20,6 +20,7 @@ export interface AdminEnrollmentListItem {
   referrerEmail: string | null;
   paymentId: string | null;
   paidAt: string | null;
+  directEnrollment: boolean;
   createdAt: string;
 }
 
@@ -71,6 +72,7 @@ export async function listAdminEnrollments(params: {
       referrerEmail: referrer?.email ?? null,
       paymentId: e.paymentId,
       paidAt: e.paidAt?.toISOString() ?? null,
+      directEnrollment: e.directEnrollment,
       createdAt: e.createdAt.toISOString(),
     };
   });
@@ -174,6 +176,7 @@ export async function updateAdminEnrollment(
     referrerEmail: referrer ? mapUser(referrer).email : null,
     paymentId: e.paymentId,
     paidAt: e.paidAt?.toISOString() ?? null,
+    directEnrollment: e.directEnrollment,
     createdAt: e.createdAt.toISOString(),
   };
 }

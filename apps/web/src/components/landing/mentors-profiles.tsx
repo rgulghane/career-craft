@@ -1,11 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { LANDING } from "@career-craft/shared";
-import { MentorSpotlightCard } from "./mentor-spotlight-card";
+import { MentorSpotlightCard, type MentorCardData } from "./mentor-spotlight-card";
 
-const MENTORS = LANDING.mentors;
-const COUNT = MENTORS.length;
 const INTERVAL_MS = 4500;
 const SLIDE_MS = 650;
 const EASE = "cubic-bezier(0.25, 0.1, 0.25, 1)";
@@ -14,35 +11,39 @@ function mod(n: number, m: number) {
   return ((n % m) + m) % m;
 }
 
-function usePreloadMentorPhotos() {
+function usePreloadMentorPhotos(mentors: MentorCardData[]) {
   useEffect(() => {
-    MENTORS.forEach((mentor) => {
+    mentors.forEach((mentor) => {
       const img = new window.Image();
       img.decoding = "async";
       img.src = mentor.photo;
     });
-  }, []);
+  }, [mentors]);
 }
 
-export function MentorsProfiles() {
+export function MentorsProfiles({ mentors }: { mentors: MentorCardData[] }) {
+  const count = mentors.length;
   const viewportRef = useRef<HTMLDivElement>(null);
   const [trackIndex, setTrackIndex] = useState(0);
   const [transitioning, setTransitioning] = useState(true);
   const [reduceMotion, setReduceMotion] = useState(false);
   const [paused, setPaused] = useState(false);
 
-  const loopSlides = useMemo(() => (COUNT > 0 ? [...MENTORS, MENTORS[0]!] : []), []);
-  const displayIndex = COUNT > 0 ? mod(trackIndex, COUNT) : 0;
-  const activeMentor = MENTORS[displayIndex];
+  const loopSlides = useMemo(
+    () => (count > 0 ? [...mentors, mentors[0]!] : []),
+    [mentors, count],
+  );
+  const displayIndex = count > 0 ? mod(trackIndex, count) : 0;
+  const activeMentor = mentors[displayIndex];
 
-  usePreloadMentorPhotos();
+  usePreloadMentorPhotos(mentors);
 
   useEffect(() => {
     setReduceMotion(window.matchMedia("(prefers-reduced-motion: reduce)").matches);
   }, []);
 
   useEffect(() => {
-    if (trackIndex !== COUNT) {
+    if (trackIndex !== count) {
       return;
     }
     const timer = window.setTimeout(() => {
@@ -53,15 +54,18 @@ export function MentorsProfiles() {
       });
     }, SLIDE_MS);
     return () => window.clearTimeout(timer);
-  }, [trackIndex]);
+  }, [trackIndex, count]);
 
-  const goTo = useCallback((nextIndex: number) => {
-    if (COUNT <= 1) {
-      return;
-    }
-    setTransitioning(true);
-    setTrackIndex(mod(nextIndex, COUNT));
-  }, []);
+  const goTo = useCallback(
+    (nextIndex: number) => {
+      if (count <= 1) {
+        return;
+      }
+      setTransitioning(true);
+      setTrackIndex(mod(nextIndex, count));
+    },
+    [count],
+  );
 
   const advance = useCallback(() => {
     setTransitioning(true);
@@ -69,12 +73,12 @@ export function MentorsProfiles() {
   }, []);
 
   useEffect(() => {
-    if (COUNT <= 1 || paused || reduceMotion) {
+    if (count <= 1 || paused || reduceMotion) {
       return;
     }
     const id = window.setInterval(advance, INTERVAL_MS);
     return () => window.clearInterval(id);
-  }, [advance, paused, reduceMotion]);
+  }, [advance, paused, reduceMotion, count]);
 
   if (!activeMentor) {
     return null;
@@ -108,7 +112,7 @@ export function MentorsProfiles() {
             <div
               key={`${mentor.name}-${i}`}
               className="flex w-full shrink-0 grow-0 basis-full justify-center px-1 sm:px-2"
-              aria-hidden={mod(i, COUNT) !== displayIndex && i !== trackIndex}
+              aria-hidden={mod(i, count) !== displayIndex && i !== trackIndex}
             >
               <MentorSpotlightCard mentor={mentor} priority={i <= 1} />
             </div>
@@ -116,14 +120,14 @@ export function MentorsProfiles() {
         </div>
       </div>
 
-      {COUNT > 1 ? (
+      {count > 1 ? (
         <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
           <div className="flex items-center gap-1.5" role="tablist" aria-label="Choose mentor">
-            {MENTORS.map((m, i) => {
+            {mentors.map((m, i) => {
               const active = i === displayIndex;
               return (
                 <button
-                  key={m.name}
+                  key={`${m.name}-${i}`}
                   type="button"
                   role="tab"
                   aria-selected={active}

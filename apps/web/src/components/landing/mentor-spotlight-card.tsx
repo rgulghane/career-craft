@@ -35,6 +35,7 @@ export function MentorSpotlightCard({
   mentor: MentorCardData;
   priority?: boolean;
 }) {
+  const hasLinkedIn = Boolean(mentor.linkedInUrl && mentor.linkedInUrl.trim() !== "" && mentor.linkedInUrl !== "#");
   return (
     <article className="group relative mx-auto w-full max-w-[23rem] sm:max-w-[25rem]">
       {/* Ambient glow behind card */}
@@ -64,15 +65,24 @@ export function MentorSpotlightCard({
             }}
           />
 
-          <a
-            href={mentor.linkedInUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="absolute right-4 top-4 z-10 transition hover:scale-105 hover:opacity-90"
-            aria-label={`${mentor.name} on LinkedIn`}
-          >
-            <LinkedInBadge />
-          </a>
+          {hasLinkedIn ? (
+            <a
+              href={mentor.linkedInUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="absolute right-4 top-4 z-10 transition hover:scale-105 hover:opacity-90"
+              aria-label={`${mentor.name} on LinkedIn`}
+            >
+              <LinkedInBadge />
+            </a>
+          ) : (
+            <span
+              aria-hidden
+              className="absolute right-4 top-4 z-10 cursor-not-allowed opacity-40 grayscale"
+            >
+              <LinkedInBadge />
+            </span>
+          )}
 
           <span className="absolute left-4 top-4 rounded-full bg-white/80 px-2.5 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.18em] text-amber-700 shadow-sm ring-1 ring-amber-200/60 backdrop-blur-sm">
             Mentor
