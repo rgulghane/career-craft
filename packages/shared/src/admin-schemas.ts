@@ -63,6 +63,23 @@ export const adminCreateReadonlyAdminBodySchema = z.object({
   fullName: z.string().trim().min(1).max(120),
 });
 
+/** Mentor photo upload constraints, shared by the client picker and the API. */
+export const MENTOR_PHOTO_UPLOAD = {
+  maxBytes: 1024 * 1024, // 1 MB
+  /** Accepted MIME types. */
+  allowedMimeTypes: ["image/png", "image/jpeg", "image/webp", "image/gif"] as const,
+  /** File extensions matching the accepted MIME types. */
+  allowedExtensions: ["png", "jpg", "jpeg", "webp", "gif"] as const,
+  /** Value for an <input type="file" accept="…"> attribute. */
+  accept: "image/png,image/jpeg,image/webp,image/gif",
+} as const;
+
+export type MentorPhotoMimeType = (typeof MENTOR_PHOTO_UPLOAD.allowedMimeTypes)[number];
+
+export function isAllowedMentorPhotoMime(value: string): value is MentorPhotoMimeType {
+  return (MENTOR_PHOTO_UPLOAD.allowedMimeTypes as readonly string[]).includes(value);
+}
+
 const optionalUrlSchema = z
   .union([z.string().trim().url().max(1000), z.literal("")])
   .default("");

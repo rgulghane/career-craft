@@ -1,7 +1,8 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useRef, useState } from "react";
+import { MENTOR_PHOTO_UPLOAD, isAllowedMentorPhotoMime } from "@career-craft/shared";
 import { MentorSpotlightCard } from "@/components/landing/mentor-spotlight-card";
 
 export type MentorEditState = {
@@ -47,12 +48,47 @@ export function MentorEditor({
   const [hasLive, setHasLive] = useState(initialHasLive);
   const [banner, setBanner] = useState<Banner>(null);
   const [busy, setBusy] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const pendingChanges = dirty || serverUnpublished;
 
   function update<K extends keyof MentorEditState>(key: K, value: MentorEditState[K]) {
     setForm((prev) => ({ ...prev, [key]: value }));
     setDirty(true);
+  }
+
+  async function onPickFile(file: File) {
+    if (!isAllowedMentorPhotoMime(file.type)) {
+      setBanner({ tone: "error", text: "Unsupported file type. Use PNG, JPG, WEBP, or GIF." });
+      return;
+    }
+    if (file.size > MENTOR_PHOTO_UPLOAD.maxBytes) {
+      setBanner({ tone: "error", text: "Image must be 1 MB or smaller." });
+      return;
+    }
+
+    setUploading(true);
+    setBanner(null);
+    try {
+      const data = new FormData();
+      data.append("file", file);
+      const r = await fetch("/api/admin/mentors/upload", { method: "POST", body: data });
+      const body = (await r.json()) as { url?: string; error?: string };
+      if (!r.ok || !body.url) {
+        setBanner({ tone: "error", text: body.error ?? "Upload failed." });
+        return;
+      }
+      update("photo", body.url);
+      setBanner({ tone: "ok", text: "Image uploaded. Remember to publish with ‘Live the changes’." });
+    } catch {
+      setBanner({ tone: "error", text: "Network error during upload." });
+    } finally {
+      setUploading(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+    }
   }
 
   function payload() {
@@ -251,13 +287,39 @@ export function MentorEditor({
             placeholder="https://www.linkedin.com/in/…"
             type="url"
           />
-          <Field
-            label="Photo URL"
-            value={form.photo}
-            onChange={(v) => update("photo", v)}
-            placeholder="https://…/photo.jpg"
-            type="url"
-          />
+          <div className="space-y-2">
+            <span className="text-sm text-slate-400">Photo</span>
+            <div className="flex flex-wrap items-center gap-3">
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept={MENTOR_PHOTO_UPLOAD.accept}
+                className="hidden"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) {
+                    void onPickFile(file);
+                  }
+                }}
+              />
+              <button
+                type="button"
+                disabled={uploading || busy}
+                onClick={() => fileInputRef.current?.click()}
+                className="rounded-lg border border-white/20 px-4 py-2 text-sm font-semibold text-white transition hover:bg-white/10 disabled:opacity-60"
+              >
+                {uploading ? "Uploading…" : "Upload image"}
+              </button>
+              <span className="text-xs text-slate-500">PNG, JPG, WEBP or GIF · max 1 MB</span>
+            </div>
+            <input
+              type="url"
+              className={FIELD_CLASS}
+              value={form.photo}
+              placeholder="…or paste an image URL: https://…/photo.jpg"
+              onChange={(e) => update("photo", e.target.value)}
+            />
+          </div>
           <label className="block text-sm">
             <span className="text-slate-400">Display order</span>
             <input

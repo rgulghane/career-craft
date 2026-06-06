@@ -29,7 +29,7 @@ const nextConfig: NextConfig = {
   /** Produces .next/standalone for slim Docker images. */
   output: "standalone",
   /** Native drivers — must not be bundled for client/edge (uses `net`, `crypto`, etc.). */
-  serverExternalPackages: ["mongodb", "razorpay"],
+  serverExternalPackages: ["mongodb", "razorpay", "@azure/storage-blob", "@azure/identity"],
   transpilePackages: ["@career-craft/shared"],
   outputFileTracingRoot,
   webpack: (config, { isServer, webpack, nextRuntime }) => {

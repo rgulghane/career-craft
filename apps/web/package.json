@@ -16,6 +16,8 @@
     "db:env": "dotenv -c development --"
   },
   "dependencies": {
+    "@azure/identity": "^4.13.1",
+    "@azure/storage-blob": "^12.32.0",
     "@career-craft/shared": "file:../../packages/shared",
     "bcryptjs": "^2.4.3",
     "jsonwebtoken": "^9.0.2",
