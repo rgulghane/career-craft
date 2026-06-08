@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { PROGRAM } from "@career-craft/shared";
+import { ThemeToggle } from "./theme-toggle";
 
 export function SiteFooter() {
   return (
@@ -27,9 +28,15 @@ export function SiteFooter() {
             </Link>
           </nav>
         </div>
-        <p className="mt-10 border-t border-slate-200 pt-6 text-xs dark:border-white/10">
-          contact@uniconnect.app · Demo referral platform — payments are mocked in this build.
-        </p>
+        <div className="mt-10 flex flex-col gap-4 border-t border-slate-200 pt-6 sm:flex-row sm:items-center sm:justify-between dark:border-white/10">
+          <p className="text-xs">
+            contact@uniconnect.app · Demo referral platform — payments are mocked in this build.
+          </p>
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-medium">Theme</span>
+            <ThemeToggle />
+          </div>
+        </div>
       </div>
     </footer>
   );

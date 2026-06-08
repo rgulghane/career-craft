@@ -5,7 +5,6 @@ import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { messages } from "@career-craft/shared/content";
 import { BrandLockup } from "./marketing";
-import { ThemeToggle } from "./theme-toggle";
 import type { SessionUser } from "./user-avatar";
 import { UserMenu } from "./user-menu";
 
@@ -88,7 +87,6 @@ export function SiteHeader({ user }: { user: SessionUser | null }) {
 
         <div className="ml-auto flex shrink-0 items-center gap-2 sm:gap-3">
           <div className="hidden items-center gap-1.5 lg:flex">
-            <ThemeToggle />
             {!user ? (
               <Link href="/login" className={signInClass}>
                 {messages.nav.signIn}
@@ -101,7 +99,6 @@ export function SiteHeader({ user }: { user: SessionUser | null }) {
           </div>
 
           <div ref={menuRef} className="relative flex items-center gap-2 lg:hidden">
-            <ThemeToggle />
             {user ? <UserMenu user={user} /> : null}
             <button
               type="button"
