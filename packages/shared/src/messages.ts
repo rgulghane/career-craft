@@ -3,11 +3,11 @@
  */
 export const messages = {
   app: {
-    title: "CareerCraft Referrals",
+    title: "AI Career Launchpad Referrals",
     tagline: "Enroll, share your code, earn when friends join — after the refund window.",
-    metaTitle: "CareerCraft AI — 12-Week Industry Accelerator",
+    metaTitle: "AI Career Launchpad — 12-Week Industry Accelerator",
     metaDescription:
-      "Master Power BI, AI tools, Canva, SQL, and more in 12 weeks. Live Saturday classes, govt-backed certs, placement support, and a student referral program.",
+      "Master Power BI, AI tools, Canva, SQL, and more in 12 weeks. Live Saturday classes, govt-backed certs, career support, and a student referral program.",
   },
   nav: {
     home: "Home",
@@ -19,7 +19,7 @@ export const messages = {
     admin: "Admin",
   },
   admin: {
-    portalTitle: "CareerCraft Admin",
+    portalTitle: "AI Career Launchpad Admin",
     signInHeading: "Admin sign in",
     signInCta: "Sign in to admin",
     useAdminPortal: "This account uses the admin portal. Sign in at /admin/login.",
@@ -78,7 +78,7 @@ export const messages = {
     signedOut: "You have been signed out.",
   },
   enroll: {
-    pageEyebrow: "Cohort 4 enrollment",
+    pageEyebrow: "2026 Summer batch enrollment",
     welcome: (name: string) => `Welcome, ${name} — secure your seat below.`,
     heading: "Complete enrollment",
     referralLabel: "Referral code (optional)",
@@ -94,7 +94,7 @@ export const messages = {
     enrolledBenefits: [
       "Full access to live classes and session recordings",
       "Your personal referral code to earn when friends join",
-      "Mentor support, projects, and placement assistance",
+      "Mentor support, projects, and career assistance",
     ],
     enrolledDashboardCta: "Go to your dashboard",
   },

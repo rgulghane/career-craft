@@ -18,7 +18,7 @@ export default async function HomePage({
   const ref = (await searchParams).ref?.trim().toUpperCase() ?? "";
   const isEnrolled = user ? await userHasPaidEnrollment(user.id) : false;
   const firstName = user ? (user.fullName.split(/\s+/)[0] ?? user.fullName) : undefined;
-  const pricing = getEnrollmentPricingRupees();
+  const pricing = await getEnrollmentPricingRupees();
 
   return (
     <div className="-mt-px">

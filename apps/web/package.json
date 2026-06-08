@@ -13,6 +13,7 @@
     "db:create-admin-readonly": "npm run db:env -- npx --yes tsx scripts/create-admin-readonly.ts",
     "db:create-readonly-admins-batch": "npm run db:env -- npx --yes tsx scripts/create-readonly-admins-batch.ts",
     "db:seed-mentors": "npm run db:env -- npx --yes tsx scripts/seed-mentors.ts",
+    "db:reset-keep-admins": "npm run db:env -- npx --yes tsx scripts/reset-data-keep-admins.ts",
     "db:env": "dotenv -c development --"
   },
   "dependencies": {

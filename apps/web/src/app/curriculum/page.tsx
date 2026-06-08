@@ -3,6 +3,7 @@ import Link from "next/link";
 import { CURRICULUM_PAGE, LANDING, PROGRAM } from "@career-craft/shared";
 import { AppPageShell } from "@/components/app-page-shell";
 import { CurriculumWeekGrid } from "@/components/curriculum/week-grid";
+import { SeatsUrgencyNote } from "@/components/seats-urgency-note";
 import { getSessionUser, userHasPaidEnrollment } from "@/lib/server-api";
 
 export const metadata: Metadata = {
@@ -34,16 +35,15 @@ export default async function CurriculumPage() {
         <CurriculumWeekGrid />
       </div>
 
-      <p className="mt-8 text-center text-xs text-slate-500 dark:text-slate-400">{LANDING.legal.placementNote}</p>
-
       {!isEnrolled ? (
-        <div className="mt-8 flex justify-center">
+        <div className="mt-8 flex flex-col items-center gap-4">
           <Link
             href="/#pricing"
             className="inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-amber-500 to-orange-600 px-6 py-3.5 text-sm font-semibold text-slate-950 shadow-lg shadow-orange-500/25 transition hover:from-amber-400 hover:to-orange-500"
           >
-            View enrollment offer
+            Enroll now
           </Link>
+          <SeatsUrgencyNote />
         </div>
       ) : null}
     </AppPageShell>

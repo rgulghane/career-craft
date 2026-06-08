@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
-import { messages } from "@career-craft/shared";
+import { PROGRAM, messages } from "@career-craft/shared";
 import { AppPageShell } from "@/components/app-page-shell";
 import { getSessionUser } from "@/lib/server-api";
 import { buildRegisterPath } from "@/lib/referral-url";
@@ -9,7 +9,7 @@ import { isGoogleAuthConfigured } from "@/server/services/google-auth";
 import { AuthCard } from "./ui";
 
 export const metadata: Metadata = {
-  title: `${messages.nav.signIn} — CareerCraft`,
+  title: `${messages.nav.signIn} — ${PROGRAM.name}`,
 };
 
 function safeNextPath(next: string | undefined): string {

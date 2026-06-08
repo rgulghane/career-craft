@@ -31,7 +31,7 @@ export const ENROLL_SHOWCASE = {
       phase: "Phase 3",
       weeks: "Weeks 9–12",
       title: "Career Launch",
-      caption: "Personal branding, interview mastery, capstone portfolio, and placement activation.",
+      caption: "Personal branding, interview mastery, capstone portfolio, and career activation.",
       image:
         "https://images.unsplash.com/photo-1521737711867-e3b97375f902?auto=format&fit=crop&w=1200&q=80",
       imageAlt: "Professional team meeting in a modern office",

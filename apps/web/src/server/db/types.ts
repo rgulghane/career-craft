@@ -13,6 +13,8 @@ export const COLLECTIONS = {
   referrals: "Referral",
   razorpayWebhookEvents: "RazorpayWebhookEvent",
   mentors: "Mentor",
+  companyLogos: "CompanyLogo",
+  settings: "Settings",
 } as const;
 
 export type EnrollmentStatus = "PENDING" | "PAID" | "REFUNDED";
@@ -129,7 +131,8 @@ export interface MentorContent {
   name: string;
   designation: string;
   company: string;
-  previouslyAt: string;
+  /** Companies the mentor previously worked at (most recent first). */
+  previouslyAt: string[];
   linkedInUrl: string;
   photo: string;
 }
@@ -161,4 +164,52 @@ export interface Mentor {
   createdAt: Date;
   updatedAt: Date;
   publishedAt: Date | null;
+}
+
+/**
+ * A reusable company brand icon. Stored in its own collection so mentors (and
+ * other surfaces) can pick a company from a shared list rather than relying on
+ * a hard-coded slug map. `company` is unique (case-insensitive via index).
+ */
+export interface CompanyLogoDocument {
+  _id: DbId;
+  company: string;
+  logoUrl: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface CompanyLogo {
+  id: string;
+  company: string;
+  logoUrl: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+/** Fixed `_id` of the singleton pricing settings document. */
+export const PRICING_SETTINGS_ID = "pricing" as const;
+
+/**
+ * Singleton document holding admin-managed course fees. When absent (or a field
+ * is unset), the application falls back to the environment-driven defaults so
+ * the site keeps working before an admin sets prices for the first time.
+ */
+export interface PricingSettingsDocument {
+  _id: typeof PRICING_SETTINGS_ID;
+  /** Standard course fee in rupees. */
+  standardInRupees?: number;
+  /** Course fee in rupees when a valid referral code is applied. */
+  withReferralCodeInRupees?: number;
+  updatedAt?: Date;
+  /** Id of the admin who last changed the fees (audit trail). */
+  updatedByAdminId?: DbId | null;
+}
+
+export interface PricingSettings {
+  standardInRupees: number;
+  withReferralCodeInRupees: number;
+  /** True when the values come from saved admin settings (not env defaults). */
+  isCustom: boolean;
+  updatedAt: Date | null;
 }

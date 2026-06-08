@@ -17,6 +17,7 @@
     "db:create-admin-readonly": "npm run db:create-admin-readonly --prefix apps/web",
     "db:create-readonly-admins-batch": "npm run db:create-readonly-admins-batch --prefix apps/web",
     "db:seed-mentors": "npm run db:seed-mentors --prefix apps/web",
+    "db:reset-keep-admins": "npm run db:reset-keep-admins --prefix apps/web",
     "lint": "npm run lint --prefix apps/web"
   },
   "engines": {

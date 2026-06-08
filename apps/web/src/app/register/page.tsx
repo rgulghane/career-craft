@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
-import { messages } from "@career-craft/shared";
+import { PROGRAM, messages } from "@career-craft/shared";
 import { AppPageShell } from "@/components/app-page-shell";
 import { getSessionUser } from "@/lib/server-api";
 import { buildEnrollPath, buildLoginPath } from "@/lib/referral-url";
@@ -9,7 +9,7 @@ import { isGoogleAuthConfigured } from "@/server/services/google-auth";
 import { AuthCard } from "../login/ui";
 
 export const metadata: Metadata = {
-  title: `${messages.nav.register} — CareerCraft`,
+  title: `${messages.nav.register} — ${PROGRAM.name}`,
 };
 
 export default async function RegisterPage({

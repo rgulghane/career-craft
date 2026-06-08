@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { messages } from "@career-craft/shared";
+import { PROGRAM, messages } from "@career-craft/shared";
 import { AppPageShell } from "@/components/app-page-shell";
 import { CopyShareLinkButton } from "@/components/copy-share-link-button";
 import { SignOutButton } from "@/components/sign-out-button";
@@ -10,7 +10,7 @@ import { formatINR } from "@/lib/format";
 import { theme } from "@/lib/theme";
 
 export const metadata: Metadata = {
-  title: `${messages.nav.dashboard} — CareerCraft`,
+  title: `${messages.nav.dashboard} — ${PROGRAM.name}`,
 };
 
 function MilestoneBar({ label, value, target }: { label: string; value: number; target: number }) {
@@ -102,7 +102,7 @@ export default async function DashboardPage() {
                 <CopyShareLinkButton shareUrl={shareUrl} />
                 <a
                   className={theme.btnSecondary}
-                  href={`https://wa.me/?text=${encodeURIComponent(`Join me on CareerCraft: ${shareUrl}`)}`}
+                  href={`https://wa.me/?text=${encodeURIComponent(`Join me on ${PROGRAM.name}: ${shareUrl}`)}`}
                   target="_blank"
                   rel="noreferrer"
                 >

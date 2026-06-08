@@ -36,7 +36,7 @@ async function main(): Promise<void> {
       name: m.name,
       designation: m.designation,
       company: m.company,
-      previouslyAt: m.previouslyAt ?? "",
+      previouslyAt: m.previouslyAt ? [m.previouslyAt] : [],
       linkedInUrl: m.linkedInUrl ?? "",
       photo: m.photo,
     };

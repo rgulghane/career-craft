@@ -10,6 +10,7 @@ import {
   messages,
   normalizeIndianPhone,
 } from "@career-craft/shared";
+import { ENROLLMENT_WIDGET } from "@career-craft/shared/content";
 import { GoogleSignInButton } from "@/components/google-sign-in-button";
 import { theme } from "@/lib/theme";
 
@@ -180,7 +181,9 @@ export function AuthCard({
 
   return (
     <div className={theme.card}>
-      <p className={theme.eyebrow}>{mode === "login" ? "Welcome back" : "Join Cohort 4"}</p>
+      <p className={theme.eyebrow}>
+        {mode === "login" ? "Welcome back" : `Join ${ENROLLMENT_WIDGET.cohortLabel}`}
+      </p>
       <h1 className={`mt-2 ${theme.title}`}>{heading}</h1>
       {referralCode ? (
         <p className="mt-3 rounded-lg bg-amber-50 px-3 py-2 text-sm font-medium text-amber-900 dark:bg-amber-500/15 dark:text-amber-200">

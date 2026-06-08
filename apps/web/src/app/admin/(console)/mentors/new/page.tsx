@@ -19,7 +19,7 @@ export default async function NewMentorPage() {
           name: "",
           designation: "",
           company: "",
-          previouslyAt: "",
+          previouslyAt: [],
           linkedInUrl: "",
           photo: "",
           order: 0,

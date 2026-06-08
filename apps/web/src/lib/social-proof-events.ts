@@ -102,7 +102,7 @@ export function randomSocialProofToast(): SocialProofToast {
   if (roll < 0.93) {
     return {
       variant: "purchase",
-      text: `Someone in ${city} just secured a seat in Cohort 4`,
+      text: `Someone in ${city} just secured a seat in the 2026 Summer batch`,
     };
   }
   return {

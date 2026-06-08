@@ -1,15 +1,24 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useRef, useState } from "react";
-import { MENTOR_PHOTO_UPLOAD, isAllowedMentorPhotoMime } from "@career-craft/shared";
+import { useEffect, useRef, useState } from "react";
+import {
+  COMPANY_LOGO_UPLOAD,
+  MENTOR_PHOTO_UPLOAD,
+  isAllowedCompanyLogoMime,
+  isAllowedMentorPhotoMime,
+} from "@career-craft/shared";
 import { MentorSpotlightCard } from "@/components/landing/mentor-spotlight-card";
+
+type CompanyLogoOption = { company: string; logoUrl: string };
+
+const ADD_NEW_COMPANY = "__add_new_company__";
 
 export type MentorEditState = {
   name: string;
   designation: string;
   company: string;
-  previouslyAt: string;
+  previouslyAt: string[];
   linkedInUrl: string;
   photo: string;
   order: number;
@@ -51,6 +60,36 @@ export function MentorEditor({
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  const [companyLogos, setCompanyLogos] = useState<CompanyLogoOption[]>([]);
+  const [addCompanyTarget, setAddCompanyTarget] = useState<"current" | "previous" | null>(null);
+  const [newCompanyName, setNewCompanyName] = useState("");
+  const [newCompanyLogoUrl, setNewCompanyLogoUrl] = useState("");
+  const [logoUploading, setLogoUploading] = useState(false);
+  const [savingCompany, setSavingCompany] = useState(false);
+  const logoInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    let active = true;
+    void (async () => {
+      try {
+        const r = await fetch("/api/admin/company-logos");
+        const body = (await r.json()) as { companyLogos?: CompanyLogoOption[] };
+        if (active && r.ok && body.companyLogos) {
+          setCompanyLogos(body.companyLogos);
+        }
+      } catch {
+        // Non-fatal — the admin can still type a company via "Add new".
+      }
+    })();
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const selectedLogoUrl =
+    companyLogos.find((c) => c.company.toLowerCase() === form.company.trim().toLowerCase())
+      ?.logoUrl ?? null;
+
   const pendingChanges = dirty || serverUnpublished;
 
   function update<K extends keyof MentorEditState>(key: K, value: MentorEditState[K]) {
@@ -88,6 +127,128 @@ export function MentorEditor({
       if (fileInputRef.current) {
         fileInputRef.current.value = "";
       }
+    }
+  }
+
+  function openAddCompany(target: "current" | "previous") {
+    setAddCompanyTarget(target);
+    setNewCompanyName("");
+    setNewCompanyLogoUrl("");
+  }
+
+  function onSelectCompany(value: string) {
+    if (value === ADD_NEW_COMPANY) {
+      openAddCompany("current");
+      return;
+    }
+    setAddCompanyTarget(null);
+    update("company", value);
+  }
+
+  function addPreviousCompany(value: string) {
+    if (value === ADD_NEW_COMPANY) {
+      openAddCompany("previous");
+      return;
+    }
+    const name = value.trim();
+    if (!name) {
+      return;
+    }
+    if (form.previouslyAt.some((c) => c.toLowerCase() === name.toLowerCase())) {
+      return;
+    }
+    if (form.previouslyAt.length >= 12) {
+      return;
+    }
+    update("previouslyAt", [...form.previouslyAt, name]);
+  }
+
+  function removePreviousCompany(index: number) {
+    update(
+      "previouslyAt",
+      form.previouslyAt.filter((_, i) => i !== index),
+    );
+  }
+
+  async function onPickCompanyLogo(file: File) {
+    if (!isAllowedCompanyLogoMime(file.type)) {
+      setBanner({ tone: "error", text: "Unsupported file type. Use PNG, JPG, WEBP, GIF, or SVG." });
+      return;
+    }
+    if (file.size > COMPANY_LOGO_UPLOAD.maxBytes) {
+      setBanner({ tone: "error", text: "Logo must be 512 KB or smaller." });
+      return;
+    }
+
+    setLogoUploading(true);
+    setBanner(null);
+    try {
+      const data = new FormData();
+      data.append("file", file);
+      const r = await fetch("/api/admin/company-logos/upload", { method: "POST", body: data });
+      const body = (await r.json()) as { url?: string; error?: string };
+      if (!r.ok || !body.url) {
+        setBanner({ tone: "error", text: body.error ?? "Logo upload failed." });
+        return;
+      }
+      setNewCompanyLogoUrl(body.url);
+    } catch {
+      setBanner({ tone: "error", text: "Network error during logo upload." });
+    } finally {
+      setLogoUploading(false);
+      if (logoInputRef.current) {
+        logoInputRef.current.value = "";
+      }
+    }
+  }
+
+  async function saveNewCompany() {
+    const company = newCompanyName.trim();
+    const logoUrl = newCompanyLogoUrl.trim();
+    if (!company) {
+      setBanner({ tone: "error", text: "Enter the company name." });
+      return;
+    }
+    if (!isPreviewablePhoto(logoUrl)) {
+      setBanner({ tone: "error", text: "Upload an icon or paste a valid icon URL for the company." });
+      return;
+    }
+
+    setSavingCompany(true);
+    setBanner(null);
+    try {
+      const r = await fetch("/api/admin/company-logos", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ company, logoUrl }),
+      });
+      const body = (await r.json()) as { companyLogo?: CompanyLogoOption; error?: string };
+      if (!r.ok || !body.companyLogo) {
+        setBanner({ tone: "error", text: body.error ?? "Could not save the company." });
+        return;
+      }
+      const saved = body.companyLogo;
+      setCompanyLogos((prev) => {
+        const without = prev.filter(
+          (c) => c.company.toLowerCase() !== saved.company.toLowerCase(),
+        );
+        return [...without, saved].sort((a, b) => a.company.localeCompare(b.company));
+      });
+      if (addCompanyTarget === "previous") {
+        if (!form.previouslyAt.some((c) => c.toLowerCase() === saved.company.toLowerCase())) {
+          update("previouslyAt", [...form.previouslyAt, saved.company]);
+        }
+      } else {
+        update("company", saved.company);
+      }
+      setAddCompanyTarget(null);
+      setNewCompanyName("");
+      setNewCompanyLogoUrl("");
+      setBanner({ tone: "ok", text: `Added “${saved.company}”. It’s now selectable for any mentor.` });
+    } catch {
+      setBanner({ tone: "error", text: "Network error while saving the company." });
+    } finally {
+      setSavingCompany(false);
     }
   }
 
@@ -208,7 +369,13 @@ export function MentorEditor({
     name: form.name || "Mentor name",
     designation: form.designation || "Designation",
     company: form.company || "Company",
-    previouslyAt: form.previouslyAt || undefined,
+    companyLogoUrl: addCompanyTarget === "current" ? newCompanyLogoUrl || null : selectedLogoUrl,
+    previouslyAt: form.previouslyAt.map((name) => ({
+      name,
+      logoUrl:
+        companyLogos.find((c) => c.company.toLowerCase() === name.trim().toLowerCase())?.logoUrl ??
+        null,
+    })),
     linkedInUrl: form.linkedInUrl || "#",
     photo: form.photo,
   };
@@ -267,19 +434,92 @@ export function MentorEditor({
             placeholder="Sr. Staff Data Scientist"
           />
           <div className="grid gap-4 sm:grid-cols-2">
-            <Field
-              label="Company"
+            <CompanySelect
               value={form.company}
-              onChange={(v) => update("company", v)}
-              placeholder="Meta"
+              options={companyLogos}
+              adding={addCompanyTarget === "current"}
+              selectedLogoUrl={selectedLogoUrl}
+              onSelect={onSelectCompany}
             />
-            <Field
-              label="Previously at (optional)"
-              value={form.previouslyAt}
-              onChange={(v) => update("previouslyAt", v)}
-              placeholder="Facebook"
+            <PreviouslyAtSelect
+              values={form.previouslyAt}
+              options={companyLogos}
+              onAdd={addPreviousCompany}
+              onRemove={removePreviousCompany}
             />
           </div>
+
+          {addCompanyTarget ? (
+            <div className="space-y-3 rounded-xl border border-amber-400/30 bg-amber-400/5 p-4">
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-semibold text-amber-300">
+                  {addCompanyTarget === "previous" ? "New ‘previously at’ company" : "New company"}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setAddCompanyTarget(null)}
+                  className="text-xs text-slate-400 hover:text-white"
+                >
+                  Cancel
+                </button>
+              </div>
+              <Field
+                label="Company name"
+                value={newCompanyName}
+                onChange={setNewCompanyName}
+                placeholder="Acme Corp"
+              />
+              <div className="space-y-2">
+                <span className="text-sm text-slate-400">Company icon</span>
+                <div className="flex flex-wrap items-center gap-3">
+                  <input
+                    ref={logoInputRef}
+                    type="file"
+                    accept={COMPANY_LOGO_UPLOAD.accept}
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        void onPickCompanyLogo(file);
+                      }
+                    }}
+                  />
+                  <button
+                    type="button"
+                    disabled={logoUploading || savingCompany}
+                    onClick={() => logoInputRef.current?.click()}
+                    className="rounded-lg border border-white/20 px-4 py-2 text-sm font-semibold text-white transition hover:bg-white/10 disabled:opacity-60"
+                  >
+                    {logoUploading ? "Uploading…" : "Upload icon"}
+                  </button>
+                  {newCompanyLogoUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={newCompanyLogoUrl}
+                      alt=""
+                      className="h-8 w-8 rounded bg-white object-contain p-1"
+                    />
+                  ) : null}
+                  <span className="text-xs text-slate-500">PNG, JPG, WEBP, GIF or SVG · max 512 KB</span>
+                </div>
+                <input
+                  type="url"
+                  className={FIELD_CLASS}
+                  value={newCompanyLogoUrl}
+                  placeholder="…or paste an icon URL: https://…/icon.svg"
+                  onChange={(e) => setNewCompanyLogoUrl(e.target.value)}
+                />
+              </div>
+              <button
+                type="button"
+                disabled={savingCompany || logoUploading}
+                onClick={() => void saveNewCompany()}
+                className="rounded-lg bg-amber-500 px-4 py-2 text-sm font-semibold text-slate-950 transition hover:bg-amber-400 disabled:opacity-60"
+              >
+                {savingCompany ? "Saving…" : "Save company"}
+              </button>
+            </div>
+          ) : null}
           <Field
             label="LinkedIn URL (optional)"
             value={form.linkedInUrl}
@@ -415,6 +655,142 @@ function StatusBadge({
     <span className="rounded-full bg-emerald-500/15 px-2.5 py-1 text-xs font-medium text-emerald-300">
       Live · up to date
     </span>
+  );
+}
+
+function PreviouslyAtSelect({
+  values,
+  options,
+  onAdd,
+  onRemove,
+}: {
+  values: string[];
+  options: CompanyLogoOption[];
+  onAdd: (value: string) => void;
+  onRemove: (index: number) => void;
+}) {
+  const logoFor = (company: string): string | null =>
+    options.find((o) => o.company.toLowerCase() === company.trim().toLowerCase())?.logoUrl ?? null;
+
+  // Hide companies already chosen as "previously at".
+  const available = options.filter(
+    (o) => !values.some((v) => v.toLowerCase() === o.company.toLowerCase()),
+  );
+
+  return (
+    <label className="block text-sm">
+      <span className="text-slate-400">Previously at (optional)</span>
+      {values.length > 0 ? (
+        <div className="mb-2 mt-1 flex flex-wrap gap-2">
+          {values.map((value, index) => {
+            const logoUrl = logoFor(value);
+            return (
+              <span
+                key={`${value}-${index}`}
+                className="inline-flex items-center gap-1.5 rounded-md bg-white/10 px-2 py-1 text-xs text-white"
+              >
+                {logoUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={logoUrl}
+                    alt=""
+                    className="h-4 w-4 rounded-sm bg-white object-contain p-0.5"
+                  />
+                ) : null}
+                {value}
+                <button
+                  type="button"
+                  onClick={() => onRemove(index)}
+                  className="text-slate-400 transition hover:text-rose-300"
+                  aria-label={`Remove ${value}`}
+                >
+                  ×
+                </button>
+              </span>
+            );
+          })}
+        </div>
+      ) : null}
+      <select
+        className="mt-1 w-full rounded-lg border border-white/15 bg-white/5 px-3 py-2 text-white [color-scheme:dark] focus:border-amber-400 focus:outline-none disabled:opacity-60"
+        value=""
+        onChange={(e) => {
+          if (e.target.value) {
+            onAdd(e.target.value);
+          }
+        }}
+      >
+        <option value="" disabled className="bg-slate-900 text-white">
+          Add a company…
+        </option>
+        {available.map((o) => (
+          <option key={o.company} value={o.company} className="bg-slate-900 text-white">
+            {o.company}
+          </option>
+        ))}
+        <option value={ADD_NEW_COMPANY} className="bg-slate-900 text-amber-300">
+          + Add new company…
+        </option>
+      </select>
+    </label>
+  );
+}
+
+function CompanySelect({
+  value,
+  options,
+  adding,
+  selectedLogoUrl,
+  onSelect,
+}: {
+  value: string;
+  options: CompanyLogoOption[];
+  adding: boolean;
+  selectedLogoUrl: string | null;
+  onSelect: (value: string) => void;
+}) {
+  const trimmed = value.trim();
+  const hasCurrent =
+    trimmed !== "" &&
+    options.some((o) => o.company.toLowerCase() === trimmed.toLowerCase());
+  const selectValue = adding ? ADD_NEW_COMPANY : hasCurrent ? trimmed : "";
+
+  return (
+    <label className="block text-sm">
+      <span className="text-slate-400">Company</span>
+      <div className="mt-1 flex items-center gap-2">
+        {selectedLogoUrl && !adding ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={selectedLogoUrl}
+            alt=""
+            className="h-9 w-9 shrink-0 rounded bg-white object-contain p-1"
+          />
+        ) : null}
+        <select
+          className="w-full rounded-lg border border-white/15 bg-white/5 px-3 py-2 text-white [color-scheme:dark] focus:border-amber-400 focus:outline-none disabled:opacity-60"
+          value={selectValue}
+          onChange={(e) => onSelect(e.target.value)}
+        >
+          <option value="" disabled className="bg-slate-900 text-white">
+            Select a company…
+          </option>
+          {!hasCurrent && trimmed !== "" && !adding ? (
+            <option value={trimmed} className="bg-slate-900 text-white">
+              {trimmed}
+            </option>
+          ) : null}
+          {options.map((o) => (
+            <option key={o.company} value={o.company} className="bg-slate-900 text-white">
+              {o.company}
+            </option>
+          ))}
+          <option value={ADD_NEW_COMPANY} className="bg-slate-900 text-amber-300">
+            + Add new company…
+          </option>
+        </select>
+      </div>
+    </label>
   );
 }
 

@@ -94,4 +94,14 @@ export async function ensureIndexes(): Promise<void> {
     { isPublished: 1, order: 1 },
     { name: "Mentor_isPublished_order" },
   );
+
+  await safeCreateIndex(
+    COLLECTIONS.companyLogos,
+    { company: 1 },
+    {
+      unique: true,
+      name: "CompanyLogo_company_key",
+      collation: { locale: "en", strength: 2 },
+    },
+  );
 }

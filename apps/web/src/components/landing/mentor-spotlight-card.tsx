@@ -1,12 +1,23 @@
 import Image from "next/image";
+import { LogoImage } from "./logo-image";
 import { MentorCompanyLogo } from "./mentor-company-logo";
 import { toolBrandIconUrl } from "./tool-brands";
+
+/** A single company the mentor previously worked at, with an optional icon. */
+export type MentorPreviousCompany = {
+  name: string;
+  logoUrl?: string | null;
+};
 
 export type MentorCardData = {
   name: string;
   designation: string;
+  /** The company the mentor currently works at. */
   company: string;
-  previouslyAt?: string;
+  /** Preferred brand icon URL for the current company (optional). */
+  companyLogoUrl?: string | null;
+  /** Companies the mentor previously worked at (most recent first). */
+  previouslyAt?: MentorPreviousCompany[];
   linkedInUrl: string;
   photo: string;
 };
@@ -118,19 +129,42 @@ export function MentorSpotlightCard({
             {mentor.designation}
           </p>
 
-          <div className="mt-5 flex w-full items-center justify-center rounded-2xl border border-slate-100 bg-slate-50/80 px-4 py-3 shadow-inner">
-            <MentorCompanyLogo company={mentor.company} />
+          <div className="mt-6 w-full">
+            <p className="mb-2 flex items-center justify-center gap-1.5 text-[0.6rem] font-semibold uppercase tracking-[0.2em] text-slate-400">
+              <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-amber-400" />
+              Currently at
+            </p>
+            <div className="flex items-center justify-center rounded-2xl border border-slate-200/70 bg-white px-5 py-4 shadow-[0_4px_14px_-8px_rgba(15,23,42,0.25)]">
+              <MentorCompanyLogo company={mentor.company} logoUrl={mentor.companyLogoUrl} />
+            </div>
           </div>
 
-          {mentor.previouslyAt ? (
-            <p className="mt-5 inline-flex items-center gap-1.5 rounded-full bg-slate-100/90 px-3.5 py-1.5 text-xs font-medium text-slate-500 ring-1 ring-slate-200/80">
-              <span aria-hidden className="text-slate-400">
-                ↳
+          {mentor.previouslyAt && mentor.previouslyAt.length > 0 ? (
+            <div className="mt-4 flex w-full flex-wrap items-center justify-center gap-2">
+              <span className="text-[0.6rem] font-semibold uppercase tracking-[0.2em] text-slate-400">
+                Previously
               </span>
-              Previously @ {mentor.previouslyAt}
-            </p>
+              {mentor.previouslyAt.map((prev, index) => (
+                <span
+                  key={`${prev.name}-${index}`}
+                  title={prev.name}
+                  className="inline-flex h-7 w-7 items-center justify-center overflow-hidden rounded-full border border-slate-200/80 bg-white shadow-sm transition hover:scale-110 hover:border-slate-300"
+                >
+                  <LogoImage
+                    src={prev.logoUrl}
+                    alt={prev.name}
+                    className="h-4 w-4 object-contain"
+                    fallback={
+                      <span className="text-[0.65rem] font-bold uppercase text-slate-500">
+                        {prev.name.slice(0, 2)}
+                      </span>
+                    }
+                  />
+                </span>
+              ))}
+            </div>
           ) : (
-            <p className="mt-5 min-h-[1.75rem]" aria-hidden />
+            <p className="mt-4 min-h-[1.5rem]" aria-hidden />
           )}
         </div>
       </div>

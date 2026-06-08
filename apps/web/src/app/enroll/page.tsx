@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
-import { messages } from "@career-craft/shared";
+import { PROGRAM, messages } from "@career-craft/shared";
+import { ENROLLMENT_WIDGET } from "@career-craft/shared/content";
 import { AppPageShell } from "@/components/app-page-shell";
 import { EnrollCurriculumShowcase } from "@/components/enroll-curriculum-showcase";
 import { EnrolledCongratulationsCard } from "@/components/enrolled-congratulations-card";
@@ -10,7 +11,7 @@ import { getSessionUser, userHasPaidEnrollment } from "@/lib/server-api";
 import { buildRegisterPath } from "@/lib/referral-url";
 
 export const metadata: Metadata = {
-  title: `${messages.nav.enroll} — CareerCraft`,
+  title: `${messages.nav.enroll} — ${PROGRAM.name}`,
 };
 
 export default async function EnrollPage({
@@ -29,7 +30,7 @@ export default async function EnrollPage({
 
   const firstName = user.fullName.split(/\s+/)[0] ?? user.fullName;
   const isEnrolled = await userHasPaidEnrollment(user.id);
-  const pricing = getEnrollmentPricingRupees();
+  const pricing = await getEnrollmentPricingRupees();
 
   return (
     <AppPageShell>
@@ -40,7 +41,7 @@ export default async function EnrollPage({
           </p>
           <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
             {isEnrolled
-              ? `Welcome back, ${firstName} — you're all set for Cohort 4.`
+              ? `Welcome back, ${firstName} — you're all set for the ${ENROLLMENT_WIDGET.cohortLabel}.`
               : messages.enroll.welcome(firstName)}
           </p>
         </div>

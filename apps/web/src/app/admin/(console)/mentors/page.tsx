@@ -49,12 +49,20 @@ export default async function AdminMentorsPage() {
             {mentors.length} total · {liveCount} live on the site
           </p>
         </div>
-        <Link
-          href="/admin/mentors/new"
-          className="rounded-lg bg-amber-500 px-4 py-2 text-sm font-semibold text-slate-950 transition hover:bg-amber-400"
-        >
-          Add mentor
-        </Link>
+        <div className="flex items-center gap-3">
+          <Link
+            href="/admin/mentors/companies"
+            className="rounded-lg border border-white/20 px-4 py-2 text-sm font-semibold text-white transition hover:bg-white/10"
+          >
+            Mentor companies
+          </Link>
+          <Link
+            href="/admin/mentors/new"
+            className="rounded-lg bg-amber-500 px-4 py-2 text-sm font-semibold text-slate-950 transition hover:bg-amber-400"
+          >
+            Add mentor
+          </Link>
+        </div>
       </div>
 
       {mentors.length === 0 ? (

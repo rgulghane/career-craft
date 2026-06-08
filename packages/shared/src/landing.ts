@@ -1,20 +1,18 @@
-/** Marketing / landing page content (CareerCraft AI accelerator). */
+/** Marketing / landing page content (AI Career Launchpad accelerator). */
+
+import { getStandardPriceInRupees } from "./constants.js";
+
+const STANDARD_PRICE_LABEL = `₹${getStandardPriceInRupees().toLocaleString("en-IN")}`;
 
 export const LANDING = {
   hero: {
-    badge: "Cohort 4 · Live Saturdays",
+    badge: "2026 Summer batch · Live Saturdays",
     title: "Master Industry AI Tools in",
     titleAccent: "12 Weeks",
     subtitle:
       "Bridge the gap between college and industry. Built for Tier II & III students, freshers, and career switchers — no prerequisites.",
     poweredBy: "Powered by UniConnect · TechnoSpectra EdTech",
   },
-  stats: [
-    { value: "60+", label: "Live hours" },
-    { value: "12 mo", label: "Recorded access" },
-    { value: "89%", label: "Placement support*" },
-    { value: "5", label: "Govt-backed certs" },
-  ],
   tools: [
     "Power BI",
     "Excel",
@@ -164,14 +162,16 @@ export const LANDING = {
         initials: "RS",
         avatarClass: "bg-rose-500",
         role: "BBA Graduate — Now: Analyst @ FinPe",
+        rating: 5,
         quote:
-          "CareerCraft gave me the tools I never learned in college. Got hired at FinPe within 2 months of completing the program.",
+          "AI Career Launchpad gave me the tools I never learned in college. Got hired at FinPe within 2 months of completing the program.",
       },
       {
         name: "Anjali Kulkarni",
         initials: "AK",
         avatarClass: "bg-teal-500",
         role: "Commerce Graduate — Placed @ Delhivery",
+        rating: 5,
         quote:
           "The live sessions and mentor network made all the difference. I went from confused to confident in 12 weeks.",
       },
@@ -180,8 +180,36 @@ export const LANDING = {
         initials: "PM",
         avatarClass: "bg-amber-500",
         role: "B.Com — Referral Agent + Analyst",
+        rating: 4.5,
         quote:
-          "Best investment of ₹5,000 I ever made. The referral program paid for my next month's rent!",
+          `Best investment of ${STANDARD_PRICE_LABEL} I ever made. The referral program paid for my next month's rent!`,
+      },
+      {
+        name: "Vikram Reddy",
+        initials: "VR",
+        avatarClass: "bg-indigo-500",
+        role: "Engineering Grad — Data Analyst @ Swiggy",
+        rating: 5,
+        quote:
+          "I came in knowing only basic Excel. By Week 8 I was building Power BI dashboards that impressed my interviewers. The capstone project became my portfolio centerpiece.",
+      },
+      {
+        name: "Sneha Patil",
+        initials: "SP",
+        avatarClass: "bg-fuchsia-500",
+        role: "Career Switcher — Marketing → Analytics",
+        rating: 4.5,
+        quote:
+          "Switching careers at 28 felt impossible until this program. The Saturday-only schedule meant I could keep my job while upskilling. Worth every rupee.",
+      },
+      {
+        name: "Mohammed Irfan",
+        initials: "MI",
+        avatarClass: "bg-emerald-500",
+        role: "B.Sc Graduate — Now: BI Associate @ Zomato",
+        rating: 5,
+        quote:
+          "The mentors actually work at companies I dreamed about. Their feedback on my mock interviews is the reason I cracked my first job offer.",
       },
     ],
   },
@@ -199,47 +227,42 @@ export const LANDING = {
   faq: {
     eyebrow: "FAQ",
     title: "Questions students ask before enrolling",
-    subtitle: "Straight answers about the program, pricing, referrals, and what happens after you join.",
+    subtitle: "Straight answers about the program, pricing, and what happens after you join.",
     items: [
       {
-        question: "Who is CareerCraft AI built for?",
+        question: "Who is AI Career Launchpad built for?",
         answer:
-          "Final-year students, fresh graduates, and career switchers from Tier II & III colleges. No coding or prior AI experience is required — we start from workplace fundamentals and build up to industry tools.",
+          "It's designed for final-year students, recent graduates, and career switchers — especially from Tier II & III colleges. You don't need any coding background or prior AI exposure; we begin with workplace fundamentals and work our way up to real industry tools.",
       },
       {
         question: "What is the class schedule?",
         answer:
-          "Live sessions run on Saturdays, 2:00 – 4:00 PM IST. If you miss a session, recordings are uploaded within 24 hours on the UniConnect app, and you keep access for 12 months.",
+          "Classes are held live every Saturday from 2:00 – 4:00 PM IST. Missed a session? Recordings go up on the UniConnect app within 24 hours, and your access stays active for a full 12 months.",
       },
       {
         question: "How much does the program cost?",
         answer:
-          "Standard enrollment is ₹5,000. Enter a valid referral code at checkout to unlock the referral price of ₹2,500 (50% off). Payments are processed securely through Razorpay.",
+          `Enrollment is ${STANDARD_PRICE_LABEL} for the full program, with payments handled securely via Razorpay.`,
       },
       {
         question: "What is the refund policy?",
         answer:
-          "You get a 7-day full refund from the date of payment if the program is not the right fit. After that, enrollment is non-refundable except where required by law.",
-      },
-      {
-        question: "How do referrals work?",
-        answer:
-          "Every enrolled student receives a unique referral code. When someone enrolls with your code and completes the refund window, you earn ₹500 per qualified referral. Milestone rewards unlock at 50, 100, and 500 qualified referrals.",
+          "We offer a 30-day, no-questions-asked refund. If the classes, structure, or mentors aren't for you, just request a full refund within 30 days of payment — no explanation required. Beyond that window, enrollment is non-refundable except where the law requires otherwise.",
       },
       {
         question: "Are the certifications government recognised?",
         answer:
-          "Graduates receive credentials aligned with MSME, Skill India, BFSI sector standards, ISO 9001:2015 quality frameworks, and FICCI industry recognition — the same logos employers see on your completion kit.",
+          "Yes — your credentials are aligned with MSME, Skill India, BFSI sector standards, ISO 9001:2015 quality frameworks, and FICCI industry recognition. These are the very same logos employers will see on your completion kit.",
       },
       {
-        question: "What placement support is included?",
+        question: "What career support do I get?",
         answer:
-          "Six months of placement support: resume and LinkedIn optimisation with AI, mock interviews, capstone review, and alumni network access. Outcomes depend on your effort, location, and cohort — we guide, you execute.",
+          "You'll get AI-powered resume and LinkedIn optimisation, mock interviews, capstone reviews, and access to our alumni network. UniConnect also partners with 100+ companies and startups to discover and back skilled talent. We provide the tools and guidance — your results ultimately depend on your effort, location, and cohort.",
       },
       {
         question: "What do I need to get started?",
         answer:
-          "A laptop with a stable internet connection, a personal email, and willingness to show up for live Saturdays. Free tiers of ChatGPT and Canva are enough for the first few weeks; we share tool setup in Week 1.",
+          "Just headphones, a laptop, and the commitment to show up for Saturday classes (1–3 hours at most). A genuine interest in the course and finishing every assignment and project is essential. To unlock your certification and job recommendations, make sure you submit all your files to assignment@uniconnect.app.",
       },
     ],
   },
@@ -260,7 +283,7 @@ export const LANDING = {
       phase: "Phase 3",
       weeks: "Weeks 9–12",
       theme: "Career Launch",
-      items: ["ATS resume & personal branding", "Interview mastery & GD drills", "Capstone portfolio & placements"],
+      items: ["ATS resume & personal branding", "Interview mastery & GD drills", "Capstone portfolio & job-readiness"],
     },
   ],
   schedule: {
@@ -276,7 +299,6 @@ export const LANDING = {
     ],
   },
   legal: {
-    placementNote: "*Placement support for 6 months; outcomes vary by cohort and effort.",
-    refund: "7-day full refund · Secure payments · No hidden charges",
+    refund: "30-day no-questions-asked refund · Secure payments · No hidden charges",
   },
 } as const;

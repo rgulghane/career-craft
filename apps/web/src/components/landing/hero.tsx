@@ -3,6 +3,7 @@ import { LANDING, PROGRAM } from "@career-craft/shared";
 import { EnrolledCongratulationsCard } from "@/components/enrolled-congratulations-card";
 import { EnrollmentPricingWidget } from "@/components/enrollment-pricing-widget";
 import { ScrollToEnrollmentButton } from "@/components/landing/scroll-to-enrollment-button";
+import { SeatsUrgencyNote } from "@/components/seats-urgency-note";
 import type { EnrollmentPricingRupees } from "@/lib/pricing-types";
 
 export function LandingHero({
@@ -51,26 +52,13 @@ export function LandingHero({
             <p className="mt-3 text-sm text-slate-500">{LANDING.hero.poweredBy}</p>
 
             {!isEnrolled ? (
-              <div className="mt-8 enroll:hidden">
+              <div className="mt-8 flex flex-col items-start gap-4 enroll:hidden">
                 <ScrollToEnrollmentButton className="inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-amber-500 to-orange-600 px-6 py-3.5 text-sm font-semibold text-slate-950 shadow-lg shadow-orange-500/25 transition hover:from-amber-400 hover:to-orange-500">
-                  View enrollment offer
+                  `ENROLL NOW`
                 </ScrollToEnrollmentButton>
+                <SeatsUrgencyNote variant="inline" />
               </div>
             ) : null}
-
-            <dl className="mt-12 grid grid-cols-2 gap-4 sm:grid-cols-4 enroll:grid-cols-2 xl:grid-cols-4">
-              {LANDING.stats.map((s) => (
-                <div
-                  key={s.label}
-                  className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-white/5 dark:shadow-none dark:backdrop-blur-sm"
-                >
-                  <dt className="text-2xl font-bold text-slate-900 sm:text-3xl dark:text-white">{s.value}</dt>
-                  <dd className="mt-1 text-xs text-slate-500 sm:text-sm dark:text-slate-400">{s.label}</dd>
-                </div>
-              ))}
-            </dl>
-
-            <p className="mt-3 text-xs text-slate-500 dark:text-slate-400">{LANDING.legal.placementNote}</p>
 
             <Link
               href="/curriculum"

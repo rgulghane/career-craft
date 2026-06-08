@@ -76,17 +76,12 @@ export interface UploadedImage {
   blobName: string;
 }
 
-/**
- * Upload a mentor photo to Azure Blob Storage and return its public URL.
- * The caller is responsible for validating size and MIME type beforehand.
- */
-export async function uploadMentorPhoto(params: {
-  data: Buffer;
-  contentType: string;
-  extension: string;
-}): Promise<UploadedImage> {
+async function uploadImage(
+  prefix: string,
+  params: { data: Buffer; contentType: string; extension: string },
+): Promise<UploadedImage> {
   const container = await mentorPhotoContainer();
-  const blobName = `mentors/${randomUUID()}.${params.extension}`;
+  const blobName = `${prefix}/${randomUUID()}.${params.extension}`;
   const blockBlob = container.getBlockBlobClient(blobName);
 
   await blockBlob.uploadData(params.data, {
@@ -97,4 +92,28 @@ export async function uploadMentorPhoto(params: {
   });
 
   return { url: publicUrl(blobName, blockBlob.url), blobName };
+}
+
+/**
+ * Upload a mentor photo to Azure Blob Storage and return its public URL.
+ * The caller is responsible for validating size and MIME type beforehand.
+ */
+export async function uploadMentorPhoto(params: {
+  data: Buffer;
+  contentType: string;
+  extension: string;
+}): Promise<UploadedImage> {
+  return uploadImage("mentors", params);
+}
+
+/**
+ * Upload a company brand icon to Azure Blob Storage and return its public URL.
+ * The caller is responsible for validating size and MIME type beforehand.
+ */
+export async function uploadCompanyLogo(params: {
+  data: Buffer;
+  contentType: string;
+  extension: string;
+}): Promise<UploadedImage> {
+  return uploadImage("company-logos", params);
 }

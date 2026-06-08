@@ -346,18 +346,28 @@ export function EnrollmentPricingWidget({
 
         <section className="enrollment-widget-features flex min-w-0 flex-col border-t border-amber-100/80 bg-amber-50/30 p-5 sm:p-6 dark:border-slate-700/60 dark:bg-slate-800/30">
           <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-            What&apos;s included
+            {ENROLLMENT_WIDGET.highlightsHeading}
           </h3>
-          <ul className="mt-3 flex-1 divide-y divide-amber-100/80 dark:divide-slate-700/60">
-            {ENROLLMENT_WIDGET.features.map((feature) => (
-              <li key={feature} className="flex gap-3 py-2.5 text-sm text-slate-700 dark:text-slate-300">
+          <ul className="mt-4 flex-1 space-y-3">
+            {ENROLLMENT_WIDGET.highlights.map((highlight) => (
+              <li
+                key={highlight.title}
+                className="group flex gap-3 rounded-xl border border-transparent p-2 transition hover:border-amber-200/70 hover:bg-white/70 dark:hover:border-amber-500/20 dark:hover:bg-slate-800/60"
+              >
                 <span
-                  className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-xs font-bold text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400"
+                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-amber-100 to-orange-100 text-lg shadow-sm ring-1 ring-amber-200/60 dark:from-amber-500/15 dark:to-orange-500/10 dark:ring-amber-500/20"
                   aria-hidden
                 >
-                  ✓
+                  {highlight.icon}
                 </span>
-                {feature}
+                <div className="min-w-0">
+                  <p className="text-sm font-semibold text-slate-900 dark:text-white">
+                    {highlight.title}
+                  </p>
+                  <p className="mt-0.5 text-xs leading-relaxed text-slate-600 dark:text-slate-400">
+                    {highlight.description}
+                  </p>
+                </div>
               </li>
             ))}
           </ul>

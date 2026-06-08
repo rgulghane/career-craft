@@ -1,7 +1,7 @@
 /** Business rules aligned with the referral product spec (tune via env). */
 
 export const PROGRAM = {
-  name: "CareerCraft AI",
+  name: "AI Career Launchpad",
   defaultCurrency: "INR",
 } as const;
 
@@ -70,7 +70,7 @@ export const PRICING = {
 
 export const REFERRAL_POLICY = {
   /** Days after payment before a referral qualifies (refund window). */
-  refundWindowDays: 7,
+  refundWindowDays: 30,
   referralCodeLength: 6,
   /** Character set used to generate referral codes (omits visually ambiguous chars). */
   referralCodeAlphabet: "ABCDEFGHJKLMNPQRSTUVWXYZ23456789",
@@ -121,7 +121,7 @@ export function getSiteOrigin(): string {
 
 /** WhatsApp support chat copy. */
 export const SUPPORT_WHATSAPP = {
-  defaultMessage: "Hi! I'd like to know more about CareerCraft AI.",
+  defaultMessage: "Hi! I'd like to know more about AI Career Launchpad.",
 } as const;
 
 const WHATSAPP_ENV_KEYS = ["WHATSAPP_NUMBER"] as const;

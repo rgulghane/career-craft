@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
-import { messages } from "@career-craft/shared";
+import { PROGRAM, messages } from "@career-craft/shared";
 import { AdminLoginForm } from "@/components/admin/admin-login-form";
 import { getAdminSession } from "@/server/auth-guards";
 
 export const metadata: Metadata = {
-  title: `${messages.admin.signInHeading} — CareerCraft`,
+  title: `${messages.admin.signInHeading} — ${PROGRAM.name}`,
 };
 
 function safeNextPath(next: string | undefined): string {

@@ -2,8 +2,10 @@ import { configureMongoDns } from "./configure-dns";
 import { MongoClient, type Collection, type MongoClientOptions } from "mongodb";
 import {
   COLLECTIONS,
+  type CompanyLogoDocument,
   type EnrollmentDocument,
   type MentorDocument,
+  type PricingSettingsDocument,
   type RazorpayWebhookEventDocument,
   type ReferralDocument,
   type UserDocument,
@@ -141,4 +143,12 @@ export async function razorpayWebhookEventsCollection(): Promise<
 
 export async function mentorsCollection(): Promise<Collection<MentorDocument>> {
   return (await mongoClient()).db().collection<MentorDocument>(COLLECTIONS.mentors);
+}
+
+export async function companyLogosCollection(): Promise<Collection<CompanyLogoDocument>> {
+  return (await mongoClient()).db().collection<CompanyLogoDocument>(COLLECTIONS.companyLogos);
+}
+
+export async function settingsCollection(): Promise<Collection<PricingSettingsDocument>> {
+  return (await mongoClient()).db().collection<PricingSettingsDocument>(COLLECTIONS.settings);
 }

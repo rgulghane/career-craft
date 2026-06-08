@@ -4,34 +4,74 @@ import { MentorsProfiles } from "./mentors-profiles";
 import type { MentorCardData } from "./mentor-spotlight-card";
 import { ToolsCarousel } from "./tools-carousel";
 import { listPublishedMentors } from "@/server/services/admin/mentors";
+import { getCompanyLogoUrlMap } from "@/server/services/admin/company-logos";
 
-const STATIC_MENTORS: MentorCardData[] = LANDING.mentors.map((m) => ({
+/** Raw mentor fields before company icons are resolved. */
+type MentorBase = {
+  name: string;
+  designation: string;
+  company: string;
+  previouslyAtNames: string[];
+  linkedInUrl: string;
+  photo: string;
+};
+
+const STATIC_MENTORS: MentorBase[] = LANDING.mentors.map((m) => ({
   name: m.name,
   designation: m.designation,
   company: m.company,
-  previouslyAt: m.previouslyAt,
+  previouslyAtNames: m.previouslyAt ? [m.previouslyAt] : [],
   linkedInUrl: m.linkedInUrl,
   photo: m.photo,
 }));
 
+async function companyLogoMap(): Promise<Record<string, string>> {
+  try {
+    return await getCompanyLogoUrlMap();
+  } catch {
+    return {};
+  }
+}
+
+function toCard(base: MentorBase, logoMap: Record<string, string>): MentorCardData {
+  const logoFor = (company: string): string | null =>
+    logoMap[company.trim().toLowerCase()] ?? null;
+  return {
+    name: base.name,
+    designation: base.designation,
+    company: base.company,
+    companyLogoUrl: logoFor(base.company),
+    previouslyAt: base.previouslyAtNames.map((name) => ({ name, logoUrl: logoFor(name) })),
+    linkedInUrl: base.linkedInUrl,
+    photo: base.photo,
+  };
+}
+
 /** Admin-managed mentors when present; falls back to the bundled defaults. */
 async function resolveMentors(): Promise<MentorCardData[]> {
+  const logoMap = await companyLogoMap();
+
   try {
     const published = await listPublishedMentors();
     if (published.length > 0) {
-      return published.map((m) => ({
-        name: m.name,
-        designation: m.designation,
-        company: m.company,
-        previouslyAt: m.previouslyAt,
-        linkedInUrl: m.linkedInUrl,
-        photo: m.photo,
-      }));
+      return published.map((m) =>
+        toCard(
+          {
+            name: m.name,
+            designation: m.designation,
+            company: m.company,
+            previouslyAtNames: m.previouslyAt,
+            linkedInUrl: m.linkedInUrl,
+            photo: m.photo,
+          },
+          logoMap,
+        ),
+      );
     }
   } catch {
     // Fall back to static content if the database is unreachable.
   }
-  return STATIC_MENTORS;
+  return STATIC_MENTORS.map((base) => toCard(base, logoMap));
 }
 
 export async function LandingToolsMentors() {

@@ -97,7 +97,7 @@ export const serverConfig = {
       return getCashPerReferralInRupees();
     },
     get refundWindowDays() {
-      return readNumber("REFUND_WINDOW_DAYS", 7);
+      return readNumber("REFUND_WINDOW_DAYS", 30);
     },
   },
   azureStorage: {

@@ -84,12 +84,31 @@ const optionalUrlSchema = z
   .union([z.string().trim().url().max(1000), z.literal("")])
   .default("");
 
+/**
+ * "Previously at" companies. Accepts an array (preferred) or a legacy
+ * comma-separated string, and normalises to a clean, de-duplicated list.
+ */
+const previouslyAtSchema = z
+  .union([z.array(z.string()), z.string()])
+  .optional()
+  .transform((value) => {
+    const raw = value === undefined ? [] : Array.isArray(value) ? value : value.split(",");
+    const cleaned: string[] = [];
+    for (const entry of raw) {
+      const trimmed = entry.trim().slice(0, 120);
+      if (trimmed && !cleaned.some((c) => c.toLowerCase() === trimmed.toLowerCase())) {
+        cleaned.push(trimmed);
+      }
+    }
+    return cleaned.slice(0, 12);
+  });
+
 /** Editable content fields shown on a mentor spotlight card. */
 export const mentorContentSchema = z.object({
   name: z.string().trim().min(1).max(120),
   designation: z.string().trim().min(1).max(160),
   company: z.string().trim().min(1).max(120),
-  previouslyAt: z.string().trim().max(120).optional().default(""),
+  previouslyAt: previouslyAtSchema,
   linkedInUrl: optionalUrlSchema,
   photo: z.string().trim().url().max(1000),
 });
@@ -106,10 +125,52 @@ export const adminMentorVisibilityBodySchema = z.object({
   isPublished: z.boolean(),
 });
 
+/** Company logo upload constraints (allows SVG in addition to raster formats). */
+export const COMPANY_LOGO_UPLOAD = {
+  maxBytes: 512 * 1024, // 512 KB — logos are small
+  allowedMimeTypes: [
+    "image/png",
+    "image/jpeg",
+    "image/webp",
+    "image/gif",
+    "image/svg+xml",
+  ] as const,
+  allowedExtensions: ["png", "jpg", "jpeg", "webp", "gif", "svg"] as const,
+  accept: "image/png,image/jpeg,image/webp,image/gif,image/svg+xml",
+} as const;
+
+export type CompanyLogoMimeType = (typeof COMPANY_LOGO_UPLOAD.allowedMimeTypes)[number];
+
+export function isAllowedCompanyLogoMime(value: string): value is CompanyLogoMimeType {
+  return (COMPANY_LOGO_UPLOAD.allowedMimeTypes as readonly string[]).includes(value);
+}
+
+/** Create / upsert a company logo (the brand name + a public icon URL). */
+export const adminCompanyLogoBodySchema = z.object({
+  company: z.string().trim().min(1).max(120),
+  logoUrl: z.string().trim().url().max(1000),
+});
+
+/** Upper bound for a single course fee (₹) — guards against typos. */
+export const MAX_COURSE_FEE_IN_RUPEES = 10_000_000;
+
+/** Admin-managed course fees (rupees). Referral price must not exceed standard. */
+export const adminUpdatePricingBodySchema = z
+  .object({
+    standardInRupees: z.number().int().min(0).max(MAX_COURSE_FEE_IN_RUPEES),
+    withReferralCodeInRupees: z.number().int().min(0).max(MAX_COURSE_FEE_IN_RUPEES),
+  })
+  .refine((data) => data.withReferralCodeInRupees <= data.standardInRupees, {
+    message: "Referral price cannot be higher than the standard price",
+    path: ["withReferralCodeInRupees"],
+  });
+
 export type MentorContentInput = z.infer<typeof mentorContentSchema>;
 export type AdminCreateMentorBody = z.infer<typeof adminCreateMentorBodySchema>;
 export type AdminUpdateMentorBody = z.infer<typeof adminUpdateMentorBodySchema>;
 export type AdminMentorVisibilityBody = z.infer<typeof adminMentorVisibilityBodySchema>;
+export type AdminCompanyLogoBody = z.infer<typeof adminCompanyLogoBodySchema>;
+export type AdminUpdatePricingBody = z.infer<typeof adminUpdatePricingBodySchema>;
 
 export type AdminLoginBody = z.infer<typeof adminLoginBodySchema>;
 export type AdminCreateReadonlyAdminBody = z.infer<typeof adminCreateReadonlyAdminBodySchema>;

@@ -1,6 +1,8 @@
 import { ObjectId } from "mongodb";
 import type { DbId } from "./types";
 import type {
+  CompanyLogo,
+  CompanyLogoDocument,
   Enrollment,
   EnrollmentDocument,
   Mentor,
@@ -78,6 +80,38 @@ export function mapEnrollment(doc: EnrollmentDocument): Enrollment {
   };
 }
 
+/**
+ * Coerce a stored "previously at" value into a clean string array. Legacy
+ * documents stored a single comma-separated string; newer ones store an array.
+ */
+export function previouslyAtToArray(value: unknown): string[] {
+  const raw = Array.isArray(value)
+    ? value
+    : typeof value === "string"
+      ? value.split(",")
+      : [];
+  const cleaned: string[] = [];
+  for (const entry of raw) {
+    const trimmed = String(entry).trim();
+    if (trimmed && !cleaned.some((c) => c.toLowerCase() === trimmed.toLowerCase())) {
+      cleaned.push(trimmed);
+    }
+  }
+  return cleaned;
+}
+
+/** Normalise raw mentor content (handles legacy field shapes). */
+function normalizeMentorContent(content: MentorContent): MentorContent {
+  return {
+    ...content,
+    previouslyAt: previouslyAtToArray((content as { previouslyAt?: unknown }).previouslyAt),
+  };
+}
+
+function stringArraysEqual(a: string[], b: string[]): boolean {
+  return a.length === b.length && a.every((value, index) => value === b[index]);
+}
+
 function contentEquals(a: MentorContent | null, b: MentorContent | null): boolean {
   if (a === null || b === null) {
     return a === b;
@@ -86,24 +120,35 @@ function contentEquals(a: MentorContent | null, b: MentorContent | null): boolea
     a.name === b.name &&
     a.designation === b.designation &&
     a.company === b.company &&
-    a.previouslyAt === b.previouslyAt &&
+    stringArraysEqual(a.previouslyAt, b.previouslyAt) &&
     a.linkedInUrl === b.linkedInUrl &&
     a.photo === b.photo
   );
 }
 
 export function mapMentor(doc: MentorDocument): Mentor {
-  const live = doc.live ?? null;
+  const draft = normalizeMentorContent(doc.draft);
+  const live = doc.live ? normalizeMentorContent(doc.live) : null;
   return {
     id: toIdString(doc._id),
     order: doc.order ?? 0,
-    draft: doc.draft,
+    draft,
     live,
     isPublished: doc.isPublished ?? false,
-    hasUnpublishedChanges: !contentEquals(doc.draft, live),
+    hasUnpublishedChanges: !contentEquals(draft, live),
     createdAt: doc.createdAt,
     updatedAt: doc.updatedAt,
     publishedAt: doc.publishedAt ?? null,
+  };
+}
+
+export function mapCompanyLogo(doc: CompanyLogoDocument): CompanyLogo {
+  return {
+    id: toIdString(doc._id),
+    company: doc.company,
+    logoUrl: doc.logoUrl,
+    createdAt: doc.createdAt,
+    updatedAt: doc.updatedAt,
   };
 }
 

@@ -1,4 +1,4 @@
-# Career Craft
+# AI Career Launchpad
 
 Single Next.js (App Router) application with server-side rendering, MongoDB, JWT auth, and a built-in referral lifecycle.
 

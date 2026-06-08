@@ -8,7 +8,7 @@ import type {
 } from "@career-craft/shared";
 import { LANDING } from "@career-craft/shared";
 import "../../db/load-env";
-import { mapMentor, toDbId } from "../../db/helpers";
+import { mapMentor, previouslyAtToArray, toDbId } from "../../db/helpers";
 import { mentorsCollection } from "../../db/mongo-client";
 import type { Mentor, MentorContent } from "../../db/types";
 import { AdminServiceError } from "./errors";
@@ -18,7 +18,7 @@ export interface PublishedMentor {
   name: string;
   designation: string;
   company: string;
-  previouslyAt?: string;
+  previouslyAt: string[];
   linkedInUrl: string;
   photo: string;
 }
@@ -28,7 +28,7 @@ function normalizeContent(input: MentorContentInput): MentorContent {
     name: input.name.trim(),
     designation: input.designation.trim(),
     company: input.company.trim(),
-    previouslyAt: (input.previouslyAt ?? "").trim(),
+    previouslyAt: previouslyAtToArray(input.previouslyAt),
     linkedInUrl: (input.linkedInUrl ?? "").trim(),
     photo: input.photo.trim(),
   };
@@ -188,7 +188,7 @@ export async function listPublishedMentors(): Promise<PublishedMentor[]> {
         name: c.name,
         designation: c.designation,
         company: c.company,
-        previouslyAt: c.previouslyAt || undefined,
+        previouslyAt: previouslyAtToArray(c.previouslyAt),
         linkedInUrl: c.linkedInUrl || "#",
         photo: c.photo,
       };
@@ -212,7 +212,7 @@ export async function seedMentorsFromLanding(): Promise<number> {
       name: m.name,
       designation: m.designation,
       company: m.company,
-      previouslyAt: m.previouslyAt ?? "",
+      previouslyAt: previouslyAtToArray(m.previouslyAt),
       linkedInUrl: m.linkedInUrl ?? "",
       photo: m.photo,
     };

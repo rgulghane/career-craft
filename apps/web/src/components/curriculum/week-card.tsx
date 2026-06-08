@@ -2,6 +2,7 @@
 
 import { useId, useState } from "react";
 import type { CURRICULUM_WEEKS } from "@career-craft/shared";
+import { ToolPill } from "./tool-pill";
 
 type WeekItem = (typeof CURRICULUM_WEEKS)[number];
 
@@ -19,12 +20,7 @@ export function CurriculumWeekCard({ item }: { item: WeekItem }) {
         <h2 className="mt-2 text-lg font-bold leading-snug text-slate-900 dark:text-white">{item.title}</h2>
         <div className="mt-4 flex flex-wrap gap-2">
           {item.tools.map((tool) => (
-            <span
-              key={tool}
-              className="rounded-full bg-sky-100 px-2.5 py-1 text-xs font-medium text-sky-800 dark:bg-sky-500/20 dark:text-sky-200"
-            >
-              {tool}
-            </span>
+            <ToolPill key={tool} name={tool} />
           ))}
         </div>
         <div className="mt-auto flex items-end justify-between gap-3 pt-5">

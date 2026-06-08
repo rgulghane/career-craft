@@ -11,7 +11,7 @@ import {
   referralsCollection,
   usersCollection,
 } from "../db/mongo-client";
-import { serverConfig } from "@/lib/config";
+import { getPricingSettings } from "./admin/pricing";
 import { generateReferralCode } from "../util/referral-code";
 import { EnrollmentError } from "../errors";
 
@@ -43,8 +43,9 @@ export async function createEnrollment(
     throw new EnrollmentError(400, "invalid_referral", "Referral code must be 6 characters");
   }
 
+  const pricing = await getPricingSettings();
   let referrerId: string | undefined;
-  let amountInRupees = serverConfig.pricing.standardInRupees;
+  let amountInRupees = pricing.standardInRupees;
 
   if (normalizedCode) {
     const referrerDoc = await users.findOne({ referralCode: normalizedCode });
@@ -52,7 +53,7 @@ export async function createEnrollment(
       const referrer = mapUser(referrerDoc);
       if (referrer.id !== user.id) {
         referrerId = referrer.id;
-        amountInRupees = serverConfig.pricing.withReferralInRupees;
+        amountInRupees = pricing.withReferralCodeInRupees;
       }
     }
   }
