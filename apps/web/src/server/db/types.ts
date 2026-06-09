@@ -213,3 +213,24 @@ export interface PricingSettings {
   isCustom: boolean;
   updatedAt: Date | null;
 }
+
+/** Fixed `_id` of the singleton seats settings document. */
+export const SEATS_SETTINGS_ID = "seats" as const;
+
+/** Singleton document for admin-managed cohort seat counts. */
+export interface SeatsSettingsDocument {
+  _id: typeof SEATS_SETTINGS_ID;
+  total?: number;
+  remaining?: number;
+  updatedAt?: Date;
+  updatedByAdminId?: DbId | null;
+}
+
+export interface SeatsSettings {
+  total: number;
+  remaining: number;
+  isCustom: boolean;
+  updatedAt: Date | null;
+}
+
+export type SettingsDocument = PricingSettingsDocument | SeatsSettingsDocument;

@@ -8,5 +8,6 @@ export * from "./enrollment-widget.js";
 export * from "./enroll-showcase.js";
 export * from "./landing.js";
 export * from "./messages.js";
+export * from "./referral-share.js";
 export * from "./schemas.js";
 export * from "./types.js";

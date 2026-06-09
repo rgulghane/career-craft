@@ -2,14 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import {
-  PORTAL_ADMIN_TYPES,
-  REFERRAL_POLICY,
-  USER_TYPES,
-  isValidReferralCodeFormat,
-  normalizeReferralCode,
-  type UserType,
-} from "@career-craft/shared";
+import { PORTAL_ADMIN_TYPES, USER_TYPES, type UserType } from "@career-craft/shared";
 import { AdminCard } from "@/components/admin/admin-card";
 import { useAdminAccess } from "@/components/admin/admin-access";
 
@@ -18,7 +11,6 @@ type UserRow = {
   email: string;
   fullName: string;
   userType: UserType | null;
-  referralCode: string | null;
 };
 
 export function UserEditor({ userId, initial }: { userId: string; initial: UserRow }) {
@@ -27,17 +19,15 @@ export function UserEditor({ userId, initial }: { userId: string; initial: UserR
   const [fullName, setFullName] = useState(initial.fullName);
   const [email, setEmail] = useState(initial.email);
   const [userType, setUserType] = useState(initial.userType ?? "student");
-  const [referralCode, setReferralCode] = useState(initial.referralCode ?? "");
   const [message, setMessage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
+  if (readOnly) {
+    return null;
+  }
+
   async function save(e: React.FormEvent) {
     e.preventDefault();
-    const code = normalizeReferralCode(referralCode);
-    if (code && !isValidReferralCodeFormat(code)) {
-      setMessage(`Referral code must be ${REFERRAL_POLICY.referralCodeLength} characters`);
-      return;
-    }
     setLoading(true);
     setMessage(null);
     try {
@@ -48,7 +38,6 @@ export function UserEditor({ userId, initial }: { userId: string; initial: UserR
           fullName,
           email,
           userType,
-          referralCode: code === "" ? null : code,
         }),
       });
       const body = (await r.json()) as { error?: string };
@@ -57,30 +46,6 @@ export function UserEditor({ userId, initial }: { userId: string; initial: UserR
         return;
       }
       setMessage("Saved");
-      router.refresh();
-    } catch {
-      setMessage("Network error");
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  if (readOnly) {
-    return null;
-  }
-
-  async function regenerateCode() {
-    setLoading(true);
-    setMessage(null);
-    try {
-      const r = await fetch(`/api/admin/users/${userId}/regenerate-code`, { method: "POST" });
-      const body = (await r.json()) as { referralCode?: string; error?: string };
-      if (!r.ok) {
-        setMessage(body.error ?? "Failed");
-        return;
-      }
-      setReferralCode(body.referralCode ?? "");
-      setMessage("Referral code regenerated");
       router.refresh();
     } catch {
       setMessage("Network error");
@@ -123,36 +88,13 @@ export function UserEditor({ userId, initial }: { userId: string; initial: UserR
             ))}
           </select>
         </label>
-        <label className="block text-sm">
-          <span className="text-slate-400">Referral code</span>
-          <input
-            className="mt-1 w-full rounded-lg border border-white/15 bg-white/5 px-3 py-2 font-mono text-white"
-            value={referralCode}
-            maxLength={REFERRAL_POLICY.referralCodeLength}
-            onChange={(e) =>
-              setReferralCode(
-                normalizeReferralCode(e.target.value).slice(0, REFERRAL_POLICY.referralCodeLength),
-              )
-            }
-          />
-        </label>
-        <div className="flex flex-wrap gap-3">
-          <button
-            type="submit"
-            disabled={loading}
-            className="rounded-lg bg-amber-500 px-4 py-2 text-sm font-semibold text-slate-950 disabled:opacity-60"
-          >
-            Save
-          </button>
-          <button
-            type="button"
-            disabled={loading}
-            onClick={() => void regenerateCode()}
-            className="rounded-lg border border-white/20 px-4 py-2 text-sm font-semibold text-white"
-          >
-            Regenerate code
-          </button>
-        </div>
+        <button
+          type="submit"
+          disabled={loading}
+          className="rounded-lg bg-amber-500 px-4 py-2 text-sm font-semibold text-slate-950 disabled:opacity-60"
+        >
+          Save
+        </button>
         {message ? <p className="text-sm text-slate-400">{message}</p> : null}
       </form>
     </AdminCard>

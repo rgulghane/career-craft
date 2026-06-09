@@ -3,19 +3,21 @@ import { AdminCard } from "@/components/admin/admin-card";
 import { serverConfig } from "@/lib/config";
 import { formatINR } from "@/lib/format";
 import { getPricingSettings } from "@/server/services/admin/pricing";
+import { getSeatsSettings } from "@/server/services/admin/seats";
 import { PricingEditor } from "./pricing-editor";
+import { SeatsEditor } from "./seats-editor";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminSettingsPage() {
-  const pricing = await getPricingSettings();
+  const [pricing, seats] = await Promise.all([getPricingSettings(), getSeatsSettings()]);
 
   return (
     <div className="space-y-6">
       <h1 className="text-3xl font-bold text-white">Settings</h1>
       <p className="text-sm text-slate-400">
-        Course fees are managed here by admins. Other policy values are configured via environment
-        variables.
+        Course fees and cohort seat counts are managed here by admins. Other policy values are
+        configured via environment variables.
       </p>
       <AdminCard title="Course fees">
         <dl className="space-y-2 text-sm">
@@ -39,6 +41,30 @@ export default async function AdminSettingsPage() {
         initial={{
           standardInRupees: pricing.standardInRupees,
           withReferralCodeInRupees: pricing.withReferralCodeInRupees,
+        }}
+      />
+      <AdminCard title="Cohort seats">
+        <dl className="space-y-2 text-sm">
+          <div className="flex justify-between">
+            <dt className="text-slate-500">Total seats</dt>
+            <dd>{seats.total}</dd>
+          </div>
+          <div className="flex justify-between">
+            <dt className="text-slate-500">Remaining</dt>
+            <dd>{seats.remaining}</dd>
+          </div>
+          <div className="flex justify-between">
+            <dt className="text-slate-500">Source</dt>
+            <dd className="text-slate-400">
+              {seats.isCustom ? "Admin-managed" : "Built-in defaults"}
+            </dd>
+          </div>
+        </dl>
+      </AdminCard>
+      <SeatsEditor
+        initial={{
+          total: seats.total,
+          remaining: seats.remaining,
         }}
       />
       <AdminCard title="Referral policy (override via environment variables)">

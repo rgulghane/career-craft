@@ -2,17 +2,23 @@
 
 import { useEffect, useState } from "react";
 import { ENROLLMENT_WIDGET } from "@career-craft/shared/content";
+import type { EnrollmentSeats } from "@/lib/seats-types";
 
-const { total, remaining } = ENROLLMENT_WIDGET.seats;
-const filledPct = Math.round(((total - remaining) / total) * 100);
+function filledPct(seats: EnrollmentSeats): number {
+  return Math.round(((seats.total - seats.remaining) / seats.total) * 100);
+}
 
 export function SeatsUrgencyNote({
+  seats,
   className = "",
   variant = "card",
 }: {
+  seats: EnrollmentSeats;
   className?: string;
   variant?: "card" | "inline";
 }) {
+  const { total, remaining } = seats;
+  const pct = filledPct(seats);
   const [pulse, setPulse] = useState(false);
 
   useEffect(() => {
@@ -41,7 +47,7 @@ export function SeatsUrgencyNote({
         >
           {remaining}
         </span>{" "}
-        of {total} seats left · {filledPct}% filled
+        of {total} seats left · {pct}% filled
       </p>
     );
   }
@@ -72,7 +78,7 @@ export function SeatsUrgencyNote({
         left in {ENROLLMENT_WIDGET.cohortLabel}
       </p>
       <p className="mt-1.5 text-xs text-rose-800/80 dark:text-rose-200/70">
-        {filledPct}% filled · enrollment closes when we hit capacity
+        {pct}% filled · enrollment closes when we hit capacity
       </p>
       <div
         className="mt-3 h-1.5 overflow-hidden rounded-full bg-rose-100 dark:bg-rose-950/60"
@@ -80,7 +86,7 @@ export function SeatsUrgencyNote({
       >
         <div
           className="h-full rounded-full bg-gradient-to-r from-amber-500 via-orange-500 to-rose-600 transition-[width] duration-700"
-          style={{ width: `${filledPct}%` }}
+          style={{ width: `${pct}%` }}
         />
       </div>
     </div>

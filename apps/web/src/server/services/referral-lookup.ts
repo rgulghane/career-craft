@@ -1,6 +1,6 @@
 import "server-only";
 
-import { isValidReferralCodeFormat, normalizeReferralCode } from "@career-craft/shared";
+import { isValidReferralCodeInput, normalizeReferralCode } from "@career-craft/shared";
 import "../db/load-env";
 import { mapUser } from "../db/helpers";
 import { usersCollection } from "../db/mongo-client";
@@ -16,7 +16,7 @@ export async function lookupReferrerByCode(
   currentUserId?: string | null,
 ): Promise<ReferralLookupResult | null> {
   const code = normalizeReferralCode(rawCode);
-  if (!isValidReferralCodeFormat(code)) {
+  if (!isValidReferralCodeInput(code)) {
     return null;
   }
 

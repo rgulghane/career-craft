@@ -1,18 +1,21 @@
-import type { Metadata } from "next";
 import { redirect } from "next/navigation";
-import { PROGRAM, messages } from "@career-craft/shared";
+import { messages } from "@career-craft/shared";
 import { ENROLLMENT_WIDGET } from "@career-craft/shared/content";
 import { AppPageShell } from "@/components/app-page-shell";
 import { EnrollCurriculumShowcase } from "@/components/enroll-curriculum-showcase";
 import { EnrolledCongratulationsCard } from "@/components/enrolled-congratulations-card";
 import { EnrollmentPricingWidget } from "@/components/enrollment-pricing-widget";
 import { getEnrollmentPricingRupees } from "@/lib/pricing.server";
+import { getEnrollmentSeats } from "@/lib/seats.server";
 import { getSessionUser, userHasPaidEnrollment } from "@/lib/server-api";
 import { buildRegisterPath } from "@/lib/referral-url";
+import { createPageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
-  title: `${messages.nav.enroll} — ${PROGRAM.name}`,
-};
+export const metadata = createPageMetadata({
+  title: messages.nav.enroll,
+  description: "Complete enrollment for the AI Career Launchpad 12-week program.",
+  noIndex: true,
+});
 
 export default async function EnrollPage({
   searchParams,
@@ -30,7 +33,7 @@ export default async function EnrollPage({
 
   const firstName = user.fullName.split(/\s+/)[0] ?? user.fullName;
   const isEnrolled = await userHasPaidEnrollment(user.id);
-  const pricing = await getEnrollmentPricingRupees();
+  const [pricing, seats] = await Promise.all([getEnrollmentPricingRupees(), getEnrollmentSeats()]);
 
   return (
     <AppPageShell>
@@ -57,6 +60,7 @@ export default async function EnrollPage({
           ) : !isEnrolled ? (
             <EnrollmentPricingWidget
               pricing={pricing}
+              seats={seats}
               mode="enroll"
               defaultReferralCode={ref}
               autoContinue={continueFlow}

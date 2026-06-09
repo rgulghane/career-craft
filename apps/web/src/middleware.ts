@@ -5,6 +5,12 @@ import { absolutePublicUrl } from "@/lib/app-origin";
 
 const ADMIN_PUBLIC_PATHS = ["/admin/login"];
 const ADMIN_AUTH_API_PREFIX = "/api/admin/auth/";
+const ROBOTS_NOINDEX = "noindex, nofollow, noarchive, nosnippet";
+
+function withNoIndex(response: NextResponse): NextResponse {
+  response.headers.set("X-Robots-Tag", ROBOTS_NOINDEX);
+  return response;
+}
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -23,16 +29,22 @@ export function middleware(request: NextRequest) {
   if (isAdminPage && !isPublicAdminPage && !token) {
     const login = new URL(absolutePublicUrl("/admin/login", request.nextUrl.origin));
     login.searchParams.set("next", pathname);
-    return NextResponse.redirect(login);
+    return withNoIndex(NextResponse.redirect(login));
   }
 
   if (isAdminApi && !isPublicAdminApi && !token) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return withNoIndex(NextResponse.json({ error: "Unauthorized" }, { status: 401 }));
   }
 
-  return NextResponse.next({
+  const response = NextResponse.next({
     request: { headers: requestHeaders },
   });
+
+  if (isAdminPage || isAdminApi) {
+    return withNoIndex(response);
+  }
+
+  return response;
 }
 
 export const config = {

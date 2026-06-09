@@ -1,12 +1,14 @@
-import type { Metadata } from "next";
 import { redirect } from "next/navigation";
-import { PROGRAM, messages } from "@career-craft/shared";
+import { messages } from "@career-craft/shared";
 import { AdminLoginForm } from "@/components/admin/admin-login-form";
 import { getAdminSession } from "@/server/auth-guards";
+import { createPageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
-  title: `${messages.admin.signInHeading} — ${PROGRAM.name}`,
-};
+export const metadata = createPageMetadata({
+  title: messages.admin.signInHeading,
+  description: "Admin portal sign in.",
+  noIndex: true,
+});
 
 function safeNextPath(next: string | undefined): string {
   if (!next || !next.startsWith("/admin") || next.startsWith("//") || next === "/admin/login") {

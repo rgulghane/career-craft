@@ -1,16 +1,18 @@
-import type { Metadata } from "next";
 import { redirect } from "next/navigation";
-import { PROGRAM, messages } from "@career-craft/shared";
+import { messages } from "@career-craft/shared";
 import { AppPageShell } from "@/components/app-page-shell";
 import { getSessionUser } from "@/lib/server-api";
 import { buildRegisterPath } from "@/lib/referral-url";
 import { googleAuthErrorMessage } from "@/lib/google-auth-error-message";
 import { isGoogleAuthConfigured } from "@/server/services/google-auth";
+import { createPageMetadata } from "@/lib/seo";
 import { AuthCard } from "./ui";
 
-export const metadata: Metadata = {
-  title: `${messages.nav.signIn} — ${PROGRAM.name}`,
-};
+export const metadata = createPageMetadata({
+  title: messages.nav.signIn,
+  description: "Sign in to your AI Career Launchpad account.",
+  noIndex: true,
+});
 
 function safeNextPath(next: string | undefined): string {
   if (!next || !next.startsWith("/") || next.startsWith("//")) {

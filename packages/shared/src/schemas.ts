@@ -1,5 +1,9 @@
 import { z } from "zod";
-import { REFERRAL_POLICY, isValidReferralCodeFormat, normalizeReferralCode } from "./constants.js";
+import {
+  REFERRAL_CODE_INPUT,
+  isValidReferralCodeInput,
+  normalizeReferralCode,
+} from "./constants.js";
 import { authSignupProfileSchema, fullNameTwoWordsSchema, phoneTenDigitsSchema } from "./auth-profile.js";
 
 export const emailSchema = z.string().trim().email();
@@ -20,21 +24,21 @@ export const loginBodySchema = z.object({
   password: passwordSchema,
 });
 
-const referralCodeMessage = `Referral code must be ${REFERRAL_POLICY.referralCodeLength} characters`;
+const referralCodeMessage = `Referral code must be ${REFERRAL_CODE_INPUT.minLength}–${REFERRAL_CODE_INPUT.maxLength} letters or numbers`;
 
-/** Required 6-character referral code. */
+/** Required referral code (custom or auto-generated format). */
 export const referralCodeSchema = z
   .string()
   .trim()
   .transform(normalizeReferralCode)
-  .refine(isValidReferralCodeFormat, { message: referralCodeMessage });
+  .refine(isValidReferralCodeInput, { message: referralCodeMessage });
 
-/** Empty string or a valid 6-character referral code. */
+/** Empty string or a valid referral code. */
 export const optionalReferralCodeSchema = z
   .string()
   .trim()
   .transform(normalizeReferralCode)
-  .refine((code) => code === "" || isValidReferralCodeFormat(code), { message: referralCodeMessage });
+  .refine((code) => code === "" || isValidReferralCodeInput(code), { message: referralCodeMessage });
 
 export const enrollBodySchema = z.object({
   referralCode: optionalReferralCodeSchema.optional().or(z.literal("")),

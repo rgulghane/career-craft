@@ -3,9 +3,15 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useActionState, useEffect, useMemo, useRef, useState } from "react";
-import { REFERRAL_POLICY, isValidReferralCodeFormat, normalizeReferralCode } from "@career-craft/shared";
+import {
+  REFERRAL_CODE_INPUT,
+  REFERRAL_POLICY,
+  isValidReferralCodeInput,
+  normalizeReferralCode,
+} from "@career-craft/shared";
 import { ENROLLMENT_WIDGET } from "@career-craft/shared/content";
 import type { EnrollmentPricingRupees } from "@/lib/pricing-types";
+import type { EnrollmentSeats } from "@/lib/seats-types";
 import { createEnrollmentAction, type EnrollState } from "@/app/enroll/actions";
 import { RazorpayPayButton } from "@/components/razorpay-pay-button";
 import { messages } from "@career-craft/shared/content";
@@ -66,12 +72,14 @@ function useCountdown(targetMs: number | null): string {
 
 export function EnrollmentPricingWidget({
   pricing,
+  seats,
   mode = "marketing",
   defaultReferralCode = "",
   isLoggedIn = false,
   autoContinue = false,
 }: {
   pricing: EnrollmentPricingRupees;
+  seats: EnrollmentSeats;
   mode?: Mode;
   defaultReferralCode?: string;
   isLoggedIn?: boolean;
@@ -95,7 +103,7 @@ export function EnrollmentPricingWidget({
 
   const lookupReferral = async (rawCode: string): Promise<boolean> => {
     const code = normalizeReferralCode(rawCode);
-    if (!isValidReferralCodeFormat(code)) {
+    if (!isValidReferralCodeInput(code)) {
       setAppliedCode("");
       setReferrerFirstName(null);
       setReferralLookupError(code ? messages.enroll.referralInvalid : null);
@@ -133,8 +141,8 @@ export function EnrollmentPricingWidget({
       return;
     }
     const code = normalizeReferralCode(defaultReferralCode);
-    setReferralInput(code.slice(0, REFERRAL_POLICY.referralCodeLength));
-    if (!isValidReferralCodeFormat(code)) {
+    setReferralInput(code.slice(0, REFERRAL_CODE_INPUT.maxLength));
+    if (!isValidReferralCodeInput(code)) {
       setReferralLookupError(messages.enroll.referralInvalid);
       return;
     }
@@ -146,15 +154,13 @@ export function EnrollmentPricingWidget({
   const enrollFormRef = useRef<HTMLFormElement>(null);
   const autoSubmittedRef = useRef(false);
 
-  const hasValidReferral = isValidReferralCodeFormat(appliedCode) && referrerFirstName !== null;
+  const hasValidReferral = isValidReferralCodeInput(appliedCode) && referrerFirstName !== null;
   const displayRupees = hasValidReferral ? pricing.withReferralCodeInRupees : pricing.standardInRupees;
   const displayPrice = formatINR(displayRupees);
   const badgePercent = hasValidReferral
     ? discountPercentOff(pricing.standardInRupees, pricing.withReferralCodeInRupees)
     : discountPercentOff(ENROLLMENT_WIDGET.listPriceInRupees, pricing.standardInRupees);
-  const seatsPct = Math.round(
-    ((ENROLLMENT_WIDGET.seats.total - ENROLLMENT_WIDGET.seats.remaining) / ENROLLMENT_WIDGET.seats.total) * 100,
-  );
+  const seatsPct = Math.round(((seats.total - seats.remaining) / seats.total) * 100);
 
   const created = enrollState.status === "created" ? enrollState : null;
   const enrollHref = useMemo(() => buildEnrollPath(appliedCode, true), [appliedCode]);
@@ -169,7 +175,7 @@ export function EnrollmentPricingWidget({
       return;
     }
     const waitingOnRefLookup =
-      isValidReferralCodeFormat(normalizeReferralCode(defaultReferralCode)) &&
+      isValidReferralCodeInput(normalizeReferralCode(defaultReferralCode)) &&
       !hasValidReferral &&
       !referralLookupError &&
       (referralChecking || referrerFirstName === null);
@@ -253,10 +259,10 @@ export function EnrollmentPricingWidget({
             <input
               type="text"
               value={referralInput}
-              maxLength={REFERRAL_POLICY.referralCodeLength}
+              maxLength={REFERRAL_CODE_INPUT.maxLength}
               onChange={(e) => {
                 setReferralInput(
-                  normalizeReferralCode(e.target.value).slice(0, REFERRAL_POLICY.referralCodeLength),
+                  normalizeReferralCode(e.target.value).slice(0, REFERRAL_CODE_INPUT.maxLength),
                 );
                 if (referralLookupError) {
                   setReferralLookupError(null);
@@ -285,7 +291,7 @@ export function EnrollmentPricingWidget({
             <div className="flex items-center justify-between text-xs">
               <span className="font-medium text-slate-700 dark:text-slate-300">Seats available</span>
               <span className="font-semibold text-rose-600 dark:text-rose-400">
-                {ENROLLMENT_WIDGET.seats.remaining} of {ENROLLMENT_WIDGET.seats.total} remaining
+                {seats.remaining} of {seats.total} remaining
               </span>
             </div>
             <div className="mt-2 h-2.5 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">

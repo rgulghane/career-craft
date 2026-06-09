@@ -2,7 +2,7 @@ import "server-only";
 
 import { randomUUID } from "node:crypto";
 import { ObjectId } from "mongodb";
-import { isValidReferralCodeFormat, normalizeReferralCode, PROGRAM } from "@career-craft/shared";
+import { isValidReferralCodeInput, normalizeReferralCode, PROGRAM } from "@career-craft/shared";
 import "../db/load-env";
 import { mapEnrollment, mapUser, toDbId } from "../db/helpers";
 import {
@@ -39,8 +39,8 @@ export async function createEnrollment(
 
   const normalizedCode = rawReferralCode ? normalizeReferralCode(rawReferralCode) || undefined : undefined;
 
-  if (normalizedCode && !isValidReferralCodeFormat(normalizedCode)) {
-    throw new EnrollmentError(400, "invalid_referral", "Referral code must be 6 characters");
+  if (normalizedCode && !isValidReferralCodeInput(normalizedCode)) {
+    throw new EnrollmentError(400, "invalid_referral", "Referral code is not valid");
   }
 
   const pricing = await getPricingSettings();

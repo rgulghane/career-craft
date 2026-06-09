@@ -5,9 +5,11 @@ import { EnrollmentPricingWidget } from "@/components/enrollment-pricing-widget"
 import { ScrollToEnrollmentButton } from "@/components/landing/scroll-to-enrollment-button";
 import { SeatsUrgencyNote } from "@/components/seats-urgency-note";
 import type { EnrollmentPricingRupees } from "@/lib/pricing-types";
+import type { EnrollmentSeats } from "@/lib/seats-types";
 
 export function LandingHero({
   pricing,
+  seats,
   isLoggedIn = false,
   isEnrolled = false,
   firstName,
@@ -15,6 +17,7 @@ export function LandingHero({
   defaultReferralCode = "",
 }: {
   pricing: EnrollmentPricingRupees;
+  seats: EnrollmentSeats;
   isLoggedIn?: boolean;
   isEnrolled?: boolean;
   firstName?: string;
@@ -54,9 +57,9 @@ export function LandingHero({
             {!isEnrolled ? (
               <div className="mt-8 flex flex-col items-start gap-4 enroll:hidden">
                 <ScrollToEnrollmentButton className="inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-amber-500 to-orange-600 px-6 py-3.5 text-sm font-semibold text-slate-950 shadow-lg shadow-orange-500/25 transition hover:from-amber-400 hover:to-orange-500">
-                  `ENROLL NOW`
+                  ENROLL NOW
                 </ScrollToEnrollmentButton>
-                <SeatsUrgencyNote variant="inline" />
+                <SeatsUrgencyNote seats={seats} variant="inline" />
               </div>
             ) : null}
 
@@ -74,6 +77,7 @@ export function LandingHero({
             ) : !isEnrolled ? (
               <EnrollmentPricingWidget
                 pricing={pricing}
+                seats={seats}
                 mode="marketing"
                 isLoggedIn={isLoggedIn}
                 defaultReferralCode={defaultReferralCode}

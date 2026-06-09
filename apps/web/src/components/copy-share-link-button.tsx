@@ -4,12 +4,12 @@ import { useState } from "react";
 import { messages } from "@career-craft/shared/content";
 import { theme } from "@/lib/theme";
 
-export function CopyShareLinkButton({ shareUrl }: { shareUrl: string }) {
+export function CopyShareLinkButton({ shareMessage }: { shareMessage: string }) {
   const [copied, setCopied] = useState(false);
 
   async function copyLink() {
     try {
-      await navigator.clipboard.writeText(shareUrl);
+      await navigator.clipboard.writeText(shareMessage);
       setCopied(true);
       window.setTimeout(() => {
         setCopied(false);
@@ -21,7 +21,7 @@ export function CopyShareLinkButton({ shareUrl }: { shareUrl: string }) {
 
   return (
     <button type="button" className={theme.btnSecondary} onClick={() => void copyLink()}>
-      {copied ? "Copied!" : messages.dashboard.copyLink}
+      {copied ? "Copied!" : messages.dashboard.copyShareMessage}
     </button>
   );
 }

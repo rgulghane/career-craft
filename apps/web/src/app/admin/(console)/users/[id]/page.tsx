@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { AdminCard } from "@/components/admin/admin-card";
 import { getAdminUser } from "@/server/services/admin/users";
 import { DeleteUserButton } from "./delete-user-button";
+import { ReferralCodeEditor } from "./referral-code-editor";
 import { UserEditor } from "./user-editor";
 
 type Params = { params: Promise<{ id: string }> };
@@ -20,6 +21,11 @@ export default async function AdminUserDetailPage({ params }: Params) {
         ← Users
       </Link>
       <h1 className="text-3xl font-bold text-white">{data.user.fullName}</h1>
+      <ReferralCodeEditor
+        userId={id}
+        initialCode={data.user.referralCode}
+        hasPaidEnrollment={data.user.hasPaidEnrollment}
+      />
       <UserEditor userId={id} initial={data.user} />
       <AdminCard title="Enrollments">
         <ul className="space-y-2 text-sm">

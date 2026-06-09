@@ -1,23 +1,31 @@
-import type { Metadata } from "next";
 import Link from "next/link";
-import { CURRICULUM_PAGE, LANDING, PROGRAM } from "@career-craft/shared";
+import { CURRICULUM_PAGE, LANDING } from "@career-craft/shared";
 import { AppPageShell } from "@/components/app-page-shell";
 import { CurriculumWeekGrid } from "@/components/curriculum/week-grid";
+import { JsonLd } from "@/components/json-ld";
 import { SeatsUrgencyNote } from "@/components/seats-urgency-note";
+import { getEnrollmentSeats } from "@/lib/seats.server";
 import { getSessionUser, userHasPaidEnrollment } from "@/lib/server-api";
+import { createPageMetadata, getCourseJsonLd } from "@/lib/seo";
+import { getSiteOrigin } from "@career-craft/shared";
 
-export const metadata: Metadata = {
-  title: `Curriculum — ${PROGRAM.name}`,
+export const metadata = createPageMetadata({
+  title: "Curriculum",
   description:
     "12-week AI & business analytics program: ChatGPT, Excel, Python, SQL, Power BI, Canva, automation, case studies, and career launch.",
-};
-
+  path: "/curriculum",
+});
 export default async function CurriculumPage() {
   const user = await getSessionUser();
-  const isEnrolled = user ? await userHasPaidEnrollment(user.id) : false;
+  const origin = getSiteOrigin();
+  const [isEnrolled, seats] = await Promise.all([
+    user ? userHasPaidEnrollment(user.id) : Promise.resolve(false),
+    getEnrollmentSeats(),
+  ]);
 
   return (
     <AppPageShell>
+      {origin ? <JsonLd data={getCourseJsonLd(`${origin}/curriculum`)} /> : null}
       <div className="max-w-3xl">
         <p className="text-sm font-semibold uppercase tracking-widest text-amber-600 dark:text-amber-400">
           {CURRICULUM_PAGE.eyebrow}
@@ -43,7 +51,7 @@ export default async function CurriculumPage() {
           >
             Enroll now
           </Link>
-          <SeatsUrgencyNote />
+          <SeatsUrgencyNote seats={seats} />
         </div>
       ) : null}
     </AppPageShell>

@@ -1,10 +1,16 @@
 /** Copy & config for the enrollment pricing card (matches product spec). */
 
+/** Default seat capacity shown before an admin saves custom values. */
+export const DEFAULT_SEATS = {
+  total: 200,
+  remaining: 27,
+} as const;
+
 export const ENROLLMENT_WIDGET = {
   listPriceInRupees: 10_000, // after deadline
   emiMonths: 12,
   cohortLabel: "2026 Summer batch",
-  seats: { total: 200, remaining: 27 },
+  seats: DEFAULT_SEATS,
   viewingCount: {
     initial: 47,
     min: 20,

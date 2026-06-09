@@ -22,6 +22,11 @@ export const adminUpdateUserBodySchema = z.object({
   referralCode: optionalReferralCodeSchema.nullable().optional(),
 });
 
+/** Set or clear a student's referral code — full and read-only portal admins. */
+export const adminSetReferralCodeBodySchema = z.object({
+  referralCode: optionalReferralCodeSchema.nullable(),
+});
+
 export const adminEnrollmentListQuerySchema = z.object({
   status: z.enum(["PENDING", "PAID", "REFUNDED"]).optional(),
   userId: z.string().optional(),
@@ -174,8 +179,22 @@ export type AdminMentorVisibilityBody = z.infer<typeof adminMentorVisibilityBody
 export type AdminCompanyLogoBody = z.infer<typeof adminCompanyLogoBodySchema>;
 export type AdminUpdatePricingBody = z.infer<typeof adminUpdatePricingBodySchema>;
 
+/** Admin-managed cohort seat counts for the enrollment widget. */
+export const adminUpdateSeatsBodySchema = z
+  .object({
+    total: z.number().int().min(1).max(100_000),
+    remaining: z.number().int().min(0).max(100_000),
+  })
+  .refine((data) => data.remaining <= data.total, {
+    message: "Remaining seats cannot exceed total capacity",
+    path: ["remaining"],
+  });
+
+export type AdminUpdateSeatsBody = z.infer<typeof adminUpdateSeatsBodySchema>;
+
 export type AdminLoginBody = z.infer<typeof adminLoginBodySchema>;
 export type AdminCreateReadonlyAdminBody = z.infer<typeof adminCreateReadonlyAdminBodySchema>;
 export type AdminUpdateUserBody = z.infer<typeof adminUpdateUserBodySchema>;
+export type AdminSetReferralCodeBody = z.infer<typeof adminSetReferralCodeBodySchema>;
 export type AdminUpdateEnrollmentBody = z.infer<typeof adminUpdateEnrollmentBodySchema>;
 export type AdminGrantDirectEnrollmentBody = z.infer<typeof adminGrantDirectEnrollmentBodySchema>;

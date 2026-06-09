@@ -5,8 +5,8 @@ import {
   type CompanyLogoDocument,
   type EnrollmentDocument,
   type MentorDocument,
-  type PricingSettingsDocument,
   type RazorpayWebhookEventDocument,
+  type SettingsDocument,
   type ReferralDocument,
   type UserDocument,
 } from "./types";
@@ -149,6 +149,6 @@ export async function companyLogosCollection(): Promise<Collection<CompanyLogoDo
   return (await mongoClient()).db().collection<CompanyLogoDocument>(COLLECTIONS.companyLogos);
 }
 
-export async function settingsCollection(): Promise<Collection<PricingSettingsDocument>> {
-  return (await mongoClient()).db().collection<PricingSettingsDocument>(COLLECTIONS.settings);
+export async function settingsCollection(): Promise<Collection<SettingsDocument>> {
+  return (await mongoClient()).db().collection<SettingsDocument>(COLLECTIONS.settings);
 }

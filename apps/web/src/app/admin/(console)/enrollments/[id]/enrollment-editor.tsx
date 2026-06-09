@@ -3,8 +3,8 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import {
-  REFERRAL_POLICY,
-  isValidReferralCodeFormat,
+  REFERRAL_CODE_INPUT,
+  isValidReferralCodeInput,
   normalizeReferralCode,
 } from "@career-craft/shared";
 import { AdminCard } from "@/components/admin/admin-card";
@@ -64,8 +64,10 @@ export function EnrollmentEditor({
         onSubmit={(e) => {
           e.preventDefault();
           const code = normalizeReferralCode(referralCodeUsed);
-          if (code && !isValidReferralCodeFormat(code)) {
-            setMessage(`Referral code must be ${REFERRAL_POLICY.referralCodeLength} characters`);
+          if (code && !isValidReferralCodeInput(code)) {
+            setMessage(
+              `Referral code must be ${REFERRAL_CODE_INPUT.minLength}–${REFERRAL_CODE_INPUT.maxLength} characters`,
+            );
             return;
           }
           void patch({
@@ -88,10 +90,10 @@ export function EnrollmentEditor({
           <input
             className="mt-1 w-full rounded-lg border border-white/15 bg-white/5 px-3 py-2 font-mono text-white"
             value={referralCodeUsed}
-            maxLength={REFERRAL_POLICY.referralCodeLength}
+            maxLength={REFERRAL_CODE_INPUT.maxLength}
             onChange={(ev) =>
               setReferralCodeUsed(
-                normalizeReferralCode(ev.target.value).slice(0, REFERRAL_POLICY.referralCodeLength),
+                normalizeReferralCode(ev.target.value).slice(0, REFERRAL_CODE_INPUT.maxLength),
               )
             }
           />

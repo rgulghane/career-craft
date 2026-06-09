@@ -95,9 +95,30 @@ function referralCodeUsesAlphabet(code: string): boolean {
   return true;
 }
 
-/** Validates referral codes (exactly `referralCodeLength` chars from the allowed alphabet). */
+/** Validates auto-generated referral codes (exactly 6 chars from the allowed alphabet). */
 export function isValidReferralCodeFormat(code: string): boolean {
   return code.length === REFERRAL_POLICY.referralCodeLength && referralCodeUsesAlphabet(code);
+}
+
+/** Accepted lengths for admin-assigned and user-entered referral codes. */
+export const REFERRAL_CODE_INPUT = {
+  minLength: 6,
+  maxLength: 12,
+} as const;
+
+/** Validates referral codes at enrollment / lookup (custom admin codes or auto-generated). */
+export function isValidReferralCodeInput(code: string): boolean {
+  const normalized = normalizeReferralCode(code);
+  if (!normalized) {
+    return false;
+  }
+  if (
+    normalized.length < REFERRAL_CODE_INPUT.minLength ||
+    normalized.length > REFERRAL_CODE_INPUT.maxLength
+  ) {
+    return false;
+  }
+  return /^[A-Z0-9]+$/.test(normalized);
 }
 
 const APP_ORIGIN_ENV_KEYS = ["APP_ORIGIN", "NEXT_PUBLIC_APP_ORIGIN"] as const;

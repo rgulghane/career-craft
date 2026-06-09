@@ -1,6 +1,6 @@
 import "server-only";
 
-import type { AdminUpdateUserBody, UserType } from "@career-craft/shared";
+import type { AdminSetReferralCodeBody, AdminUpdateUserBody, UserType } from "@career-craft/shared";
 import { PORTAL_ADMIN_TYPES } from "@career-craft/shared";
 import "../../db/load-env";
 import { mapEnrollment, mapReferral, mapUser, toDbId, toIdString } from "../../db/helpers";
@@ -254,6 +254,47 @@ export async function updateAdminUser(
     hasPaidEnrollment: Boolean(paid),
     createdAt: u.createdAt.toISOString(),
   };
+}
+
+/** Assign a custom referral code (or clear it). Portal admins — full or read-only. */
+export async function setAdminUserReferralCode(
+  userId: string,
+  body: AdminSetReferralCodeBody,
+): Promise<string | null> {
+  const users = await usersCollection();
+  const doc = await users.findOne({ _id: toDbId(userId) });
+  if (!doc) {
+    throw new AdminServiceError(404, "User not found");
+  }
+
+  const userType = doc.userType ?? "student";
+  if ((PORTAL_ADMIN_TYPES as readonly string[]).includes(userType)) {
+    throw new AdminServiceError(400, "Portal admin accounts do not use referral codes.");
+  }
+
+  const $set: Record<string, unknown> = { updatedAt: new Date() };
+  const $unset: Record<string, ""> = {};
+
+  if (body.referralCode === null || body.referralCode === "") {
+    $unset.referralCode = "";
+  } else {
+    const clash = await users.findOne({
+      referralCode: body.referralCode,
+      _id: { $ne: toDbId(userId) },
+    });
+    if (clash) {
+      throw new AdminServiceError(409, "Referral code already in use");
+    }
+    $set.referralCode = body.referralCode;
+  }
+
+  await users.updateOne(
+    { _id: toDbId(userId) },
+    { $set, ...(Object.keys($unset).length > 0 ? { $unset } : {}) },
+  );
+
+  const updated = await users.findOne({ _id: toDbId(userId) });
+  return updated?.referralCode ?? null;
 }
 
 export async function regenerateAdminUserReferralCode(userId: string): Promise<string> {

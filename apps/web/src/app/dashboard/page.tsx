@@ -1,17 +1,20 @@
-import type { Metadata } from "next";
 import Link from "next/link";
-import { PROGRAM, messages } from "@career-craft/shared";
+import { PROGRAM, buildReferralShareMessage, messages } from "@career-craft/shared";
 import { AppPageShell } from "@/components/app-page-shell";
 import { CopyShareLinkButton } from "@/components/copy-share-link-button";
 import { SignOutButton } from "@/components/sign-out-button";
 import { serverConfig } from "@/lib/config";
 import { fetchDashboard, getSessionUser } from "@/lib/server-api";
-import { formatINR } from "@/lib/format";
+import { getEnrollmentPricingRupees } from "@/lib/pricing.server";
+import { discountPercentOff, formatINR } from "@/lib/format";
 import { theme } from "@/lib/theme";
+import { createPageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
-  title: `${messages.nav.dashboard} — ${PROGRAM.name}`,
-};
+export const metadata = createPageMetadata({
+  title: messages.nav.dashboard,
+  description: "Your AI Career Launchpad referral dashboard and enrollment status.",
+  noIndex: true,
+});
 
 function MilestoneBar({ label, value, target }: { label: string; value: number; target: number }) {
   const pct = Math.min(100, Math.round((value / target) * 100));
@@ -63,6 +66,22 @@ export default async function DashboardPage() {
   const sharePath = data.user.referralCode ? `/enroll?ref=${encodeURIComponent(data.user.referralCode)}` : "";
   const shareUrl = sharePath ? `${origin}${sharePath}` : "";
   const reward = formatINR(serverConfig.referral.cashPerReferralRupees);
+  const enrollmentPricing = getEnrollmentPricingRupees();
+  const referralDiscountPercent = discountPercentOff(
+    enrollmentPricing.standardInRupees,
+    enrollmentPricing.withReferralCodeInRupees,
+  );
+  const shareMessage =
+    shareUrl && data.user.referralCode
+      ? buildReferralShareMessage({
+          programName: PROGRAM.name,
+          shareUrl,
+          referralCode: data.user.referralCode,
+          referralDiscountPercent,
+          referralPriceLabel: formatINR(enrollmentPricing.withReferralCodeInRupees),
+          standardPriceLabel: formatINR(enrollmentPricing.standardInRupees),
+        })
+      : "";
 
   return (
     <AppPageShell>
@@ -89,6 +108,11 @@ export default async function DashboardPage() {
               </p>
               <p className={`mt-3 ${theme.body}`}>{messages.dashboard.shareLink}</p>
               <p className="mt-1 break-all font-mono text-xs text-slate-600 dark:text-slate-300">{shareUrl}</p>
+              {shareMessage ? (
+                <pre className="mt-4 whitespace-pre-wrap rounded-lg border border-slate-200 bg-slate-50 p-3 text-xs leading-relaxed text-slate-600 dark:border-white/10 dark:bg-white/5 dark:text-slate-300">
+                  {shareMessage}
+                </pre>
+              ) : null}
               <p className={`mt-3 text-xs ${theme.body}`}>
                 Qualify after {serverConfig.referral.refundWindowDays}-day refund window · {reward} per qualified referral
               </p>
@@ -97,12 +121,12 @@ export default async function DashboardPage() {
             <p className={`mt-3 ${theme.body}`}>{messages.dashboard.notEnrolled}</p>
           )}
           <div className="mt-6 flex flex-wrap gap-3">
-            {shareUrl ? (
+            {shareMessage ? (
               <>
-                <CopyShareLinkButton shareUrl={shareUrl} />
+                <CopyShareLinkButton shareMessage={shareMessage} />
                 <a
                   className={theme.btnSecondary}
-                  href={`https://wa.me/?text=${encodeURIComponent(`Join me on ${PROGRAM.name}: ${shareUrl}`)}`}
+                  href={`https://wa.me/?text=${encodeURIComponent(shareMessage)}`}
                   target="_blank"
                   rel="noreferrer"
                 >

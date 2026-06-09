@@ -38,6 +38,17 @@ export const messages = {
     deleteUserConfirm: (name: string, email: string) =>
       `Permanently delete ${name} (${email})? This removes their enrollments and referrals. This cannot be undone.`,
     deleteUserCta: "Delete user",
+    referralCodeTitle: "Referral code",
+    referralCodeHint:
+      "Set a custom code (6–12 letters/numbers, e.g. SUMMER26). Available to full and viewer admins.",
+    referralCodeSave: "Save code",
+    referralCodeClear: "Clear code",
+    referralCodeSaved: "Referral code updated.",
+    referralCodeCleared: "Referral code removed.",
+    referralCodeRegenerate: "Generate random code",
+    referralCodeRegenerated: "Random referral code generated.",
+    referralCodeInUse: "That referral code is already assigned to another user.",
+    referralCodeReadOnlyNote: "Viewer admins can set custom codes but cannot edit other profile fields.",
     deleteUserSuccess: "User deleted.",
     directEnrollTitle: "Direct enrollment",
     directEnrollSubtitle:
@@ -103,6 +114,7 @@ export const messages = {
     yourCode: "Your referral code",
     shareLink: "Share link",
     copyLink: "Copy link",
+    copyShareMessage: "Copy share message",
     stats: "Progress",
     qualified: "Qualified",
     pending: "Pending",
