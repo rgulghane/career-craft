@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { mentorCompanyLogoUrl } from "./company-logo-slugs";
+import { resolveCompanyLogoUrls } from "./company-logo-slugs";
 import { LogoImage } from "./logo-image";
 import { toolBrandIconUrl } from "./tool-brands";
 
@@ -75,7 +75,7 @@ function CompanyLogoTile({
   return (
     <span className={className}>
       <LogoImage
-        src={logoUrl}
+        sources={resolveCompanyLogoUrls(company, logoUrl)}
         alt={company}
         className={imgClassName}
         fallback={
@@ -94,7 +94,6 @@ export function MentorSpotlightCard({
   priority?: boolean;
 }) {
   const hasLinkedIn = Boolean(mentor.linkedInUrl && mentor.linkedInUrl.trim() !== "" && mentor.linkedInUrl !== "#");
-  const currentLogoUrl = mentor.companyLogoUrl?.trim() || mentorCompanyLogoUrl(mentor.company);
   const previousCompanies = mentor.previouslyAt ?? [];
   return (
     <article className="group relative mx-auto w-full max-w-[23rem] sm:max-w-[25rem]">
@@ -188,7 +187,7 @@ export function MentorSpotlightCard({
               <span className="inline-flex max-w-full items-center gap-2.5 rounded-full border border-amber-200/80 bg-gradient-to-r from-amber-50 to-orange-50/70 py-1.5 pl-1.5 pr-4 shadow-[0_4px_14px_-8px_rgba(217,119,6,0.4)]">
                 <CompanyLogoTile
                   company={mentor.company}
-                  logoUrl={currentLogoUrl}
+                  logoUrl={mentor.companyLogoUrl}
                   className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full bg-white ring-1 ring-amber-200/70"
                   imgClassName="h-5 w-5 object-contain"
                   initialsClassName="text-[0.7rem] font-bold uppercase text-amber-700"

@@ -239,6 +239,11 @@ export const LANDING = {
           "Classes are held live every Saturday from 2:00 – 4:00 PM IST. Missed a session? Recordings go up on the UniConnect app within 24 hours, and your access stays active for a full 12 months.",
       },
       {
+        question: "What does the 12-week course cover?",
+        answer:
+          "The program runs in three phases: Weeks 1–4 build AI and data foundations (ChatGPT, Claude, Gemini, prompt engineering, Excel, Python, and SQL). Weeks 5–8 focus on analytics and applied AI (Power BI dashboards, Canva visual storytelling, and no-code automation with real case studies). Weeks 9–12 are career launch — ATS resume polish, interview prep, and a capstone portfolio project you can show employers.",
+      },
+      {
         question: "How much does the program cost?",
         answer:
           `Enrollment is ${STANDARD_PRICE_PLACEHOLDER} for the full program, with payments handled securely via Razorpay.`,

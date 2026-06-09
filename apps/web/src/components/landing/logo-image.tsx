@@ -1,39 +1,60 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 
 /**
- * Renders a logo image, falling back to `fallback` when there is no source or
- * the image fails to load (e.g. a CDN icon that no longer exists). Keeps the
- * mentor cards from showing broken-image icons.
+ * Renders a logo image, trying each URL in `sources` before showing `fallback`.
+ * Handles dead SimpleIcons links and missing DB icons gracefully.
  */
 export function LogoImage({
   src,
+  sources,
   alt,
   className,
   fallback,
 }: {
+  /** Primary URL (legacy — merged into `sources` when provided). */
   src?: string | null;
+  /** Ordered URLs to try; first success wins. */
+  sources?: readonly string[];
   alt: string;
   className?: string;
   fallback: ReactNode;
 }) {
-  const [errored, setErrored] = useState(false);
-  const trimmed = src?.trim();
+  const candidates = useMemo(() => {
+    const list: string[] = [];
+    for (const raw of sources ?? (src ? [src] : [])) {
+      const trimmed = raw?.trim();
+      if (trimmed && !list.includes(trimmed)) {
+        list.push(trimmed);
+      }
+    }
+    return list;
+  }, [sources, src]);
 
-  if (!trimmed || errored) {
+  const [index, setIndex] = useState(0);
+  const candidateKey = candidates.join("|");
+
+  useEffect(() => {
+    setIndex(0);
+  }, [candidateKey]);
+
+  const current = candidates[index];
+
+  if (!current || index >= candidates.length) {
     return <>{fallback}</>;
   }
 
   return (
     // eslint-disable-next-line @next/next/no-img-element
     <img
-      src={trimmed}
+      key={current}
+      src={current}
       alt={alt}
       className={className}
       loading="lazy"
       decoding="async"
-      onError={() => setErrored(true)}
+      onError={() => setIndex((i) => i + 1)}
     />
   );
 }

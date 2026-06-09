@@ -1,9 +1,9 @@
 "use client";
 
-import { mentorCompanyLogoUrl } from "./company-logo-slugs";
+import { resolveCompanyLogoUrls } from "./company-logo-slugs";
 import { LogoImage } from "./logo-image";
 
-export { mentorCompanyLogoUrl };
+export { mentorCompanyLogoUrl, resolveCompanyLogoUrls } from "./company-logo-slugs";
 
 export function MentorCompanyLogo({
   company,
@@ -12,11 +12,9 @@ export function MentorCompanyLogo({
   company: string;
   logoUrl?: string | null;
 }) {
-  const resolvedUrl = logoUrl?.trim() || mentorCompanyLogoUrl(company);
-
   return (
     <LogoImage
-      src={resolvedUrl}
+      sources={resolveCompanyLogoUrls(company, logoUrl)}
       alt={company}
       className="mx-auto h-8 w-auto max-w-[9rem] object-contain sm:h-9"
       fallback={

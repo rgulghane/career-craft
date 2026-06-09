@@ -8,6 +8,8 @@ import {
   isAllowedCompanyLogoMime,
   isAllowedMentorPhotoMime,
 } from "@career-craft/shared";
+import { resolveCompanyLogoUrls } from "@/components/landing/company-logo-slugs";
+import { LogoImage } from "@/components/landing/logo-image";
 import { MentorSpotlightCard } from "@/components/landing/mentor-spotlight-card";
 
 type CompanyLogoOption = { company: string; logoUrl: string };
@@ -699,14 +701,16 @@ function PreviouslyAtSelect({
                 key={`${value}-${index}`}
                 className="inline-flex items-center gap-1.5 rounded-md bg-white/10 px-2 py-1 text-xs text-white"
               >
-                {logoUrl ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={logoUrl}
-                    alt=""
-                    className="h-4 w-4 rounded-sm bg-white object-contain p-0.5"
-                  />
-                ) : null}
+                <LogoImage
+                  sources={resolveCompanyLogoUrls(value, logoUrl)}
+                  alt=""
+                  className="h-4 w-4 rounded-sm bg-white object-contain p-0.5"
+                  fallback={
+                    <span className="flex h-4 w-4 items-center justify-center rounded-sm bg-white/20 text-[0.5rem] font-bold uppercase text-slate-300">
+                      {value.slice(0, 2)}
+                    </span>
+                  }
+                />
                 {value}
                 <button
                   type="button"
@@ -772,12 +776,16 @@ function CompanySelect({
         <RequiredMark />
       </span>
       <div className="mt-1 flex items-center gap-2">
-        {selectedLogoUrl && !adding ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={selectedLogoUrl}
+        {trimmed && !adding ? (
+          <LogoImage
+            sources={resolveCompanyLogoUrls(trimmed, selectedLogoUrl)}
             alt=""
             className="h-9 w-9 shrink-0 rounded bg-white object-contain p-1"
+            fallback={
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded bg-white/10 text-xs font-bold uppercase text-slate-400">
+                {trimmed.slice(0, 2)}
+              </span>
+            }
           />
         ) : null}
         <select
