@@ -1,8 +1,7 @@
 /** Marketing / landing page content (AI Career Launchpad accelerator). */
 
-import { getStandardPriceInRupees } from "./constants.js";
-
-const STANDARD_PRICE_LABEL = `₹${getStandardPriceInRupees().toLocaleString("en-IN")}`;
+/** Replaced at render time with the live enrollment standard fee (see `applyStandardPriceLabel`). */
+export const STANDARD_PRICE_PLACEHOLDER = "__STANDARD_PRICE__";
 
 export const LANDING = {
   hero: {
@@ -182,7 +181,7 @@ export const LANDING = {
         role: "B.Com — Referral Agent + Analyst",
         rating: 4.5,
         quote:
-          `Best investment of ${STANDARD_PRICE_LABEL} I ever made. The referral program paid for my next month's rent!`,
+          `Best investment of ${STANDARD_PRICE_PLACEHOLDER} I ever made. The referral program paid for my next month's rent!`,
       },
       {
         name: "Vikram Reddy",
@@ -242,7 +241,7 @@ export const LANDING = {
       {
         question: "How much does the program cost?",
         answer:
-          `Enrollment is ${STANDARD_PRICE_LABEL} for the full program, with payments handled securely via Razorpay.`,
+          `Enrollment is ${STANDARD_PRICE_PLACEHOLDER} for the full program, with payments handled securely via Razorpay.`,
       },
       {
         question: "What is the refund policy?",

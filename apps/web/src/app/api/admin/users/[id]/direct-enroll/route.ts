@@ -24,7 +24,12 @@ export async function POST(req: Request, { params }: Params) {
     }
 
     try {
-      const result = await grantDirectEnrollment(id, admin.id, parsed.data.reason);
+      const result = await grantDirectEnrollment(
+        id,
+        admin.id,
+        parsed.data.category,
+        parsed.data.reason,
+      );
       return NextResponse.json(result);
     } catch (err) {
       return adminServiceErrorResponse(err);

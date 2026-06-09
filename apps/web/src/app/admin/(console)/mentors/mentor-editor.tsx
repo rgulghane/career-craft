@@ -92,6 +92,12 @@ export function MentorEditor({
 
   const pendingChanges = dirty || serverUnpublished;
 
+  const canCreateMentor =
+    form.name.trim() !== "" &&
+    form.designation.trim() !== "" &&
+    form.company.trim() !== "" &&
+    isPreviewablePhoto(form.photo);
+
   function update<K extends keyof MentorEditState>(key: K, value: MentorEditState[K]) {
     setForm((prev) => ({ ...prev, [key]: value }));
     setDirty(true);
@@ -394,13 +400,12 @@ export function MentorEditor({
           </p>
 
           <div className="mt-6 rounded-2xl bg-gradient-to-br from-slate-900 to-slate-800 p-6">
-            {isPreviewablePhoto(form.photo) ? (
-              <MentorSpotlightCard mentor={previewData} priority />
-            ) : (
-              <div className="flex min-h-[20rem] items-center justify-center rounded-2xl border border-dashed border-white/20 text-center text-sm text-slate-400">
-                Add a valid photo URL to preview the mentor card.
-              </div>
-            )}
+            <MentorSpotlightCard mentor={previewData} priority />
+            {!isPreviewablePhoto(form.photo) ? (
+              <p className="mt-4 text-center text-xs text-slate-500">
+                Showing a default profile image — add a photo URL to preview the real one.
+              </p>
+            ) : null}
           </div>
         </div>
       </div>
@@ -426,12 +431,14 @@ export function MentorEditor({
             value={form.name}
             onChange={(v) => update("name", v)}
             placeholder="Eshan Tiwari"
+            required
           />
           <Field
             label="Designation"
             value={form.designation}
             onChange={(v) => update("designation", v)}
             placeholder="Sr. Staff Data Scientist"
+            required
           />
           <div className="grid gap-4 sm:grid-cols-2">
             <CompanySelect
@@ -528,7 +535,10 @@ export function MentorEditor({
             type="url"
           />
           <div className="space-y-2">
-            <span className="text-sm text-slate-400">Photo</span>
+            <span className="text-sm text-slate-400">
+              Photo
+              <RequiredMark />
+            </span>
             <div className="flex flex-wrap items-center gap-3">
               <input
                 ref={fileInputRef}
@@ -575,7 +585,7 @@ export function MentorEditor({
             {mode === "create" ? (
               <button
                 type="submit"
-                disabled={busy}
+                disabled={busy || !canCreateMentor}
                 className="rounded-lg bg-amber-500 px-4 py-2 text-sm font-semibold text-slate-950 transition hover:bg-amber-400 disabled:opacity-60"
               >
                 {busy ? "Creating…" : "Create mentor"}
@@ -757,7 +767,10 @@ function CompanySelect({
 
   return (
     <label className="block text-sm">
-      <span className="text-slate-400">Company</span>
+      <span className="text-slate-400">
+        Company
+        <RequiredMark />
+      </span>
       <div className="mt-1 flex items-center gap-2">
         {selectedLogoUrl && !adding ? (
           // eslint-disable-next-line @next/next/no-img-element
@@ -801,6 +814,7 @@ function Field({
   disabled,
   placeholder,
   type = "text",
+  required = false,
 }: {
   label: string;
   value: string;
@@ -808,18 +822,32 @@ function Field({
   disabled?: boolean;
   placeholder?: string;
   type?: string;
+  required?: boolean;
 }) {
   return (
     <label className="block text-sm">
-      <span className="text-slate-400">{label}</span>
+      <span className="text-slate-400">
+        {label}
+        {required ? <RequiredMark /> : null}
+      </span>
       <input
         type={type}
         className={FIELD_CLASS}
         value={value}
         placeholder={placeholder}
         disabled={disabled}
+        aria-required={required}
         onChange={(e) => onChange(e.target.value)}
       />
     </label>
+  );
+}
+
+/** Small red asterisk marking a mandatory field. */
+function RequiredMark() {
+  return (
+    <span className="ml-0.5 text-rose-400" title="Required" aria-hidden>
+      *
+    </span>
   );
 }

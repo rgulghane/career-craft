@@ -5,14 +5,14 @@ export const PROGRAM = {
   defaultCurrency: "INR",
 } as const;
 
-/** Default amounts when env overrides are not set (INR rupees). */
+/** Default course fees (INR rupees). Used as enrollment fallback when admin has not set custom prices. */
 export const DEFAULT_PRICING = {
   standardInRupees: 5_000,
   withReferralCodeInRupees: 2_500,
 } as const;
 
-/** Server + build-time; use for payments and SSR. */
-const STANDARD_PRICE_ENV_KEYS = ["STANDARD_PRICE", "NEXT_PUBLIC_STANDARD_PRICE"] as const;
+/** Same default standard fee used by enrollment when no admin override is saved. */
+export const ENROLLMENT_STANDARD_PRICE_IN_RUPEES = DEFAULT_PRICING.standardInRupees;
 
 /** Server + build-time; use for payments and SSR. */
 const REFERRAL_PRICE_ENV_KEYS = ["REFERRAL_PRICE", "NEXT_PUBLIC_REFERRAL_PRICE"] as const;
@@ -37,12 +37,9 @@ function readMoneyRupees(
   return fallback;
 }
 
-/** Standard enrollment price (rupees). Override via `STANDARD_PRICE`. */
+/** Standard enrollment price (rupees). Matches the enrollment fallback in `getPricingSettings()`. */
 export function getStandardPriceInRupees(): number {
-  return readMoneyRupees(
-    STANDARD_PRICE_ENV_KEYS,
-    DEFAULT_PRICING.standardInRupees,
-  );
+  return ENROLLMENT_STANDARD_PRICE_IN_RUPEES;
 }
 
 /** Price when a valid referral code is applied (rupees). Override via `REFERRAL_PRICE`. */

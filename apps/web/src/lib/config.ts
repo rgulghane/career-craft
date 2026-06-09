@@ -1,10 +1,10 @@
 import "server-only";
 
 import {
+  DEFAULT_PRICING,
   getCashPerReferralInRupees,
   getReferralPriceInRupees,
   getSiteOrigin,
-  getStandardPriceInRupees,
 } from "@career-craft/shared";
 
 /**
@@ -86,7 +86,7 @@ export const serverConfig = {
   },
   pricing: {
     get standardInRupees() {
-      return getStandardPriceInRupees();
+      return DEFAULT_PRICING.standardInRupees;
     },
     get withReferralInRupees() {
       return getReferralPriceInRupees();

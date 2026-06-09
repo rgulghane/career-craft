@@ -2,7 +2,11 @@ import "server-only";
 
 import { randomUUID } from "node:crypto";
 import { type ClientSession, ObjectId } from "mongodb";
-import { PORTAL_ADMIN_TYPES, PROGRAM } from "@career-craft/shared";
+import {
+  type DirectEnrollmentCategory,
+  PORTAL_ADMIN_TYPES,
+  PROGRAM,
+} from "@career-craft/shared";
 import "../../db/load-env";
 import { toDbId, toIdString } from "../../db/helpers";
 import { enrollmentsCollection, mongoClient, usersCollection } from "../../db/mongo-client";
@@ -59,6 +63,7 @@ async function ensureReferralCode(
 export async function grantDirectEnrollment(
   userId: string,
   adminId: string,
+  category: DirectEnrollmentCategory,
   reason?: string,
 ): Promise<DirectEnrollmentResult> {
   const users = await usersCollection();
@@ -76,6 +81,10 @@ export async function grantDirectEnrollment(
 
   const paid = await enrollments.findOne({ userId: toDbId(userId), status: "PAID" });
   if (paid) {
+    await users.updateOne(
+      { _id: toDbId(userId) },
+      { $set: { userType: category, updatedAt: new Date() } },
+    );
     const referralCode = await ensureReferralCode(users, userId, userDoc.referralCode ?? null);
     return {
       userId,
@@ -142,6 +151,12 @@ export async function grantDirectEnrollment(
           { session },
         );
       }
+
+      await users.updateOne(
+        { _id: toDbId(userId) },
+        { $set: { userType: category, updatedAt: now } },
+        { session },
+      );
 
       referralCode = await ensureReferralCode(users, userId, referralCode, session);
     });

@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { LANDING } from "@career-craft/shared";
+import { applyStandardPriceLabel } from "@/lib/format";
 import { Section } from "./section";
 
 function StarRating({ rating }: { rating: number }) {
@@ -27,7 +28,7 @@ function StarRating({ rating }: { rating: number }) {
   );
 }
 
-export function LandingStudentStories() {
+export function LandingStudentStories({ standardPriceLabel }: { standardPriceLabel: string }) {
   const { eyebrow, title, items } = LANDING.studentStories;
   const scrollerRef = useRef<HTMLDivElement>(null);
   const [activeIndex, setActiveIndex] = useState(0);
@@ -107,7 +108,7 @@ export function LandingStudentStories() {
           >
             <StarRating rating={story.rating} />
             <blockquote className="mt-4 flex-1 text-sm italic leading-relaxed text-slate-700 dark:text-slate-300">
-              &ldquo;{story.quote}&rdquo;
+              &ldquo;{applyStandardPriceLabel(story.quote, standardPriceLabel)}&rdquo;
             </blockquote>
             <footer className="mt-6 flex items-center gap-3 border-t border-slate-100 pt-5 dark:border-slate-700/60">
               <span

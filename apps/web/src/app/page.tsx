@@ -7,6 +7,7 @@ import { LandingMobileEnrollment } from "@/components/landing/mobile-enrollment"
 import { LandingStudentStories } from "@/components/landing/student-stories";
 import { LandingToolsMentors } from "@/components/landing/tools-mentors";
 import { getEnrollmentPricingRupees } from "@/lib/pricing.server";
+import { formatINR } from "@/lib/format";
 import { getSessionUser, userHasPaidEnrollment } from "@/lib/server-api";
 
 export default async function HomePage({
@@ -19,6 +20,7 @@ export default async function HomePage({
   const isEnrolled = user ? await userHasPaidEnrollment(user.id) : false;
   const firstName = user ? (user.fullName.split(/\s+/)[0] ?? user.fullName) : undefined;
   const pricing = await getEnrollmentPricingRupees();
+  const standardPriceLabel = formatINR(pricing.standardInRupees);
 
   return (
     <div className="-mt-px">
@@ -33,9 +35,9 @@ export default async function HomePage({
       />
       <LandingCurriculum />
       <LandingToolsMentors />
-      <LandingStudentStories />
+      <LandingStudentStories standardPriceLabel={standardPriceLabel} />
       <LandingCertifications />
-      <LandingFaq />
+      <LandingFaq standardPriceLabel={standardPriceLabel} />
       <LandingMobileEnrollment
         pricing={pricing}
         isLoggedIn={user !== null}

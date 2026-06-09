@@ -1,4 +1,4 @@
-import { ENROLLMENT_WIDGET } from "@career-craft/shared/content";
+import { ENROLLMENT_WIDGET, STANDARD_PRICE_PLACEHOLDER } from "@career-craft/shared/content";
 import type { EnrollmentPricingRupees } from "@/lib/pricing-types";
 
 /** Format a whole-rupee amount as INR (e.g. 5000 → ₹5,000). */
@@ -8,6 +8,11 @@ export function formatINR(rupees: number): string {
     currency: "INR",
     maximumFractionDigits: 0,
   }).format(rupees);
+}
+
+/** Inject the live enrollment standard fee into static marketing copy. */
+export function applyStandardPriceLabel(text: string, standardPriceLabel: string): string {
+  return text.replaceAll(STANDARD_PRICE_PLACEHOLDER, standardPriceLabel);
 }
 
 /** Rounded percent discount from `fromRupees` down to `toRupees`. */

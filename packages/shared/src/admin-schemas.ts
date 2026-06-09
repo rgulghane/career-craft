@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { USER_TYPES } from "./user-types.js";
+import { DIRECT_ENROLLMENT_CATEGORIES, USER_TYPES } from "./user-types.js";
 import { emailSchema, optionalReferralCodeSchema, passwordSchema } from "./schemas.js";
 
 export const adminLoginBodySchema = z.object({
@@ -38,6 +38,8 @@ export const adminUpdateEnrollmentBodySchema = z.object({
 });
 
 export const adminGrantDirectEnrollmentBodySchema = z.object({
+  /** Category/role the admin assigns to the enrolled user (required). */
+  category: z.enum(DIRECT_ENROLLMENT_CATEGORIES),
   /** Optional note explaining why payment is waived (audit trail). */
   reason: z.string().trim().max(500).optional(),
 });

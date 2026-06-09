@@ -1,7 +1,8 @@
 import { LANDING } from "@career-craft/shared";
+import { applyStandardPriceLabel } from "@/lib/format";
 import { Section } from "./section";
 
-export function LandingFaq() {
+export function LandingFaq({ standardPriceLabel }: { standardPriceLabel: string }) {
   const { eyebrow, title, subtitle, items } = LANDING.faq;
 
   return (
@@ -31,7 +32,9 @@ export function LandingFaq() {
                 +
               </span>
             </summary>
-            <p className="pb-4 pr-10 text-sm leading-relaxed text-slate-600 dark:text-slate-400">{item.answer}</p>
+            <p className="pb-4 pr-10 text-sm leading-relaxed text-slate-600 dark:text-slate-400">
+              {applyStandardPriceLabel(item.answer, standardPriceLabel)}
+            </p>
           </details>
         ))}
       </div>

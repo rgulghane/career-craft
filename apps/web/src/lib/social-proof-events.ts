@@ -81,12 +81,6 @@ export function randomSocialProofToast(): SocialProofToast {
       text: `${name} purchased the course from ${city}`,
     };
   }
-  if (roll < 0.5) {
-    return {
-      variant: "referral",
-      text: `${name} used referral code ${pick(REFERRAL_CODES)} and saved 50%`,
-    };
-  }
   if (roll < 0.72) {
     return {
       variant: "earn",

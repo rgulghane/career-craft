@@ -1,7 +1,12 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { messages } from "@career-craft/shared";
+import {
+  DIRECT_ENROLLMENT_CATEGORIES,
+  DIRECT_ENROLLMENT_CATEGORY_LABELS,
+  type DirectEnrollmentCategory,
+  messages,
+} from "@career-craft/shared";
 
 type Student = {
   id: string;
@@ -32,6 +37,7 @@ export function DirectEnrollmentTool() {
 
   const [confirmStudent, setConfirmStudent] = useState<Student | null>(null);
   const [reason, setReason] = useState("");
+  const [category, setCategory] = useState<DirectEnrollmentCategory | "">("");
   const [granting, setGranting] = useState(false);
 
   const requestIdRef = useRef(0);
@@ -82,6 +88,7 @@ export function DirectEnrollmentTool() {
 
   function openConfirm(student: Student) {
     setReason("");
+    setCategory("");
     setError(null);
     setNotice(null);
     setConfirmStudent(student);
@@ -95,7 +102,7 @@ export function DirectEnrollmentTool() {
   }
 
   async function confirmGrant() {
-    if (!confirmStudent) {
+    if (!confirmStudent || !category) {
       return;
     }
     const student = confirmStudent;
@@ -106,7 +113,7 @@ export function DirectEnrollmentTool() {
       const r = await fetch(`/api/admin/users/${student.id}/direct-enroll`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ reason: reason.trim() || undefined }),
+        body: JSON.stringify({ category, reason: reason.trim() || undefined }),
       });
       const body = (await r.json()) as Partial<GrantResult> & { error?: string };
       if (!r.ok) {
@@ -207,6 +214,8 @@ export function DirectEnrollmentTool() {
           student={confirmStudent}
           reason={reason}
           onReasonChange={setReason}
+          category={category}
+          onCategoryChange={setCategory}
           granting={granting}
           onCancel={closeConfirm}
           onConfirm={() => void confirmGrant()}
@@ -220,6 +229,8 @@ function ConfirmEnrollModal({
   student,
   reason,
   onReasonChange,
+  category,
+  onCategoryChange,
   granting,
   onCancel,
   onConfirm,
@@ -227,6 +238,8 @@ function ConfirmEnrollModal({
   student: Student;
   reason: string;
   onReasonChange: (value: string) => void;
+  category: DirectEnrollmentCategory | "";
+  onCategoryChange: (value: DirectEnrollmentCategory | "") => void;
   granting: boolean;
   onCancel: () => void;
   onConfirm: () => void;
@@ -261,12 +274,40 @@ function ConfirmEnrollModal({
           {messages.admin.directEnrollConfirm(student.fullName, student.email)}
         </p>
         <label className="mt-4 block text-sm">
+          <span className="text-slate-400">
+            Category
+            <span className="ml-0.5 text-rose-400" aria-hidden>
+              *
+            </span>
+          </span>
+          <select
+            value={category}
+            onChange={(e) => onCategoryChange(e.target.value as DirectEnrollmentCategory | "")}
+            autoFocus
+            aria-required
+            className="mt-1 w-full rounded-lg border border-white/15 bg-white/5 px-3 py-2 text-sm text-white [color-scheme:dark] focus:border-amber-400 focus:outline-none"
+          >
+            <option value="" disabled className="bg-slate-900 text-white">
+              Select a category…
+            </option>
+            {DIRECT_ENROLLMENT_CATEGORIES.map((c) => (
+              <option key={c} value={c} className="bg-slate-900 text-white">
+                {DIRECT_ENROLLMENT_CATEGORY_LABELS[c]}
+              </option>
+            ))}
+          </select>
+          {!category ? (
+            <span className="mt-1 block text-xs text-slate-500">
+              Select a category to enable enrollment.
+            </span>
+          ) : null}
+        </label>
+        <label className="mt-4 block text-sm">
           <span className="text-slate-400">{messages.admin.directEnrollReasonLabel}</span>
           <input
             value={reason}
             onChange={(e) => onReasonChange(e.target.value)}
             maxLength={500}
-            autoFocus
             placeholder="e.g. Scholarship / partner agreement"
             className="mt-1 w-full rounded-lg border border-white/15 bg-white/5 px-3 py-2 text-sm text-white"
           />
@@ -283,8 +324,8 @@ function ConfirmEnrollModal({
           <button
             type="button"
             onClick={onConfirm}
-            disabled={granting}
-            className="rounded-lg bg-emerald-500 px-4 py-2 text-sm font-semibold text-slate-950 hover:bg-emerald-400 disabled:opacity-60"
+            disabled={granting || !category}
+            className="rounded-lg bg-emerald-500 px-4 py-2 text-sm font-semibold text-slate-950 hover:bg-emerald-400 disabled:cursor-not-allowed disabled:opacity-60"
           >
             {granting ? "Enrolling…" : messages.admin.directEnrollCta}
           </button>

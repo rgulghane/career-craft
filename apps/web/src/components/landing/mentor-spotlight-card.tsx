@@ -1,6 +1,6 @@
 import Image from "next/image";
+import { mentorCompanyLogoUrl } from "./company-logo-slugs";
 import { LogoImage } from "./logo-image";
-import { MentorCompanyLogo } from "./mentor-company-logo";
 import { toolBrandIconUrl } from "./tool-brands";
 
 /** A single company the mentor previously worked at, with an optional icon. */
@@ -22,6 +22,25 @@ export type MentorCardData = {
   photo: string;
 };
 
+/** True when a photo source can actually be rendered (http(s) or local path). */
+function hasRenderablePhoto(url: string | undefined | null): boolean {
+  return Boolean(url && /^(https?:\/\/|\/)\S*/i.test(url.trim()));
+}
+
+/** Generic profile placeholder shown when a mentor has no usable photo. */
+function DefaultMentorAvatar() {
+  return (
+    <div
+      aria-hidden
+      className="flex h-full w-full items-end justify-center bg-gradient-to-br from-slate-100 to-slate-200"
+    >
+      <svg viewBox="0 0 24 24" className="h-[7.75rem] w-[7.75rem] text-slate-300" fill="currentColor">
+        <path d="M12 12.5a4.75 4.75 0 1 0 0-9.5 4.75 4.75 0 0 0 0 9.5Zm0 1.75c-4.7 0-8.5 2.86-8.5 6.39 0 .47.38.86.85.86h15.3c.47 0 .85-.39.85-.86 0-3.53-3.8-6.39-8.5-6.39Z" />
+      </svg>
+    </div>
+  );
+}
+
 function LinkedInBadge() {
   return (
     <span className="inline-flex h-7 w-7 items-center justify-center rounded-md bg-[#0A66C2] shadow-md shadow-[#0A66C2]/30">
@@ -39,6 +58,34 @@ function LinkedInBadge() {
   );
 }
 
+/** A square, consistently-sized brand logo with an initials fallback. */
+function CompanyLogoTile({
+  company,
+  logoUrl,
+  className,
+  imgClassName,
+  initialsClassName,
+}: {
+  company: string;
+  logoUrl?: string | null;
+  className: string;
+  imgClassName: string;
+  initialsClassName: string;
+}) {
+  return (
+    <span className={className}>
+      <LogoImage
+        src={logoUrl}
+        alt={company}
+        className={imgClassName}
+        fallback={
+          <span className={initialsClassName}>{company.trim().slice(0, 2).toUpperCase()}</span>
+        }
+      />
+    </span>
+  );
+}
+
 export function MentorSpotlightCard({
   mentor,
   priority,
@@ -47,6 +94,8 @@ export function MentorSpotlightCard({
   priority?: boolean;
 }) {
   const hasLinkedIn = Boolean(mentor.linkedInUrl && mentor.linkedInUrl.trim() !== "" && mentor.linkedInUrl !== "#");
+  const currentLogoUrl = mentor.companyLogoUrl?.trim() || mentorCompanyLogoUrl(mentor.company);
+  const previousCompanies = mentor.previouslyAt ?? [];
   return (
     <article className="group relative mx-auto w-full max-w-[23rem] sm:max-w-[25rem]">
       {/* Ambient glow behind card */}
@@ -108,14 +157,18 @@ export function MentorSpotlightCard({
               className="absolute -inset-2 rounded-full bg-gradient-to-br from-amber-300/60 via-orange-200/40 to-transparent blur-md"
             />
             <div className="relative h-[8.75rem] w-[8.75rem] overflow-hidden rounded-full bg-slate-100 ring-[5px] ring-white shadow-lg shadow-slate-900/15">
-              <Image
-                src={mentor.photo}
-                alt=""
-                fill
-                sizes="140px"
-                className="object-cover object-top transition duration-500 group-hover:scale-105"
-                priority={priority}
-              />
+              {hasRenderablePhoto(mentor.photo) ? (
+                <Image
+                  src={mentor.photo}
+                  alt=""
+                  fill
+                  sizes="140px"
+                  className="object-cover object-top transition duration-500 group-hover:scale-105"
+                  priority={priority}
+                />
+              ) : (
+                <DefaultMentorAvatar />
+              )}
             </div>
           </div>
         </div>
@@ -129,43 +182,55 @@ export function MentorSpotlightCard({
             {mentor.designation}
           </p>
 
+          {/* Career: current company (emphasized) + previous companies (muted) */}
           <div className="mt-6 w-full">
-            <p className="mb-2 flex items-center justify-center gap-1.5 text-[0.6rem] font-semibold uppercase tracking-[0.2em] text-slate-400">
-              <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-amber-400" />
-              Currently at
-            </p>
-            <div className="flex items-center justify-center rounded-2xl border border-slate-200/70 bg-white px-5 py-4 shadow-[0_4px_14px_-8px_rgba(15,23,42,0.25)]">
-              <MentorCompanyLogo company={mentor.company} logoUrl={mentor.companyLogoUrl} />
-            </div>
-          </div>
-
-          {mentor.previouslyAt && mentor.previouslyAt.length > 0 ? (
-            <div className="mt-4 flex w-full flex-wrap items-center justify-center gap-2">
-              <span className="text-[0.6rem] font-semibold uppercase tracking-[0.2em] text-slate-400">
-                Previously
-              </span>
-              {mentor.previouslyAt.map((prev, index) => (
-                <span
-                  key={`${prev.name}-${index}`}
-                  title={prev.name}
-                  className="inline-flex h-7 w-7 items-center justify-center overflow-hidden rounded-full border border-slate-200/80 bg-white shadow-sm transition hover:scale-110 hover:border-slate-300"
-                >
-                  <LogoImage
-                    src={prev.logoUrl}
-                    alt={prev.name}
-                    className="h-4 w-4 object-contain"
-                    fallback={
-                      <span className="text-[0.65rem] font-bold uppercase text-slate-500">
-                        {prev.name.slice(0, 2)}
-                      </span>
-                    }
-                  />
+            <div className="flex justify-center">
+              <span className="inline-flex max-w-full items-center gap-2.5 rounded-full border border-amber-200/80 bg-gradient-to-r from-amber-50 to-orange-50/70 py-1.5 pl-1.5 pr-4 shadow-[0_4px_14px_-8px_rgba(217,119,6,0.4)]">
+                <CompanyLogoTile
+                  company={mentor.company}
+                  logoUrl={currentLogoUrl}
+                  className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full bg-white ring-1 ring-amber-200/70"
+                  imgClassName="h-5 w-5 object-contain"
+                  initialsClassName="text-[0.7rem] font-bold uppercase text-amber-700"
+                />
+                <span className="min-w-0 text-left leading-tight">
+                  <span className="block text-[0.55rem] font-semibold uppercase tracking-[0.18em] text-amber-600">
+                    Currently at
+                  </span>
+                  <span className="block truncate text-sm font-bold text-slate-900">
+                    {mentor.company}
+                  </span>
                 </span>
-              ))}
+              </span>
             </div>
-          ) : (
-            <p className="mt-4 min-h-[1.5rem]" aria-hidden />
-          )}
+
+            {previousCompanies.length > 0 ? (
+              <div className="mt-3.5">
+                <p className="mb-2 text-center text-[0.55rem] font-semibold uppercase tracking-[0.2em] text-slate-400">
+                  Previously at
+                </p>
+                <div className="flex flex-wrap items-center justify-center gap-1.5">
+                  {previousCompanies.map((prev, index) => (
+                    <span
+                      key={`${prev.name}-${index}`}
+                      className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200/80 bg-slate-50 py-1 pl-1 pr-2.5 text-xs font-medium text-slate-600 transition hover:border-slate-300 hover:bg-white"
+                    >
+                      <CompanyLogoTile
+                        company={prev.name}
+                        logoUrl={prev.logoUrl}
+                        className="flex h-5 w-5 shrink-0 items-center justify-center overflow-hidden rounded-md bg-white ring-1 ring-slate-200/80"
+                        imgClassName="h-3.5 w-3.5 object-contain"
+                        initialsClassName="text-[0.55rem] font-bold uppercase text-slate-500"
+                      />
+                      <span className="max-w-[8rem] truncate">{prev.name}</span>
+                    </span>
+                  ))}
+                </div>
+              </div>
+            ) : (
+              <p className="mt-3.5 min-h-[1.75rem]" aria-hidden />
+            )}
+          </div>
         </div>
       </div>
     </article>

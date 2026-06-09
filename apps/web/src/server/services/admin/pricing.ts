@@ -1,8 +1,8 @@
 import "server-only";
 
 import {
+  DEFAULT_PRICING,
   getReferralPriceInRupees,
-  getStandardPriceInRupees,
   type AdminUpdatePricingBody,
 } from "@career-craft/shared";
 import "../../db/load-env";
@@ -10,10 +10,10 @@ import { toDbId } from "../../db/helpers";
 import { settingsCollection } from "../../db/mongo-client";
 import { PRICING_SETTINGS_ID, type PricingSettings } from "../../db/types";
 
-/** Env-driven fee defaults used when an admin has not saved custom prices. */
+/** Built-in default fees when an admin has not saved custom prices. */
 function envDefaults(): { standardInRupees: number; withReferralCodeInRupees: number } {
   return {
-    standardInRupees: getStandardPriceInRupees(),
+    standardInRupees: DEFAULT_PRICING.standardInRupees,
     withReferralCodeInRupees: getReferralPriceInRupees(),
   };
 }
