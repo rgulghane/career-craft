@@ -377,7 +377,8 @@ export function MentorEditor({
     name: form.name || "Mentor name",
     designation: form.designation || "Designation",
     company: form.company || "Company",
-    companyLogoUrl: addCompanyTarget === "current" ? newCompanyLogoUrl || null : selectedLogoUrl,
+    companyLogoUrl:
+      selectedLogoUrl ?? (addCompanyTarget === "current" ? newCompanyLogoUrl || null : null),
     previouslyAt: form.previouslyAt.map((name) => ({
       name,
       logoUrl:

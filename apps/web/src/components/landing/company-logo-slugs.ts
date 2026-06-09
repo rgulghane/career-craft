@@ -72,7 +72,10 @@ const COMPANY_LOGO_DOMAINS: Record<string, string> = {
   Groww: "groww.in",
   Atlan: "atlan.com",
   Canva: "canva.com",
+  IBM: "ibm.com",
 };
+
+const KNOWN_SIMPLE_ICON_SLUGS = new Set(Object.values(COMPANY_LOGO_SLUGS));
 
 function lookupKey<T>(map: Record<string, T>, company: string): T | undefined {
   const trimmed = company.trim();
@@ -84,20 +87,30 @@ function lookupKey<T>(map: Record<string, T>, company: string): T | undefined {
   return match?.[1];
 }
 
-function simpleIconsUrl(slug: string): string {
-  return `https://cdn.simpleicons.org/${slug}`;
+/** jsDelivr mirror — same source as tool icons on the landing page. */
+export function simpleIconsJsdelivrUrl(slug: string): string {
+  return `https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/${slug}.svg`;
 }
 
 function faviconUrl(domain: string): string {
   return `https://www.google.com/s2/favicons?domain=${domain}&sz=128`;
 }
 
-/** Built-in logo URLs for a company (SimpleIcons first, then domain favicon). */
+function isSimpleIconsCdnUrl(url: string): boolean {
+  return /^https:\/\/cdn\.simpleicons\.org\//i.test(url);
+}
+
+function slugFromSimpleIconsCdnUrl(url: string): string | null {
+  const match = url.match(/^https:\/\/cdn\.simpleicons\.org\/([^/?#]+)/i);
+  return match?.[1] ?? null;
+}
+
+/** Built-in logo URLs for a company (jsDelivr slug, then domain favicon). */
 export function builtInCompanyLogoUrls(company: string): string[] {
   const urls: string[] = [];
   const slug = lookupKey(COMPANY_LOGO_SLUGS, company);
   if (slug) {
-    urls.push(simpleIconsUrl(slug));
+    urls.push(simpleIconsJsdelivrUrl(slug));
   }
   const domain = lookupKey(COMPANY_LOGO_DOMAINS, company);
   if (domain) {
@@ -106,21 +119,57 @@ export function builtInCompanyLogoUrls(company: string): string[] {
   return urls;
 }
 
+/** Case-insensitive lookup in an admin-managed `company → logoUrl` map. */
+export function lookupStoredLogoUrl(
+  company: string,
+  map: Record<string, string>,
+): string | null {
+  const key = company.trim().toLowerCase();
+  if (map[key]) {
+    return map[key];
+  }
+  const match = Object.entries(map).find(([name]) => name.toLowerCase() === key);
+  return match?.[1] ?? null;
+}
+
 /**
- * Ordered logo URLs to try for a company: explicit (DB/admin) first, then built-in
- * fallbacks. De-duplicated.
+ * Ordered logo URLs to try for a company.
+ *
+ * Custom uploads (Azure, etc.) first, then reliable built-ins. Legacy
+ * `cdn.simpleicons.org` seeds from the DB are only kept when the slug is known —
+ * broken links for Myntra/Nykaa-style brands were blocking favicon fallbacks.
  */
 export function resolveCompanyLogoUrls(company: string, explicitUrl?: string | null): string[] {
   const urls: string[] = [];
+  const add = (url: string) => {
+    const trimmed = url.trim();
+    if (trimmed && !urls.includes(trimmed)) {
+      urls.push(trimmed);
+    }
+  };
+
   const explicit = explicitUrl?.trim();
-  if (explicit) {
-    urls.push(explicit);
+  const explicitIsSimpleIconsCdn = explicit ? isSimpleIconsCdnUrl(explicit) : false;
+
+  // Custom uploads (Azure blob, etc.) — highest priority.
+  if (explicit && !explicitIsSimpleIconsCdn) {
+    add(explicit);
   }
+
+  // jsDelivr slugs + Google favicons for domain-only brands.
   for (const url of builtInCompanyLogoUrls(company)) {
-    if (!urls.includes(url)) {
-      urls.push(url);
+    add(url);
+  }
+
+  // Legacy DB seeds on cdn.simpleicons.org — only when the slug is in our map.
+  if (explicit && explicitIsSimpleIconsCdn) {
+    const slug = slugFromSimpleIconsCdnUrl(explicit);
+    if (slug && KNOWN_SIMPLE_ICON_SLUGS.has(slug)) {
+      add(simpleIconsJsdelivrUrl(slug));
+      add(explicit);
     }
   }
+
   return urls;
 }
 

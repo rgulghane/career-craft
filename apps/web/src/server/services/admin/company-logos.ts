@@ -6,14 +6,17 @@ import "../../db/load-env";
 import { mapCompanyLogo, toDbId } from "../../db/helpers";
 import { companyLogosCollection } from "../../db/mongo-client";
 import type { CompanyLogo } from "../../db/types";
-import { COMPANY_LOGO_SLUGS } from "@/components/landing/company-logo-slugs";
+import {
+  COMPANY_LOGO_SLUGS,
+  simpleIconsJsdelivrUrl,
+} from "@/components/landing/company-logo-slugs";
 import { AdminServiceError } from "./errors";
 
 /** Default brand icons used to bootstrap an empty CompanyLogo collection. */
 function seedEntries(): { company: string; logoUrl: string }[] {
   return Object.entries(COMPANY_LOGO_SLUGS).map(([company, slug]) => ({
     company,
-    logoUrl: `https://cdn.simpleicons.org/${slug}`,
+    logoUrl: simpleIconsJsdelivrUrl(slug),
   }));
 }
 

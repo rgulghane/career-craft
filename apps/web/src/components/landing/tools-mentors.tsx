@@ -4,6 +4,7 @@ import { MentorsProfiles } from "./mentors-profiles";
 import type { MentorCardData } from "./mentor-spotlight-card";
 import { ToolsCarousel } from "./tools-carousel";
 import { listPublishedMentors } from "@/server/services/admin/mentors";
+import { lookupStoredLogoUrl } from "@/components/landing/company-logo-slugs";
 import { getCompanyLogoUrlMap } from "@/server/services/admin/company-logos";
 
 /** Raw mentor fields before company icons are resolved. */
@@ -34,8 +35,7 @@ async function companyLogoMap(): Promise<Record<string, string>> {
 }
 
 function toCard(base: MentorBase, logoMap: Record<string, string>): MentorCardData {
-  const logoFor = (company: string): string | null =>
-    logoMap[company.trim().toLowerCase()] ?? null;
+  const logoFor = (company: string): string | null => lookupStoredLogoUrl(company, logoMap);
   return {
     name: base.name,
     designation: base.designation,
