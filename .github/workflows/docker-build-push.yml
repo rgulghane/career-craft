@@ -1,5 +1,8 @@
 name: Build and Push Docker Image
 
+# REGISTRY_LOGIN_SERVER must be the ACR host only, e.g. myregistry.azurecr.io
+# (https:// prefix and trailing slashes are stripped automatically).
+
 on:
   push:
     branches:
@@ -28,29 +31,45 @@ jobs:
         id: registry
         shell: bash
         run: |
-          REGISTRY="${REGISTRY_RAW}"
+          set -euo pipefail
+
+          REGISTRY="$(printf '%s' "${REGISTRY_RAW}" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')"
 
           if [ -z "${REGISTRY}" ]; then
             echo "REGISTRY_LOGIN_SERVER secret is missing. Set it to your ACR host (example: myregistry.azurecr.io)." >&2
             exit 1
           fi
 
-          # Accept values with scheme/trailing slash and normalize to host[:port].
+          # Accept values copied from Azure Portal (scheme, path, trailing slash).
           REGISTRY="${REGISTRY#http://}"
           REGISTRY="${REGISTRY#https://}"
           REGISTRY="${REGISTRY%%/*}"
+          REGISTRY="${REGISTRY%/}"
+          REGISTRY="$(printf '%s' "${REGISTRY}" | tr '[:upper:]' '[:lower:]')"
 
           if [ -z "${REGISTRY}" ]; then
             echo "REGISTRY_LOGIN_SERVER resolves to empty after normalization." >&2
             exit 1
           fi
 
-          if ! [[ "${REGISTRY}" =~ ^[a-zA-Z0-9.-]+(:[0-9]+)?$ ]]; then
+          if ! [[ "${REGISTRY}" =~ ^[a-z0-9.-]+(:[0-9]+)?$ ]]; then
             echo "REGISTRY_LOGIN_SERVER must be a registry host like myregistry.azurecr.io (no path)." >&2
+            echo "Got (length ${#REGISTRY}): '${REGISTRY}'" >&2
             exit 1
           fi
 
+          echo "Using registry host: ${REGISTRY}"
           echo "registry=${REGISTRY}" >> "${GITHUB_OUTPUT}"
+
+      - name: Preview image tags
+        shell: bash
+        run: |
+          REGISTRY="${{ steps.registry.outputs.registry }}"
+          IMAGE="${{ env.IMAGE_NAME }}"
+          echo "Will push:"
+          echo "  ${REGISTRY}/${IMAGE}:${{ github.sha }}"
+          echo "  ${REGISTRY}/${IMAGE}:latest"
+          echo "  ${REGISTRY}/${IMAGE}:0.1"
 
       - name: Login to Azure Container Registry
         uses: docker/login-action@v3
