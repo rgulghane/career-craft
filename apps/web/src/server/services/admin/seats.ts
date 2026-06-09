@@ -4,7 +4,7 @@ import { DEFAULT_SEATS, type AdminUpdateSeatsBody } from "@career-craft/shared";
 import "../../db/load-env";
 import { toDbId } from "../../db/helpers";
 import { settingsCollection } from "../../db/mongo-client";
-import { SEATS_SETTINGS_ID, type SeatsSettings } from "../../db/types";
+import { SEATS_SETTINGS_ID, type SeatsSettings, type SeatsSettingsDocument } from "../../db/types";
 
 function defaults(): Pick<SeatsSettings, "total" | "remaining"> {
   return {
@@ -18,14 +18,14 @@ export async function getSeatsSettings(): Promise<SeatsSettings> {
   const fallback = defaults();
   try {
     const collection = await settingsCollection();
-    const doc = await collection.findOne({ _id: SEATS_SETTINGS_ID });
+    const doc = (await collection.findOne({ _id: SEATS_SETTINGS_ID })) as SeatsSettingsDocument | null;
 
     const hasTotal = typeof doc?.total === "number";
     const hasRemaining = typeof doc?.remaining === "number";
 
     return {
-      total: hasTotal ? doc!.total! : fallback.total,
-      remaining: hasRemaining ? doc!.remaining! : fallback.remaining,
+      total: hasTotal ? doc.total! : fallback.total,
+      remaining: hasRemaining ? doc.remaining! : fallback.remaining,
       isCustom: hasTotal || hasRemaining,
       updatedAt: doc?.updatedAt ?? null,
     };

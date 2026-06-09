@@ -66,7 +66,7 @@ export default async function DashboardPage() {
   const sharePath = data.user.referralCode ? `/enroll?ref=${encodeURIComponent(data.user.referralCode)}` : "";
   const shareUrl = sharePath ? `${origin}${sharePath}` : "";
   const reward = formatINR(serverConfig.referral.cashPerReferralRupees);
-  const enrollmentPricing = getEnrollmentPricingRupees();
+  const enrollmentPricing = await getEnrollmentPricingRupees();
   const referralDiscountPercent = discountPercentOff(
     enrollmentPricing.standardInRupees,
     enrollmentPricing.withReferralCodeInRupees,

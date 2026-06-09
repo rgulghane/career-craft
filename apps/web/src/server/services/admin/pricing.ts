@@ -8,7 +8,7 @@ import {
 import "../../db/load-env";
 import { toDbId } from "../../db/helpers";
 import { settingsCollection } from "../../db/mongo-client";
-import { PRICING_SETTINGS_ID, type PricingSettings } from "../../db/types";
+import { PRICING_SETTINGS_ID, type PricingSettings, type PricingSettingsDocument } from "../../db/types";
 
 /** Built-in default fees when an admin has not saved custom prices. */
 function envDefaults(): { standardInRupees: number; withReferralCodeInRupees: number } {
@@ -28,15 +28,15 @@ export async function getPricingSettings(): Promise<PricingSettings> {
   const defaults = envDefaults();
   try {
     const collection = await settingsCollection();
-    const doc = await collection.findOne({ _id: PRICING_SETTINGS_ID });
+    const doc = (await collection.findOne({ _id: PRICING_SETTINGS_ID })) as PricingSettingsDocument | null;
 
     const hasStandard = typeof doc?.standardInRupees === "number";
     const hasReferral = typeof doc?.withReferralCodeInRupees === "number";
 
     return {
-      standardInRupees: hasStandard ? doc!.standardInRupees! : defaults.standardInRupees,
+      standardInRupees: hasStandard ? doc.standardInRupees! : defaults.standardInRupees,
       withReferralCodeInRupees: hasReferral
-        ? doc!.withReferralCodeInRupees!
+        ? doc.withReferralCodeInRupees!
         : defaults.withReferralCodeInRupees,
       isCustom: hasStandard || hasReferral,
       updatedAt: doc?.updatedAt ?? null,
