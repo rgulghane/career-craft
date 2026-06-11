@@ -12,6 +12,7 @@
  *   CONFIRM_DELETE=YES npm run db:cleanup-orphans
  */
 import { ObjectId } from "mongodb";
+import { toDbId } from "../src/server/db/helpers";
 import { establishDatabaseConnection } from "../src/server/db/startup";
 import { mongoClient } from "../src/server/db/mongo-client";
 import { COLLECTIONS, type DbId } from "../src/server/db/types";
@@ -28,6 +29,10 @@ function comparableId(value: unknown): string | null {
     return trimmed.length > 0 ? trimmed : null;
   }
   return String(value);
+}
+
+function toObjectIds(ids: DbId[]): ObjectId[] {
+  return ids.map((id) => (id instanceof ObjectId ? id : (toDbId(id) as ObjectId)));
 }
 
 async function main(): Promise<void> {
@@ -96,8 +101,8 @@ async function main(): Promise<void> {
   }
 
   console.log("\nDeleting…");
-  const referrals = await referralsCol.deleteMany({ _id: { $in: orphanReferralIds } });
-  const enrollments = await enrollmentsCol.deleteMany({ _id: { $in: orphanEnrollmentIds } });
+  const referrals = await referralsCol.deleteMany({ _id: { $in: toObjectIds(orphanReferralIds) } });
+  const enrollments = await enrollmentsCol.deleteMany({ _id: { $in: toObjectIds(orphanEnrollmentIds) } });
 
   console.log("\nDeleted:");
   console.log(`  Referral:    ${referrals.deletedCount}`);

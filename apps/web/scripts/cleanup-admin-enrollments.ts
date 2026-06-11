@@ -10,6 +10,7 @@
  */
 import { ObjectId } from "mongodb";
 import { PORTAL_ADMIN_TYPES } from "@career-craft/shared";
+import { toDbId } from "../src/server/db/helpers";
 import { establishDatabaseConnection } from "../src/server/db/startup";
 import { mongoClient } from "../src/server/db/mongo-client";
 import { COLLECTIONS, type DbId } from "../src/server/db/types";
@@ -26,6 +27,10 @@ function comparableId(value: unknown): string | null {
     return trimmed.length > 0 ? trimmed : null;
   }
   return String(value);
+}
+
+function toObjectIds(ids: DbId[]): ObjectId[] {
+  return ids.map((id) => (id instanceof ObjectId ? id : (toDbId(id) as ObjectId)));
 }
 
 async function main(): Promise<void> {
@@ -99,8 +104,8 @@ async function main(): Promise<void> {
   }
 
   console.log("\nDeleting…");
-  const referrals = await referralsCol.deleteMany({ _id: { $in: referralDbIds } });
-  const enrollments = await enrollmentsCol.deleteMany({ _id: { $in: enrollmentDbIds } });
+  const referrals = await referralsCol.deleteMany({ _id: { $in: toObjectIds(referralDbIds) } });
+  const enrollments = await enrollmentsCol.deleteMany({ _id: { $in: toObjectIds(enrollmentDbIds) } });
 
   console.log("\nDeleted:");
   console.log(`  Referral:    ${referrals.deletedCount}`);
