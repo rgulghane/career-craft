@@ -93,17 +93,20 @@ export function ReferralCodeEditor({
     }
   }
 
+  if (!hasPaidEnrollment) {
+    return (
+      <AdminCard title={messages.admin.referralCodeTitle}>
+        <p className="text-sm text-slate-400">{messages.admin.referralCodeEnrolledOnly}</p>
+        {initialCode ? (
+          <p className="mt-3 font-mono text-sm text-slate-300">{initialCode}</p>
+        ) : null}
+      </AdminCard>
+    );
+  }
+
   return (
     <AdminCard title={messages.admin.referralCodeTitle}>
       <p className="text-sm text-slate-400">{messages.admin.referralCodeHint}</p>
-      {!isFullAdmin ? (
-        <p className="mt-2 text-xs text-slate-500">{messages.admin.referralCodeReadOnlyNote}</p>
-      ) : null}
-      {!hasPaidEnrollment ? (
-        <p className="mt-2 text-xs text-amber-300/90">
-          This student is not enrolled yet — the code will apply once they have a paid enrollment.
-        </p>
-      ) : null}
 
       <form onSubmit={onSave} className="mt-4 space-y-4">
         <label className="block text-sm">

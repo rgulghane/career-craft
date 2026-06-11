@@ -11,19 +11,23 @@ import {
 } from "../../db/mongo-client";
 import { generateReferralCode } from "../../util/referral-code";
 import { AdminServiceError } from "./errors";
+import type { UserListSortDir, UserListSortField } from "@/lib/admin/user-list-config";
 
 export interface AdminUserListItem {
   id: string;
   email: string;
   fullName: string;
+  phone: string | null;
+  collegeName: string | null;
   userType: UserType | null;
   referralCode: string | null;
   hasPaidEnrollment: boolean;
   createdAt: string;
+  updatedAt: string;
 }
 
 export interface AdminUserDetail {
-  user: AdminUserListItem & { googleId: string | null; updatedAt: string };
+  user: AdminUserListItem & { googleId: string | null };
   enrollments: Array<{
     id: string;
     status: string;
@@ -53,6 +57,8 @@ export async function listAdminUsers(params: {
   enrolled?: boolean;
   page: number;
   limit: number;
+  sortBy?: UserListSortField;
+  sortDir?: UserListSortDir;
 }): Promise<{ items: AdminUserListItem[]; total: number; page: number; limit: number }> {
   const users = await usersCollection();
   const enrollments = await enrollmentsCollection();
@@ -76,9 +82,12 @@ export async function listAdminUsers(params: {
     }
   }
 
+  const sortField = params.sortBy ?? "createdAt";
+  const sortDirection = params.sortDir === "asc" ? 1 : -1;
+
   const skip = (params.page - 1) * params.limit;
   const [docs, total] = await Promise.all([
-    users.find(filter).sort({ createdAt: -1 }).skip(skip).limit(params.limit).toArray(),
+    users.find(filter).sort({ [sortField]: sortDirection }).skip(skip).limit(params.limit).toArray(),
     users.countDocuments(filter),
   ]);
 
@@ -102,10 +111,13 @@ export async function listAdminUsers(params: {
       id: u.id,
       email: u.email,
       fullName: u.fullName,
+      phone: u.phone,
+      collegeName: u.collegeName,
       userType: u.userType,
       referralCode: u.referralCode,
       hasPaidEnrollment: paidSet.has(u.id),
       createdAt: u.createdAt.toISOString(),
+      updatedAt: u.updatedAt.toISOString(),
     };
   });
 
@@ -151,6 +163,8 @@ export async function getAdminUser(userId: string): Promise<AdminUserDetail | nu
       id: u.id,
       email: u.email,
       fullName: u.fullName,
+      phone: u.phone,
+      collegeName: u.collegeName,
       userType: u.userType,
       referralCode: u.referralCode,
       hasPaidEnrollment: Boolean(paidDoc),
@@ -249,11 +263,22 @@ export async function updateAdminUser(
     id: u.id,
     email: u.email,
     fullName: u.fullName,
+    phone: u.phone,
+    collegeName: u.collegeName,
     userType: u.userType,
     referralCode: u.referralCode,
     hasPaidEnrollment: Boolean(paid),
     createdAt: u.createdAt.toISOString(),
+    updatedAt: u.updatedAt.toISOString(),
   };
+}
+
+async function assertUserHasPaidEnrollment(userId: string): Promise<void> {
+  const enrollments = await enrollmentsCollection();
+  const paid = await enrollments.findOne({ userId: toDbId(userId), status: "PAID" });
+  if (!paid) {
+    throw new AdminServiceError(400, "Referral codes are available only after paid enrollment.");
+  }
 }
 
 /** Assign a custom referral code (or clear it). Portal admins — full or read-only. */
@@ -271,6 +296,8 @@ export async function setAdminUserReferralCode(
   if ((PORTAL_ADMIN_TYPES as readonly string[]).includes(userType)) {
     throw new AdminServiceError(400, "Portal admin accounts do not use referral codes.");
   }
+
+  await assertUserHasPaidEnrollment(userId);
 
   const $set: Record<string, unknown> = { updatedAt: new Date() };
   const $unset: Record<string, ""> = {};
@@ -303,6 +330,8 @@ export async function regenerateAdminUserReferralCode(userId: string): Promise<s
   if (!doc) {
     throw new AdminServiceError(404, "User not found");
   }
+
+  await assertUserHasPaidEnrollment(userId);
 
   for (let attempt = 0; attempt < 8; attempt += 1) {
     const code = generateReferralCode();

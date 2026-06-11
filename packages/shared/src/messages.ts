@@ -40,7 +40,9 @@ export const messages = {
     deleteUserCta: "Delete user",
     referralCodeTitle: "Referral code",
     referralCodeHint:
-      "Set a custom code (6–12 letters/numbers, e.g. SUMMER26). Available to full and viewer admins.",
+      "Set a custom code (6–12 letters/numbers, e.g. SUMMER26).",
+    referralCodeEnrolledOnly:
+      "Referral codes can be set or regenerated after the student has a paid enrollment.",
     referralCodeSave: "Save code",
     referralCodeClear: "Clear code",
     referralCodeSaved: "Referral code updated.",
@@ -48,7 +50,6 @@ export const messages = {
     referralCodeRegenerate: "Generate random code",
     referralCodeRegenerated: "Random referral code generated.",
     referralCodeInUse: "That referral code is already assigned to another user.",
-    referralCodeReadOnlyNote: "Viewer admins can set custom codes but cannot edit other profile fields.",
     deleteUserSuccess: "User deleted.",
     directEnrollTitle: "Direct enrollment",
     directEnrollSubtitle:

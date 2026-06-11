@@ -14,6 +14,8 @@
     "db:create-readonly-admins-batch": "npm run db:env -- npx --yes tsx scripts/create-readonly-admins-batch.ts",
     "db:seed-mentors": "npm run db:env -- npx --yes tsx scripts/seed-mentors.ts",
     "db:reset-keep-admins": "npm run db:env -- npx --yes tsx scripts/reset-data-keep-admins.ts",
+    "db:cleanup-orphans": "npm run db:env -- npx --yes tsx scripts/cleanup-orphan-enrollments-referrals.ts",
+    "db:cleanup-admin-enrollments": "npm run db:env -- npx --yes tsx scripts/cleanup-admin-enrollments.ts",
     "db:env": "dotenv -c development --"
   },
   "dependencies": {
