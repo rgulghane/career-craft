@@ -1,3 +1,12 @@
+/** Build `/` path with optional referral code (opens home enrollment widget). */
+export function buildHomeReferralPath(ref?: string): string {
+  const code = ref?.trim().toUpperCase();
+  if (!code) {
+    return "/";
+  }
+  return `/?ref=${encodeURIComponent(code)}`;
+}
+
 /** Build `/enroll` path with optional referral code and auto-continue flag. */
 export function buildEnrollPath(ref?: string, continueFlow = false): string {
   const params = new URLSearchParams();

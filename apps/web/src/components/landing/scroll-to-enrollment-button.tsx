@@ -2,24 +2,26 @@
 
 import type { ReactNode } from "react";
 
-const ENROLLMENT_SECTION_ID = "pricing";
-
 type ScrollToEnrollmentButtonProps = {
   className?: string;
   children: ReactNode;
 };
 
-export function ScrollToEnrollmentButton({ className, children }: ScrollToEnrollmentButtonProps) {
-  function scrollToEnrollment() {
-    const target = document.getElementById(ENROLLMENT_SECTION_ID);
-    if (!target) {
+const ENROLLMENT_SECTION_IDS = ["enrollment", "pricing"] as const;
+
+function scrollToEnrollmentSection() {
+  for (const id of ENROLLMENT_SECTION_IDS) {
+    const target = document.getElementById(id);
+    if (target) {
+      target.scrollIntoView({ behavior: "smooth", block: "start" });
       return;
     }
-    target.scrollIntoView({ behavior: "smooth", block: "start" });
   }
+}
 
+export function ScrollToEnrollmentButton({ className, children }: ScrollToEnrollmentButtonProps) {
   return (
-    <button type="button" className={className} onClick={scrollToEnrollment}>
+    <button type="button" className={className} onClick={scrollToEnrollmentSection}>
       {children}
     </button>
   );

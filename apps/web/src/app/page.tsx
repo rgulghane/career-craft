@@ -3,6 +3,7 @@ import { LandingCertifications } from "@/components/landing/certifications";
 import { LandingFaq } from "@/components/landing/faq";
 import { LandingCurriculum } from "@/components/landing/curriculum";
 import { LandingHero } from "@/components/landing/hero";
+import { ReferralLandingHandler } from "@/components/landing/referral-landing-handler";
 import { SocialProofToast } from "@/components/landing/social-proof-toast";
 import { LandingMobileEnrollment } from "@/components/landing/mobile-enrollment";
 import { LandingStudentStories } from "@/components/landing/student-stories";
@@ -44,6 +45,7 @@ export default async function HomePage({
         />
       ) : null}
       <SocialProofToast />
+      <ReferralLandingHandler referralCode={ref} />
       <LandingHero
         pricing={pricing}
         seats={seats}

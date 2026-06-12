@@ -9,6 +9,7 @@ import { getEnrollmentPricingRupees } from "@/lib/pricing.server";
 import { discountPercentOff, formatINR } from "@/lib/format";
 import { theme } from "@/lib/theme";
 import { createPageMetadata } from "@/lib/seo";
+import { buildHomeReferralPath } from "@/lib/referral-url";
 
 export const metadata = createPageMetadata({
   title: messages.nav.dashboard,
@@ -63,7 +64,7 @@ export default async function DashboardPage() {
   }
 
   const origin = serverConfig.appOrigin;
-  const sharePath = data.user.referralCode ? `/enroll?ref=${encodeURIComponent(data.user.referralCode)}` : "";
+  const sharePath = data.user.referralCode ? buildHomeReferralPath(data.user.referralCode) : "";
   const shareUrl = sharePath ? `${origin}${sharePath}` : "";
   const reward = formatINR(serverConfig.referral.cashPerReferralRupees);
   const enrollmentPricing = await getEnrollmentPricingRupees();

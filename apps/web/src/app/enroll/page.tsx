@@ -8,7 +8,7 @@ import { EnrollmentPricingWidget } from "@/components/enrollment-pricing-widget"
 import { getEnrollmentPricingRupees } from "@/lib/pricing.server";
 import { getEnrollmentSeats } from "@/lib/seats.server";
 import { getSessionUser, userHasPaidEnrollment } from "@/lib/server-api";
-import { buildRegisterPath } from "@/lib/referral-url";
+import { buildHomeReferralPath, buildRegisterPath } from "@/lib/referral-url";
 import { createPageMetadata } from "@/lib/seo";
 
 export const metadata = createPageMetadata({
@@ -28,7 +28,7 @@ export default async function EnrollPage({
   const continueFlow = params.continue === "1";
 
   if (!user) {
-    redirect(buildRegisterPath(ref));
+    redirect(ref ? buildHomeReferralPath(ref) : buildRegisterPath());
   }
 
   const firstName = user.fullName.split(/\s+/)[0] ?? user.fullName;

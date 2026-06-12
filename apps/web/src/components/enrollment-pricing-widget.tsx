@@ -17,6 +17,7 @@ import { RazorpayPayButton } from "@/components/razorpay-pay-button";
 import { messages } from "@career-craft/shared/content";
 import { discountPercentOff, formatINR, listPrices } from "@/lib/format";
 import { buildEnrollPath, buildLoginPath, buildRegisterPath } from "@/lib/referral-url";
+import { readStoredReferral, resolveReferralCode, writeStoredReferral } from "@/lib/referral-storage";
 import { ViewingNowBanner } from "@/components/viewing-now-banner";
 
 type Mode = "marketing" | "enroll";
@@ -90,10 +91,23 @@ export function EnrollmentPricingWidget({
   const prices = useMemo(() => listPrices(pricing), [pricing]);
   const [deadlineMs, setDeadlineMs] = useState<number | null>(null);
   const countdown = useCountdown(deadlineMs);
+  const [resolvedReferralCode, setResolvedReferralCode] = useState(defaultReferralCode);
 
   useEffect(() => {
     setDeadlineMs(getDeadlineMs());
   }, []);
+
+  useEffect(() => {
+    const code = resolveReferralCode(defaultReferralCode);
+    setResolvedReferralCode(code);
+    if (code) {
+      writeStoredReferral(code);
+      const stored = readStoredReferral();
+      if (stored?.referrerFirstName) {
+        setReferrerFirstName(stored.referrerFirstName);
+      }
+    }
+  }, [defaultReferralCode]);
 
   const [referralInput, setReferralInput] = useState(defaultReferralCode);
   const [appliedCode, setAppliedCode] = useState("");
@@ -127,6 +141,7 @@ export function EnrollmentPricingWidget({
       setAppliedCode(code);
       setReferrerFirstName(data.referrerFirstName);
       setReferralInput(code);
+      writeStoredReferral(code, data.referrerFirstName);
       return true;
     } catch {
       setReferralLookupError(messages.errors.network);
@@ -137,24 +152,26 @@ export function EnrollmentPricingWidget({
   };
 
   useEffect(() => {
-    if (!defaultReferralCode.trim()) {
+    if (!resolvedReferralCode.trim()) {
       return;
     }
-    const code = normalizeReferralCode(defaultReferralCode);
+    const code = normalizeReferralCode(resolvedReferralCode);
     setReferralInput(code.slice(0, REFERRAL_CODE_INPUT.maxLength));
     if (!isValidReferralCodeInput(code)) {
       setReferralLookupError(messages.enroll.referralInvalid);
       return;
     }
     void lookupReferral(code);
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- only when URL/default code changes
-  }, [defaultReferralCode]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- only when resolved referral changes
+  }, [resolvedReferralCode]);
 
   const [enrollState, enrollAction, enrollPending] = useActionState(createEnrollmentAction, initialEnroll);
   const enrollFormRef = useRef<HTMLFormElement>(null);
   const autoSubmittedRef = useRef(false);
 
   const hasValidReferral = isValidReferralCodeInput(appliedCode) && referrerFirstName !== null;
+  const pendingReferralCode = normalizeReferralCode(appliedCode || referralInput || resolvedReferralCode);
+  const checkoutReferralCode = hasValidReferral ? appliedCode : pendingReferralCode;
   const displayRupees = hasValidReferral ? pricing.withReferralCodeInRupees : pricing.standardInRupees;
   const displayPrice = formatINR(displayRupees);
   const badgePercent = hasValidReferral
@@ -163,9 +180,12 @@ export function EnrollmentPricingWidget({
   const seatsPct = Math.round(((seats.total - seats.remaining) / seats.total) * 100);
 
   const created = enrollState.status === "created" ? enrollState : null;
-  const enrollHref = useMemo(() => buildEnrollPath(appliedCode, true), [appliedCode]);
-  const registerHref = useMemo(() => buildRegisterPath(appliedCode), [appliedCode]);
-  const signInHref = useMemo(() => buildLoginPath(appliedCode), [appliedCode]);
+  const enrollHref = useMemo(
+    () => (mode === "marketing" ? buildEnrollPath(checkoutReferralCode, true) : buildEnrollPath(appliedCode, true)),
+    [mode, checkoutReferralCode, appliedCode],
+  );
+  const registerHref = useMemo(() => buildRegisterPath(checkoutReferralCode), [checkoutReferralCode]);
+  const signInHref = useMemo(() => buildLoginPath(checkoutReferralCode), [checkoutReferralCode]);
 
   useEffect(() => {
     if (!autoContinue || mode !== "enroll" || autoSubmittedRef.current || created) {
@@ -175,7 +195,7 @@ export function EnrollmentPricingWidget({
       return;
     }
     const waitingOnRefLookup =
-      isValidReferralCodeInput(normalizeReferralCode(defaultReferralCode)) &&
+      isValidReferralCodeInput(normalizeReferralCode(resolvedReferralCode)) &&
       !hasValidReferral &&
       !referralLookupError &&
       (referralChecking || referrerFirstName === null);
@@ -191,6 +211,7 @@ export function EnrollmentPricingWidget({
     enrollState.status,
     enrollPending,
     defaultReferralCode,
+    resolvedReferralCode,
     hasValidReferral,
     referralLookupError,
     referralChecking,
@@ -206,6 +227,7 @@ export function EnrollmentPricingWidget({
 
   return (
     <aside
+      id="enrollment"
       className="enrollment-widget w-full max-w-none overflow-hidden rounded-2xl border border-amber-200/60 bg-white text-slate-900 shadow-xl shadow-amber-500/10 ring-1 ring-slate-900/5 dark:border-amber-500/20 dark:bg-slate-900 dark:text-white dark:shadow-2xl dark:shadow-black/40 dark:ring-white/10"
     >
       <ViewingNowBanner />
@@ -247,6 +269,16 @@ export function EnrollmentPricingWidget({
           {hasValidReferral && referrerFirstName ? (
             <p className="mt-2 text-sm font-medium text-emerald-800 dark:text-emerald-300">
               {messages.enroll.referredBy(referrerFirstName)}
+            </p>
+          ) : referrerFirstName && !referralLookupError ? (
+            <p className="mt-2 text-sm font-medium text-amber-800 dark:text-amber-300">
+              {referralChecking
+                ? `Verifying referral from ${referrerFirstName}…`
+                : messages.enroll.referredBy(referrerFirstName)}
+            </p>
+          ) : isValidReferralCodeInput(pendingReferralCode) && referralChecking ? (
+            <p className="mt-2 text-sm font-medium text-amber-800 dark:text-amber-300">
+              Applying your referral discount…
             </p>
           ) : (
             <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
